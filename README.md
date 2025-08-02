@@ -1,39 +1,37 @@
-# Nuxt Minimal Starter
+# Pavel Padron's Portfolio
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+The new version of my personal website and portfolio.
 
-## Setup
+## Architecture
 
-Make sure to install dependencies:
+### Deployment & integration
 
-```bash
-# pnpm
-pnpm install
+```ts
+/* TODO */
 ```
 
-## Development Server
+### Programming language
 
-Start the development server on `http://localhost:3000`:
+I use [TypeScript](https://www.typescriptlang.org/), a strongly typed programming language that builds on JavaScript and enables better tooling.
 
-```bash
-# pnpm
-pnpm dev
-```
+### Framework
 
-## Production
+Declarative rendering and reactivity, I selected [Vue](https://vuejs.org/).
 
-Build the application for production:
+### Meta-framework
 
-```bash
-# pnpm
-pnpm build
-```
+For automation and conventions, I use [Nuxt](https://nuxt.com/).
 
-Locally preview production build:
+### Application concerns
 
-```bash
-# pnpm
-pnpm preview
-```
+- Components: [Daisy UI](https://daisyui.com)
+- [Conventional commits](https://www.conventionalcommits.org)
+- Error tracking: [Sentry](https://sentry.io)
+- Unit tests: [Vitest](https://vitest.dev)
+- End-to-end & component tests: [Playwright](https://playwright.dev)
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Browser support
+
+This website support the latest two versions of the following browsers: Chrome, Safari, Edge, Firefox, and Opera (browsers that support modern JavaScript).
+
+In addition, I implemented automated e2e tests that run in recent versions of Chromium, Firefox, and WebKit.
