@@ -1,7 +1,7 @@
 {
   "name": "nuxt-app",
-  "private": true,
   "type": "module",
+  "private": true,
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -12,7 +12,7 @@
     "commit": "cz",
     "commitlint": "commitlint --edit",
     "lint": "eslint .",
-    "lint:fix": "eslint . -fix",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --ignore-unknown --write .",
     "format:check": "prettier --ignore-unknown --check .",
     "test": "pnpm run test:unit -- --run && pnpm run test:e2e",
@@ -28,10 +28,12 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^5.1.0",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@nuxt/eslint": "1.7.1",
     "eslint": "^9.32.0",
+    "eslint-plugin-format": "^1.0.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "3.6.2",
