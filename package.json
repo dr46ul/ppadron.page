@@ -8,7 +8,18 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "prepare": "husky"
+    "prepare": "husky",
+    "commit": "cz",
+    "commitlint": "commitlint --edit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . -fix",
+    "format": "prettier --ignore-unknown --write .",
+    "format:check": "prettier --ignore-unknown --check .",
+    "test": "pnpm run test:unit -- --run && pnpm run test:e2e",
+    "test:unit": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@nuxt/fonts": "0.11.4",
@@ -21,6 +32,12 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@nuxt/eslint": "1.7.1",
     "eslint": "^9.32.0",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "3.6.2",
+    "typescript": "^5.9.2",
+    "vite-plugin-eslint2": "^5.0.4",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^3.0.5"
   }
 }
