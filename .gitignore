@@ -22,3 +22,13 @@ logs
 .env
 .env.*
 !.env.example
+
+# Additional ignores
+.nuxtrc
+.husky
+.nvmrc
+.gitignore
+.vscode/settings.json
+/test-results/
+/playwright-report/
+/playwright/.cache/

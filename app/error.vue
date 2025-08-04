@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { NuxtError } from "#app";
+import type { NuxtError } from '#app'
 
-type Props = {
-  error: NuxtError;
-};
-defineProps<Props>();
+interface Props {
+  error: NuxtError
+}
+defineProps<Props>()
 </script>
 
 <template>
   <div>
     <h1>{{ error.statusCode }}</h1>
-    <NuxtLink to="/">Go back home</NuxtLink>
+    <NuxtLink to="/"> Go back home </NuxtLink>
   </div>
 </template>
