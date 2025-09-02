@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { MenuSection } from '~~/shared/types/navigation'
+
 defineProps<MenuSection>()
 </script>
 
