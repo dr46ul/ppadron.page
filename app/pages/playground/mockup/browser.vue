@@ -15,7 +15,9 @@ const url = 'https://ppadron.com'
       id="browser-mockup-with-background-color"
       label="browser mockup with background color"
     >
-      <MockupBrowser :url borderless> Hello! </MockupBrowser>
+      <MockupBrowser :url borderless class="bg-neutral-content">
+        Hello!
+      </MockupBrowser>
     </BaseSection>
   </div>
 </template>
