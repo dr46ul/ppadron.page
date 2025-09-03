@@ -4,10 +4,18 @@ const url = 'https://ppadron.com'
 
 <template>
   <div class="flex flex-col items-center gap-6 w-auto m-auto max-w-7xl p-8">
-    <MockupBrowser :url> browser mockup with border </MockupBrowser>
+    <BaseSection
+      id="browser-mockup-with-border"
+      label="browser mockup with border"
+    >
+      <MockupBrowser :url> Hello! </MockupBrowser>
+    </BaseSection>
 
-    <MockupBrowser :url borderless>
-      browser mockup with background color
-    </MockupBrowser>
+    <BaseSection
+      id="browser-mockup-with-background-color"
+      label="browser mockup with background color"
+    >
+      <MockupBrowser :url borderless> Hello! </MockupBrowser>
+    </BaseSection>
   </div>
 </template>

@@ -2,12 +2,12 @@
 interface Props {
   url?: string
   borderless?: boolean
-  height?: number
+  contentClasses?: string
 }
 withDefaults(defineProps<Props>(), {
   url: undefined,
   borderless: false,
-  height: 80,
+  contentClasses: 'h-80',
 })
 </script>
 
@@ -21,8 +21,8 @@ withDefaults(defineProps<Props>(), {
     <div
       class="grid place-content-center"
       :class="{
+        [contentClasses]: contentClasses,
         'border-t border-base-300': !borderless,
-        [`h-${height}`]: height,
       }"
     >
       <slot />
