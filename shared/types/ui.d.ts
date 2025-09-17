@@ -18,7 +18,4 @@ export type ButtonStyle = 'outline' | 'dash' | 'soft' | 'ghost' | 'link'
 
 export type ButtonModifier = 'wide' | 'block' | 'square' | 'circle'
 
-/**
- * Navigation / Menu
- */
-export type MenuModifier = 'active' | 'disabled' | 'focus' | 'dropdown-show'
+export type ButtonBehavior = 'active' | 'disabled'

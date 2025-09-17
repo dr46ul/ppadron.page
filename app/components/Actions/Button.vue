@@ -6,15 +6,9 @@ interface Props {
   modifier?: ButtonModifier
   active?: boolean
   disabled?: boolean
+  behavior?: ButtonBehavior
 }
-withDefaults(defineProps<Props>(), {
-  color: 'primary',
-  style: undefined,
-  behavior: 'active',
-  size: 'sm',
-  modifier: undefined,
-  disabled: undefined,
-})
+defineProps<Props>()
 </script>
 
 <template>
