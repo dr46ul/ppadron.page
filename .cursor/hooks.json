@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [{ "command": "context-mode hook cursor pretooluse" }],
+    "postToolUse": [{ "command": "context-mode hook cursor posttooluse" }],
+    "stop": [{ "command": "context-mode hook cursor stop" }]
+  }
+}
+  
