@@ -34,4 +34,5 @@ logs
 /playwright/.cache/
 
 # PNPM specific
+.pnpm-store
 pnpm-lock.yaml

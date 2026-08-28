@@ -32,3 +32,6 @@ logs
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# PNPM specific
+.pnpm-store
