@@ -13,19 +13,22 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        lang: 'en',
-        'data-theme': 'dracula',
+        'lang': 'en',
+        'data-theme': 'terminal',
       },
-      title: 'Pavel Padron',
-      meta: [{ name: 'description', content: "Pavel Padron's portfolio" }],
-    },
-    pageTransition: {
-      name: 'page',
-      mode: 'out-in',
+      title: 'Pavel Padron — Frontend Engineer',
+      meta: [{ name: 'description', content: 'Pavel Padron\'s portfolio' }],
     },
   },
 
   css: ['@/assets/css/main.css'],
+
+  fonts: {
+    // One register, one family. The serif went with the editorial layout.
+    families: [
+      { name: 'IBM Plex Mono', provider: 'google', weights: [400, 500, 600, 700] },
+    ],
+  },
 
   vite: {
     plugins: [tailwindcss()],

@@ -55,8 +55,8 @@ describe('home page', async () => {
     expect(htmlAttribute(html, 'lang')).toBe('en')
   })
 
-  it('sets html data-theme to dracula', () => {
-    expect(htmlAttribute(html, 'data-theme')).toBe('dracula')
+  it('sets html data-theme to terminal', () => {
+    expect(htmlAttribute(html, 'data-theme')).toBe('terminal')
   })
 
   it('sets the description meta tag', () => {
@@ -74,6 +74,6 @@ describe('home page', async () => {
   })
 
   it('renders the document title', () => {
-    expect(titleText(html)).toBe('Welcome to Nuxt!')
+    expect(titleText(html)).toBe('Pavel Padron — Frontend Engineer')
   })
 })

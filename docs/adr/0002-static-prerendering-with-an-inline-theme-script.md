@@ -1,5 +1,13 @@
 # Static prerendering with an inline theme script, not SSR
 
+> **Partly superseded by [ADR-0004](./0004-the-site-is-a-terminal-session.md).**
+> The site is dark only: there is no theme toggle, no cookie, and the inline
+> `<head>` script described below has been removed. What stands is the decision
+> this record is really about — the page is statically prerendered to the CDN
+> rather than server-rendered, with `server/api/` deploying as a serverless
+> function through Nitro's hybrid rendering. The reasoning under "Considered
+> Options" for rejecting SSR is unchanged; the theme mechanics are history.
+
 The site offers a light/dark toggle (`corporate` / `dracula`) whose choice must survive a reload without a flash of the wrong theme. The obvious implementation is SSR with a cookie: the server reads the theme per request and emits the right `data-theme`. We chose static prerendering instead, and handle the override with a small inline `<head>` script that reads the cookie and sets `data-theme` before first paint. The contact endpoint still deploys as a serverless function via Nitro's hybrid rendering, so the page is CDN-static while `server/api/contact.post.ts` is dynamic.
 
 The reason this works cheaply is that daisyUI's `--default` / `--prefersdark` flags already resolve first-time visitors correctly through a pure CSS media query, with no JavaScript at all. The inline script therefore only has to handle visitors who have explicitly overridden their OS preference — a minority — rather than deciding the theme for everyone.

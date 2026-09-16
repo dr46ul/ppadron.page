@@ -20,6 +20,26 @@ _Avoid_: CTA, lead, conversion
 One submitted contact form: who is writing, how to reach them, and what they want. An Enquiry exists only as the email it is delivered as; nothing is stored.
 _Avoid_: Lead, submission, ticket, message
 
+### Interface
+
+**Session**:
+The page itself. A terminal session that opens with a login banner, prints its
+content as command output, and keeps a working prompt at the foot. There are no
+sections to navigate to — see `docs/adr/0004-the-site-is-a-terminal-session.md`.
+_Avoid_: Page, layout, theme
+
+**Command**:
+One thing a Visitor can run, canonically spelled (`ls ~/experience`) and
+reachable by alias (`experience`, `work`). Each one prints exactly one kind of
+output. Adding content means adding a Command, not a page section.
+_Avoid_: Link, route, nav item
+
+**Transcript**:
+The scrollback: every Command echoed with its output, most recent last. It is
+seeded on load with the full tour so the page can be read without typing, and
+capped so it cannot grow without bound.
+_Avoid_: Feed, log, history
+
 ### Proof surfaces
 
 **Experience**:
