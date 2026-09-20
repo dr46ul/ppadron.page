@@ -47,4 +47,12 @@ off. Supply-chain enforcement is worth having; it is a deliberate change with a
 lockfile audit behind it, not a side effect of `eslint --fix`. `shellEmulator`,
 which arrived the same way, was kept on its own merits.
 
+**A file that still looks Prettier-shaped was probably never linted.** The
+preset ships a default ignore list that includes `**/output`, which matched
+`app/components/session/output/` and kept the Command output components out of
+every lint and fix run; the split end-tags Prettier had left there survived
+ADR-0006 for that reason alone. `eslint.config.js` negates that entry. If
+another directory ever shows the same symptom, check the preset's ignores
+before touching a rule.
+
 Use `pnpm lint:fix`. There is no `pnpm format`.

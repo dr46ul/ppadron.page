@@ -2,21 +2,31 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu(
   {
+    antislop: true,
     formatters: true,
     typescript: true,
     vue: true,
+
+    // The preset ignores `**/output` by default, next to `**/dist`, so the
+    // Command output components were skipped by every lint run until this
+    // negation put them back. The directory keeps its name: "Output" is the
+    // domain's word for what a Command prints (CONTEXT.md).
+    ignores: ['!app/components/session/output/**'],
   },
   {
+    // Explicit so the overrides reach Markdown, which the preset lints as its
+    // own language; a block without `files` only reaches the source globs.
+    files: ['**/*'],
     rules: {
-      // Enforces a fixed set of pnpm-workspace.yaml settings, one of which is
-      // `trustPolicy: no-downgrade`. That setting rejects this lockfile —
-      // chokidar@4.0.3 and semver@6.3.1 are the last versions of their major
-      // lines and carry no npm attestation, which the policy reads as a
-      // downgrade — so `pnpm install --frozen-lockfile` fails outright, both
-      // locally and in CI. The rule offers no way to opt out of a single
-      // setting. Supply-chain enforcement is worth having, but as a deliberate
-      // change with a lockfile audit behind it, not as a lint autofix.
+      // Would write `trustPolicy: no-downgrade` into pnpm-workspace.yaml, which
+      // rejects this lockfile and breaks `pnpm install --frozen-lockfile`. The
+      // rule cannot opt out of one setting, so it is off. See ADR-0006.
       'pnpm/yaml-enforce-settings': 'off',
+
+      // The em dash is part of this repository's written voice, in the ADRs,
+      // CONTEXT.md and the Session's own Interface copy, and `2022 — now` is
+      // the right typography for a range. Not slop; an editorial choice.
+      'slop/no-em-dash': 'off',
     },
   },
 )

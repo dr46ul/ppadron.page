@@ -34,11 +34,37 @@ reachable by alias (`experience`, `work`). Each one prints exactly one kind of
 output. Adding content means adding a Command, not a page section.
 _Avoid_: Link, route, nav item
 
+**Output**:
+What one Command prints into the Transcript: the whoami card, the Experience
+list, the Help text. Each Command has exactly one kind of Output, and no two
+Commands share one; adding a Command means adding its Output.
+_Avoid_: Result, response, section, view
+
 **Transcript**:
 The scrollback: every Command echoed with its output, most recent last. It is
 seeded on load with the full tour so the page can be read without typing, and
 capped so it cannot grow without bound.
 _Avoid_: Feed, log, history
+
+**Content**:
+What the site says about Pavel: the Profile, the Roles, the Recommendations,
+and the list of Commands. It changes when Pavel's life changes and is handed
+to the components that print it; no component holds Content of its own.
+_Avoid_: Copy, data, text
+
+**Interface copy**:
+The Session's own voice: "command not found", "sending…", the Help hints.
+It belongs to the component that speaks it and never changes with Content.
+_Avoid_: Content, labels, strings
+
+### The person
+
+**Profile**:
+The facts about Pavel the site presents: name, headline, location, an
+introduction, how to reach him, where else to find him, and whether he is open
+for work. There is exactly one Profile, and it is not a Role.
+_Avoid_: User (that word is wrong for the Visitor and would collide), owner,
+account, about, bio
 
 ### Proof surfaces
 
