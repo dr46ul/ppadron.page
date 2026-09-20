@@ -6,7 +6,7 @@ Guidance for AI agents working in this repository.
 
 ### Issue tracker
 
-Issues and specs are tracked in GitHub Issues (`dr46ul/ppadron.com`) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues and specs are tracked in GitHub Issues (`dr46ul/ppadron.page`) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

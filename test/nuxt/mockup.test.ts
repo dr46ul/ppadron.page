@@ -31,10 +31,10 @@ describe('mockupBrowser', () => {
 
   it('shows a custom url', async () => {
     const component = await mountSuspended(MockupBrowser, {
-      props: { url: 'https://ppadron.com' },
+      props: { url: 'https://ppadron.page' },
     })
 
-    expect(component.get('.input').text()).toBe('https://ppadron.com')
+    expect(component.get('.input').text()).toBe('https://ppadron.page')
   })
 
   it('shows a content border by default', async () => {
