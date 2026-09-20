@@ -1,11 +1,10 @@
 export default {
-  '**/*.(ts|tsx|js|vue)': (filenames) => [
-    `npx vue-tsc --noEmit`,
+  // ESLint owns formatting as well as linting — see ADR-0006. It formats every
+  // type below, including the ones Prettier used to handle on its own.
+  '**/*.(ts|tsx|js|mjs|vue|css|html|md|json|yaml|yml)': (filenames) => [
     `npx eslint ${filenames.join(' ')} --fix`,
-    `npx prettier --write ${filenames.join(' ')}`,
   ],
 
-  '**/*.(html|css|vue|md|json)': (filenames) => [
-    `npx prettier --write ${filenames.join(' ')}`,
-  ],
+  // Project-wide, so it is worth running only when code actually changed.
+  '**/*.(ts|tsx|js|mjs|vue)': () => [`npx vue-tsc --noEmit`],
 }
