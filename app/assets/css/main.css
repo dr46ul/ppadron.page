@@ -1,0 +1,198 @@
+@import 'tailwindcss';
+
+/* --------------------------------------------------------------------------
+   Terminal Brutalist
+   Are.na's raw grid + Bloomberg Terminal's density.
+
+   The palette below started as daisyUI's `dracula` and is now declared in full
+   as the site's own, because the theme name ends up in `<html data-theme>` and
+   that is not a place to advertise a borrowed identity. The hues are unchanged
+   — nothing here is a new colour — but they are written out rather than
+   inherited, so the tokens the components actually depend on are visible in
+   the repository instead of resolved out of node_modules.
+
+   Two families of override sit inside the declaration rather than beside it:
+
+   - Radius is 0 and elevation is expressed only as 1px hairlines, so daisyUI's
+     radius and depth tokens are flattened here rather than fought with utility
+     classes on every component.
+   - The three base surfaces are darker than stock. The page is the surface a
+     terminal is printed on, so the banner and the prompt bar read as chrome
+     attached to something, rather than as panels floating on the same value.
+
+   Dark only: a terminal is a dark surface in any light. See docs/adr/0004.
+   -------------------------------------------------------------------------- */
+
+/* No built-in themes: the declaration below is the only one the site has, so
+   daisyUI's stock light and dark would be ~4kB of CSS nothing can select. */
+@plugin "daisyui" {
+  themes: false;
+}
+
+@plugin "daisyui/theme" {
+  name: 'terminal';
+  default: true;
+  color-scheme: dark;
+
+  /* Surfaces — deeper than stock. */
+  --color-base-100: oklch(16.5% 0.02 277);
+  --color-base-200: oklch(20% 0.02 277);
+  --color-base-300: oklch(30.5% 0.024 277);
+  --color-base-content: oklch(97.747% 0.007 106.545);
+
+  /* Amber is the accent the whole page is built on: the prompt, the caret,
+     the rules, the active row. */
+  --color-accent: oklch(83.392% 0.124 66.558);
+  --color-accent-content: oklch(16.678% 0.024 66.558);
+
+  --color-primary: oklch(75.461% 0.183 346.812);
+  --color-primary-content: oklch(15.092% 0.036 346.812);
+  --color-secondary: oklch(74.202% 0.148 301.883);
+  --color-secondary-content: oklch(14.84% 0.029 301.883);
+  --color-neutral: oklch(39.445% 0.032 275.524);
+  --color-neutral-content: oklch(87.889% 0.006 275.524);
+
+  /* Status. `success` is the availability dot; `error` is a failed Enquiry. */
+  --color-success: oklch(87.099% 0.219 148.024);
+  --color-success-content: oklch(17.419% 0.043 148.024);
+  --color-error: oklch(68.22% 0.206 24.43);
+  --color-error-content: oklch(13.644% 0.041 24.43);
+  --color-warning: oklch(95.533% 0.134 112.757);
+  --color-warning-content: oklch(19.106% 0.026 112.757);
+  --color-info: oklch(88.263% 0.093 212.846);
+  --color-info-content: oklch(17.652% 0.018 212.846);
+
+  /* Square, flat, hairlines only. */
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-mono:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    font-family:
+      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  body {
+    font-family:
+      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hard, square, amber. Terminals do not glow softly. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 0;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-content);
+  }
+}
+
+@layer components {
+  /* Content that is awaiting real copy. Reads as a template slot in a
+     terminal, not as a design flourish. Delete the rule once the last
+     [bracketed] string is gone. */
+  [data-placeholder] {
+    text-decoration: underline dotted
+      color-mix(in oklch, var(--color-accent) 55%, transparent);
+    text-underline-offset: 0.25em;
+  }
+
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    translate: 0 0.18em;
+    background: var(--color-accent);
+    animation: caret-blink 1.06s steps(2, start) infinite;
+  }
+
+  /* The machine thinking, for exactly as long as it takes the first line to
+     land. Without it the output appears to have been there all along. */
+  .session-busy {
+    animation: caret-blink 400ms steps(2, start) infinite;
+  }
+
+  /* Output printed in response to a command, revealed a line at a time the way
+     a real one arrives. Only ever applied to entries the Visitor ran
+     themselves — the transcript printed on load appears at once, because
+     making someone wait to read is a cost with no return.
+
+     Transform and opacity only: a block therefore occupies its full height the
+     moment it renders, so following it with a single scroll lands correctly
+     and there is nothing to chase as it prints. */
+  .session-print > *,
+  .session-print li {
+    animation: session-line 200ms ease-out both;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
+
+  .session-print li {
+    animation-delay: calc((var(--i, 0) + 2) * 45ms);
+  }
+
+  .session-print > *:nth-child(1) {
+    --i: 0;
+  }
+  .session-print > *:nth-child(2) {
+    --i: 1;
+  }
+  .session-print > *:nth-child(3) {
+    --i: 2;
+  }
+  .session-print > *:nth-child(4) {
+    --i: 3;
+  }
+  .session-print > *:nth-child(5) {
+    --i: 4;
+  }
+  .session-print > *:nth-child(6) {
+    --i: 5;
+  }
+}
+
+@keyframes caret-blink {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes session-line {
+  from {
+    opacity: 0;
+    transform: translateY(0.4em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret,
+  .session-busy,
+  .session-print > *,
+  .session-print li {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
