@@ -23,7 +23,9 @@ const { contact, contactState, send } = injectSession()
         class="flex flex-col gap-4"
         :disabled="contactState === 'sending'"
       >
-        <legend class="sr-only">Send an enquiry</legend>
+        <legend class="sr-only">
+          Send an enquiry
+        </legend>
 
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
@@ -35,7 +37,7 @@ const { contact, contactState, send } = injectSession()
             autocomplete="name"
             required
             placeholder="your name"
-          />
+          >
         </label>
 
         <label class="flex items-baseline gap-3">
@@ -48,7 +50,7 @@ const { contact, contactState, send } = injectSession()
             autocomplete="email"
             required
             placeholder="you@company.com"
-          />
+          >
         </label>
 
         <label class="flex items-baseline gap-3">

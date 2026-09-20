@@ -37,9 +37,9 @@
         GitHub
       </a>
       ·
-      <a data-placeholder class="hover:text-base-content" href="#" @click.stop
-        >[LinkedIn]</a
-      >
+      <a data-placeholder class="hover:text-base-content" href="#" @click.stop>
+        [LinkedIn]
+      </a>
     </p>
   </div>
 </template>

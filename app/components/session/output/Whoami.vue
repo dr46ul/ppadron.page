@@ -1,6 +1,8 @@
 <template>
   <div>
-    <p class="text-lg font-semibold tracking-tight">Pavel Padron</p>
+    <p class="text-lg font-semibold tracking-tight">
+      Pavel Padron
+    </p>
     <p class="text-base-content/50">
       Frontend engineer · <span data-placeholder>[location]</span>
     </p>
