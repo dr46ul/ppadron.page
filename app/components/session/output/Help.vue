@@ -22,10 +22,9 @@
     </ul>
 
     <p class="text-base-content/35 mt-4 text-xs">
-      Tab completes · ↑ ↓ walk the history · plain words work too (<span
-        class="text-base-content/55"
-        >experience</span
-      >, <span class="text-base-content/55">contact</span>).
+      Tab completes · ↑ ↓ walk the history · plain words work too
+      (<span class="text-base-content/55">experience</span>,
+      <span class="text-base-content/55">contact</span>).
     </p>
   </div>
 </template>

@@ -1,8 +1,9 @@
+minimumReleaseAgeExclude:
+  - vue-router@5.3.0
+
+shellEmulator: true
+
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
   unrs-resolver: false
-minimumReleaseAgeExclude:
-  - lint-staged@17.4.1
-  - vue-router@5.3.0
-shellEmulator: true
