@@ -29,7 +29,9 @@ logs
 .husky
 .nvmrc
 .gitignore
-.vscode/settings.json
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 /test-results/
 /playwright-report/
 /playwright/.cache/

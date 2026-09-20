@@ -1,0 +1,5 @@
+{
+  "recommendations": ["dbaeumer.vscode-eslint", "Vue.volar"],
+  // Prettier would fight ESLint for formatting — see ADR-0006.
+  "unwantedRecommendations": ["esbenp.prettier-vscode"]
+}
