@@ -36,4 +36,15 @@ is substantially what it was. What went is the second, competing entry point:
 the `format` and `format:check` scripts, `.prettierrc.json`, `.prettierignore`,
 the direct devDependency, and the `lint-staged` step.
 
+**This makes ESLint the authority on formatting, not on everything.** The same
+config carries a `pnpm/yaml-enforce-settings` rule that writes settings into
+`pnpm-workspace.yaml`, one of which — `trustPolicy: no-downgrade` — rejects this
+lockfile and breaks `pnpm install --frozen-lockfile` outright, locally and in
+CI. The two entries it flags, `chokidar@4.0.3` and `semver@6.3.1`, are the last
+versions of their major lines and carry no npm attestation, which the policy
+reads as a downgrade. The rule has no way to opt out of one setting, so it is
+off. Supply-chain enforcement is worth having; it is a deliberate change with a
+lockfile audit behind it, not a side effect of `eslint --fix`. `shellEmulator`,
+which arrived the same way, was kept on its own merits.
+
 Use `pnpm lint:fix`. There is no `pnpm format`.
