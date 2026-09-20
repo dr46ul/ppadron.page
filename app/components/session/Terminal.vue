@@ -16,8 +16,8 @@
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
 const session = provideSession()
-const { entries, trimmed, cleared, scrollback, input, exec, complete, recall } =
-  session
+const { entries, trimmed, cleared, scrollback, input, exec, complete, recall }
+  = session
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
@@ -82,8 +82,7 @@ function focusPrompt() {
         <p class="mt-3">
           <span class="font-semibold">ppadron.page</span>
           <span class="text-base-content/35">
-            — Pavel Padron, frontend engineer</span
-          >
+            — Pavel Padron, frontend engineer</span>
         </p>
         <p class="text-accent mt-1">
           Open for freelance work.
@@ -182,9 +181,7 @@ function focusPrompt() {
         @submit.prevent="exec(input)"
       >
         <label class="sr-only" for="prompt">Run a command</label>
-        <span aria-hidden="true" class="text-accent shrink-0 select-none"
-          >$</span
-        >
+        <span aria-hidden="true" class="text-accent shrink-0 select-none">$</span>
         <input
           id="prompt"
           ref="inputEl"
@@ -198,7 +195,7 @@ function focusPrompt() {
           @keydown.tab.prevent="complete"
           @keydown.up.prevent="recall(1)"
           @keydown.down.prevent="recall(-1)"
-        />
+        >
         <span aria-hidden="true" class="caret shrink-0" />
 
         <span

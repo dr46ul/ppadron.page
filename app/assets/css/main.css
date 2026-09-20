@@ -74,19 +74,16 @@
 }
 
 @theme {
-  --font-mono:
-    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @layer base {
   html {
-    font-family:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
   body {
-    font-family:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem;
     line-height: 1.6;
     text-wrap: pretty;
@@ -111,8 +108,7 @@
      terminal, not as a design flourish. Delete the rule once the last
      [bracketed] string is gone. */
   [data-placeholder] {
-    text-decoration: underline dotted
-      color-mix(in oklch, var(--color-accent) 55%, transparent);
+    text-decoration: underline dotted color-mix(in oklch, var(--color-accent) 55%, transparent);
     text-underline-offset: 0.25em;
   }
 

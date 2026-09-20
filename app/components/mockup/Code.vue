@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-type MockupCodeLineObject = {
+interface MockupCodeLineObject {
   content: string
   prefix?: string
   class?: string

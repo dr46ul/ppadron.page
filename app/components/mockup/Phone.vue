@@ -10,7 +10,7 @@ defineProps<{
     class="mockup-phone"
     :class="{ [`border-[${borderColor}]`]: borderColor }"
   >
-    <div class="mockup-phone-camera"></div>
+    <div class="mockup-phone-camera" />
     <div class="mockup-phone-display" :class="displayClasses">
       <slot />
     </div>

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import App from '~/app.vue'
 import ErrorPage from '~/error.vue'
 
-describe('App', () => {
+describe('app', () => {
   it('mounts the app shell', async () => {
     const component = await mountSuspended(App, { route: '/' })
 
@@ -11,13 +11,13 @@ describe('App', () => {
   })
 })
 
-describe('ErrorPage', () => {
+describe('errorPage', () => {
   async function mountNotFound() {
     return mountSuspended(ErrorPage, {
       props: {
         error: {
-          statusCode: 404,
-          statusMessage: 'Not Found',
+          status: 404,
+          statusText: 'Not Found',
           message: 'Not Found',
         },
       },
