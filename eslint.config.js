@@ -7,11 +7,18 @@ export default antfu(
     typescript: true,
     vue: true,
 
-    // The preset ignores `**/output` by default, next to `**/dist`, so the
-    // Command output components were skipped by every lint run until this
-    // negation put them back. The directory keeps its name: "Output" is the
-    // domain's word for what a Command prints (CONTEXT.md).
-    ignores: ['!app/components/session/output/**'],
+    ignores: [
+      // Git worktrees live under `.worktrees/` (docs/agents/worktrees.md).
+      // Each one is a full checkout, so `eslint .` would lint every file in
+      // it twice over and on the wrong branch.
+      '.worktrees/**',
+
+      // The preset ignores `**/output` by default, next to `**/dist`, so the
+      // Command output components were skipped by every lint run until this
+      // negation put them back. The directory keeps its name: "Output" is the
+      // domain's word for what a Command prints (CONTEXT.md).
+      '!app/components/session/output/**',
+    ],
   },
   {
     // Explicit so the overrides reach Markdown, which the preset lints as its

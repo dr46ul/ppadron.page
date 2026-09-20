@@ -23,6 +23,11 @@ export default defineNuxtConfig({
 
   css: ['@/assets/css/main.css'],
 
+  // Git worktrees live under `.worktrees/` (docs/agents/worktrees.md). Nuxt
+  // only scans `app/`, but the Vite dev server watches the whole root, and
+  // without this a worktree's edits would trigger HMR in the main checkout.
+  ignore: ['.worktrees/**'],
+
   fonts: {
     // One register, one family. The serif went with the editorial layout.
     families: [
