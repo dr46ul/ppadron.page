@@ -16,11 +16,11 @@
     <p>
       <a
         class="text-accent mt-3 inline-block hover:underline"
-        href="https://github.com/dr46ul/ppadron.com"
+        href="https://github.com/dr46ul/ppadron.page"
         rel="noopener"
         @click.stop
       >
-        → github.com/dr46ul/ppadron.com
+        → github.com/dr46ul/ppadron.page
       </a>
     </p>
     <p class="text-base-content/35 mt-4 text-xs">

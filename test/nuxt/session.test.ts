@@ -1,19 +1,13 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 
 /**
- * The interactive half of the session, which SSR cannot exercise. Waits are
- * keyed to the per-command think times in useSession.ts: `whoami` is the
- * quickest real command and `mail pavel` the slowest.
+ * The interactive half of the session, which SSR cannot exercise. The machine
+ * prints its output behind a per-command think delay, so the clock is faked
+ * and run out rather than waited on: the tests stay honest about the delay
+ * existing without being coupled to how long any one command takes.
  */
-const QUICK = 360
-const SLOWEST = 760
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 async function mountTerminal() {
   const component = await mountSuspended(Terminal)
 
@@ -25,19 +19,28 @@ async function mountTerminal() {
      * be identified by the input it wraps rather than by document order.
      */
     promptForm: () =>
-      component.findAll('form').find((form) => form.find('#prompt').exists())!,
+      component.findAll('form').find(form => form.find('#prompt').exists())!,
     chip: (label: string) =>
       component
         .findAll('button')
-        .find((button) => button.text().trim() === label)!,
-    async settle(ms = SLOWEST) {
-      await sleep(ms)
+        .find(button => button.text().trim() === label)!,
+    /** Run out every pending think delay and let the DOM catch up. */
+    async settle() {
+      await vi.runAllTimersAsync()
       await component.vm.$nextTick()
     },
   }
 }
 
 describe('session', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('prints the whole transcript on load', async () => {
     const { entries } = await mountTerminal()
 
@@ -84,12 +87,12 @@ describe('session', () => {
 
     for (let i = 0; i < 14; i++) {
       await session.chip('whoami').trigger('click')
-      await session.settle(QUICK)
+      await session.settle()
     }
 
     expect(session.entries().length).toBe(14)
     expect(session.component.text()).toMatch(/earlier blocks? dropped/)
-  }, 20_000)
+  })
 
   it('keeps a single Enquiry form however often it is run', async () => {
     const session = await mountTerminal()
@@ -129,7 +132,7 @@ describe('session', () => {
     const session = await mountTerminal()
 
     await session.chip('whoami').trigger('click')
-    await session.settle(QUICK)
+    await session.settle()
     await session.chip('reset').trigger('click')
     await session.component.vm.$nextTick()
 

@@ -2,6 +2,7 @@
   "name": "nuxt-app",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@12.4.2",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -13,8 +14,6 @@
     "commitlint": "commitlint --edit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --ignore-unknown --write .",
-    "format:check": "prettier --ignore-unknown --check .",
     "test": "vitest run",
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",
@@ -42,9 +41,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "playwright-core": "^1.62.1",
-    "prettier": "3.9.6",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.3",
     "vite-plugin-eslint2": "^5.3.0",
     "vitest": "^4.1.11",
     "vue-tsc": "^3.3.11"

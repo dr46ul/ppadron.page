@@ -5,14 +5,14 @@
  *
  * See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
-export type SessionOutput =
-  | 'whoami'
-  | 'experience'
-  | 'recommendations'
-  | 'contact'
-  | 'colophon'
-  | 'help'
-  | 'unknown'
+export type SessionOutput
+  = | 'whoami'
+    | 'experience'
+    | 'recommendations'
+    | 'contact'
+    | 'colophon'
+    | 'help'
+    | 'unknown'
 
 export interface SessionCommand {
   /** The canonical spelling, as it is echoed and as the chips advertise it. */
@@ -68,28 +68,28 @@ export const commands: SessionCommand[] = [
 ]
 
 /** Commands that act on the session itself rather than printing anything. */
-export const metaCommands: { cmd: string; label: string }[] = [
+export const metaCommands: { cmd: string, label: string }[] = [
   { cmd: 'reset', label: 'back to how the page loaded' },
   { cmd: 'clear', label: 'empty the scrollback' },
 ]
 
 /** What a visitor is likely to type instead of the canonical spelling. */
 export const aliases: Record<string, string> = {
-  about: 'whoami',
-  me: 'whoami',
-  experience: 'ls ~/experience',
-  work: 'ls ~/experience',
-  ls: 'ls ~/experience',
-  recommendations: 'cat ~/recommendations',
-  rec: 'cat ~/recommendations',
-  contact: 'mail pavel',
-  mail: 'mail pavel',
-  email: 'mail pavel',
-  colophon: 'cat ~/colophon',
-  source: 'cat ~/colophon',
+  'about': 'whoami',
+  'me': 'whoami',
+  'experience': 'ls ~/experience',
+  'work': 'ls ~/experience',
+  'ls': 'ls ~/experience',
+  'recommendations': 'cat ~/recommendations',
+  'rec': 'cat ~/recommendations',
+  'contact': 'mail pavel',
+  'mail': 'mail pavel',
+  'email': 'mail pavel',
+  'colophon': 'cat ~/colophon',
+  'source': 'cat ~/colophon',
   '?': 'help',
-  man: 'help',
-  restart: 'reset',
+  'man': 'help',
+  'restart': 'reset',
 }
 
 /** What the transcript holds when the page loads, in order. */
@@ -114,9 +114,9 @@ export function useSession() {
   let nextId = 0
 
   function seed(): SessionEntry[] {
-    return TOUR.map((output) => ({
+    return TOUR.map(output => ({
       id: nextId++,
-      cmd: commands.find((entry) => entry.output === output)!.cmd,
+      cmd: commands.find(entry => entry.output === output)!.cmd,
       output,
       animate: false,
     }))
@@ -176,7 +176,8 @@ export function useSession() {
 
   function exec(raw: string) {
     const typed = raw.trim()
-    if (!typed) return
+    if (!typed)
+      return
 
     const normalised = aliases[typed.toLowerCase()] ?? typed.toLowerCase()
 
@@ -196,14 +197,14 @@ export function useSession() {
       return
     }
 
-    const command = commands.find((entry) => entry.cmd === normalised)
+    const command = commands.find(entry => entry.cmd === normalised)
     const output = command?.output ?? 'unknown'
 
     // The Enquiry form is a singleton. A second copy would be a second form
     // bound to the same state, so typing into one would fill the other.
     if (output === 'contact') {
       entries.value = entries.value.filter(
-        (existing) => existing.output !== 'contact',
+        existing => existing.output !== 'contact',
       )
       contactState.value = 'idle'
     }
@@ -227,8 +228,9 @@ export function useSession() {
         // Mutate through the array, never through the object that was pushed:
         // a ref hands the template a reactive proxy of each entry, and writing
         // to the raw object behind it notifies nothing.
-        const target = entries.value.find((existing) => existing.id === id)
-        if (!target) return
+        const target = entries.value.find(existing => existing.id === id)
+        if (!target)
+          return
 
         target.output = output
         nextTick(scrollToEnd)
@@ -240,21 +242,24 @@ export function useSession() {
   /** Tab completion over every spelling a visitor might be part-way through. */
   function complete() {
     const typed = input.value.trim().toLowerCase()
-    if (!typed) return
+    if (!typed)
+      return
 
     const pool = [
-      ...commands.map((entry) => entry.cmd),
-      ...metaCommands.map((entry) => entry.cmd),
+      ...commands.map(entry => entry.cmd),
+      ...metaCommands.map(entry => entry.cmd),
       ...Object.keys(aliases),
     ]
 
-    const hit = pool.find((entry) => entry.startsWith(typed))
-    if (hit) input.value = hit
+    const hit = pool.find(entry => entry.startsWith(typed))
+    if (hit)
+      input.value = hit
   }
 
   function recall(offset: number) {
     const next = historyIndex.value + offset
-    if (next < -1 || next >= history.value.length) return
+    if (next < -1 || next >= history.value.length)
+      return
 
     historyIndex.value = next
     input.value = next === -1 ? '' : history.value[next]!
@@ -266,7 +271,8 @@ export function useSession() {
     try {
       await $fetch('/api/contact', { method: 'POST', body: { ...contact } })
       contactState.value = 'sent'
-    } catch {
+    }
+    catch {
       contactState.value = 'failed'
     }
   }
@@ -291,8 +297,8 @@ export function useSession() {
  * its output rather than beside it — so the shell is provided down the tree
  * rather than threaded through props on every block.
  */
-const SessionKey: InjectionKey<ReturnType<typeof useSession>> =
-  Symbol('session')
+const SessionKey: InjectionKey<ReturnType<typeof useSession>>
+  = Symbol('session')
 
 export function provideSession() {
   const session = useSession()

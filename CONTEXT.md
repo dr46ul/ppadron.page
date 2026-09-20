@@ -2,7 +2,7 @@
 
 Pavel Padron's presentation website: a single-page site whose job is to convince a prospective freelance client that Pavel can do the work, and to get them to send an email. It replaces the previous site at the same address.
 
-The repository is named `ppadron.com` for historical reasons; the site's only domain is **ppadron.page**, hosted on Vercel. `ppadron.com` is not owned and should not appear in copy, metadata, or links.
+The site's only domain is **ppadron.page**, hosted on Vercel, and the repository is `dr46ul/ppadron.page` to match. `ppadron.com` is not owned and should not appear in copy, metadata, or links. A local clone directory may still carry the old name; that means nothing.
 
 ## Language
 

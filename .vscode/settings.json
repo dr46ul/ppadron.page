@@ -1,0 +1,40 @@
+{
+  // ESLint is the only formatter — see docs/adr/0006-eslint-is-the-only-formatter.md.
+  // Turning the Prettier extension off here stops it reformatting on save and
+  // reopening the conflict that ADR the moment someone has it installed.
+  "prettier.enable": false,
+  "editor.formatOnSave": false,
+
+  // Formatting happens as an ESLint fix rather than through a formatter, so it
+  // is a code action rather than editor.formatOnSave.
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Stylistic rules are noise in the editor when they get fixed on save
+  // anyway. They still fail `pnpm lint` and CI.
+  "eslint.rules.customizations": [
+    { "rule": "style/*", "severity": "off", "fixable": true },
+    { "rule": "format/*", "severity": "off", "fixable": true },
+    { "rule": "*-indent", "severity": "off", "fixable": true },
+    { "rule": "*-spacing", "severity": "off", "fixable": true },
+    { "rule": "*-order", "severity": "off", "fixable": true },
+    { "rule": "*quotes", "severity": "off", "fixable": true },
+    { "rule": "*semi", "severity": "off", "fixable": true }
+  ],
+
+  // ESLint only formats the languages it is told to validate, and this config
+  // covers considerably more than JavaScript.
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "json5",
+    "yaml",
+    "css"
+  ]
+}
