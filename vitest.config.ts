@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
 import { defineVitestProject } from '@nuxt/test-utils/config'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -7,14 +7,14 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['test/unit/*.{test,spec}.ts'],
+          include: ['test/unit/**/*.{test,spec}.ts'],
           environment: 'node',
         },
       },
       {
         test: {
           name: 'e2e',
-          include: ['test/e2e/*.{test,spec}.ts'],
+          include: ['test/e2e/**/*.{test,spec}.ts'],
           environment: 'node',
           testTimeout: 120_000,
         },
@@ -22,7 +22,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'nuxt',
-          include: ['test/nuxt/*.{test,spec}.ts'],
+          include: ['test/nuxt/**/*.{test,spec}.ts'],
           environment: 'nuxt',
         },
       }),
