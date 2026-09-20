@@ -19,11 +19,11 @@ async function mountTerminal() {
      * be identified by the input it wraps rather than by document order.
      */
     promptForm: () =>
-      component.findAll('form').find((form) => form.find('#prompt').exists())!,
+      component.findAll('form').find(form => form.find('#prompt').exists())!,
     chip: (label: string) =>
       component
         .findAll('button')
-        .find((button) => button.text().trim() === label)!,
+        .find(button => button.text().trim() === label)!,
     /** Run out every pending think delay and let the DOM catch up. */
     async settle() {
       await vi.runAllTimersAsync()

@@ -15,7 +15,7 @@ function titleText(html: string) {
 
 function metaContent(html: string, name: string) {
   const tags = html.match(/<meta\b[^>]*>/gi) ?? []
-  const tag = tags.find((entry) =>
+  const tag = tags.find(entry =>
     new RegExp(`\\bname="${name}"`, 'i').test(entry),
   )
 
@@ -24,11 +24,11 @@ function metaContent(html: string, name: string) {
 
 function charset(html: string) {
   const tags = html.match(/<meta\b[^>]*>/gi) ?? []
-  const tag = tags.find((entry) => /charset/i.test(entry))
+  const tag = tags.find(entry => /charset/i.test(entry))
 
   return (
-    tag?.match(/charset="([^"]*)"/i)?.[1] ??
-    tag?.match(/charset=([^\s>/]+)/i)?.[1]
+    tag?.match(/charset="([^"]*)"/i)?.[1]
+    ?? tag?.match(/charset=([^\s>/]+)/i)?.[1]
   )
 }
 
@@ -60,7 +60,7 @@ describe('home page', async () => {
   })
 
   it('sets the description meta tag', () => {
-    expect(metaContent(html, 'description')).toBe("Pavel Padron's portfolio")
+    expect(metaContent(html, 'description')).toBe('Pavel Padron\'s portfolio')
   })
 
   it('sets the charset to utf-8', () => {

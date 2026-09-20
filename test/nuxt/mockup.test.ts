@@ -6,7 +6,7 @@ import MockupCodeLine from '~/components/mockup/CodeLine.vue'
 import MockupPhone from '~/components/mockup/Phone.vue'
 import MockupWindow from '~/components/mockup/Window.vue'
 
-describe('MockupWindow', () => {
+describe('mockupWindow', () => {
   it('uses the mockup-window class', async () => {
     const component = await mountSuspended(MockupWindow)
 
@@ -22,7 +22,7 @@ describe('MockupWindow', () => {
   })
 })
 
-describe('MockupBrowser', () => {
+describe('mockupBrowser', () => {
   it('shows the default url', async () => {
     const component = await mountSuspended(MockupBrowser)
 
@@ -52,7 +52,7 @@ describe('MockupBrowser', () => {
   })
 })
 
-describe('MockupCodeLine', () => {
+describe('mockupCodeLine', () => {
   it('uses > as the default prefix', async () => {
     const component = await mountSuspended(MockupCodeLine)
 
@@ -76,7 +76,7 @@ describe('MockupCodeLine', () => {
   })
 })
 
-describe('MockupCode', () => {
+describe('mockupCode', () => {
   it('renders a line for each item', async () => {
     const component = await mountSuspended(MockupCode, {
       props: {
@@ -94,7 +94,7 @@ describe('MockupCode', () => {
       },
     })
 
-    expect(component.findAll('code').map((line) => line.text())).toEqual([
+    expect(component.findAll('code').map(line => line.text())).toEqual([
       'git status',
       'clean working tree',
     ])
@@ -111,7 +111,7 @@ describe('MockupCode', () => {
   })
 })
 
-describe('MockupPhone', () => {
+describe('mockupPhone', () => {
   it('uses the mockup-phone class', async () => {
     const component = await mountSuspended(MockupPhone)
 

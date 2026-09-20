@@ -14,7 +14,9 @@ withDefaults(
 <template>
   <div class="mockup-browser border border-base-300 w-full">
     <div class="mockup-browser-toolbar">
-      <div class="input">{{ url }}</div>
+      <div class="input">
+        {{ url }}
+      </div>
     </div>
     <div
       class="grid place-content-center h-80"
