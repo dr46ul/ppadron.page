@@ -15,6 +15,9 @@
  * lives in the prompt at the foot, which is where a terminal's status line has
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
+import { roles } from '~/data/experience'
+import { recommendations } from '~/data/recommendations'
+
 const session = provideSession()
 const { entries, trimmed, cleared, scrollback, input, exec, complete, recall }
   = session
@@ -123,13 +126,19 @@ function focusPrompt() {
             <SessionOutputWhoami v-if="entry.output === 'whoami'" />
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
+              :roles="roles"
             />
             <SessionOutputRecommendations
               v-else-if="entry.output === 'recommendations'"
+              :recommendations="recommendations"
             />
             <SessionOutputContact v-else-if="entry.output === 'contact'" />
             <SessionOutputColophon v-else-if="entry.output === 'colophon'" />
-            <SessionOutputHelp v-else-if="entry.output === 'help'" />
+            <SessionOutputHelp
+              v-else-if="entry.output === 'help'"
+              :commands="commands"
+              :meta-commands="metaCommands"
+            />
             <SessionOutputUnknown v-else :cmd="entry.cmd" />
           </div>
         </div>

@@ -1,6 +1,8 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
+import { roles } from '~/data/experience'
+import { recommendations } from '~/data/recommendations'
 
 /**
  * The interactive half of the session, which SSR cannot exercise. The machine
@@ -45,6 +47,33 @@ describe('session', () => {
     const { entries } = await mountTerminal()
 
     expect(entries().length).toBe(5)
+  })
+
+  it('hands the Roles to the Experience output', async () => {
+    const { component } = await mountTerminal()
+    const printed = component.findAll('time[datetime]')
+
+    expect(printed).toHaveLength(roles.length)
+    expect(printed[0]!.text()).toBe(roles[0]!.period)
+  })
+
+  it('hands the Recommendations to the Recommendations output', async () => {
+    const { component } = await mountTerminal()
+    const printed = component.findAll('blockquote')
+
+    expect(printed).toHaveLength(recommendations.length)
+    expect(printed[0]!.text()).toBe(recommendations[0]!.quote)
+  })
+
+  it('hands the command list to the Help output', async () => {
+    const session = await mountTerminal()
+
+    await session.chip('help').trigger('click')
+    await session.settle()
+
+    const help = session.entries().at(-1)!
+    for (const command of [...commands, ...metaCommands])
+      expect(help.text()).toContain(command.label)
   })
 
   it('prints output after the think delay when a command is run', async () => {
