@@ -18,7 +18,7 @@ Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/do
 
 ### Testing
 
-Test-first, always: every new component, page, composable or util starts as a failing test, and "covered" means every branch plus the edge cases, with the 100% threshold as the floor. Three Vitest projects, split by directory: `test/unit` (node), `test/nuxt` (Nuxt runtime), `test/e2e` (built server). See `docs/agents/testing.md`.
+Test-first, always: every new component, page, composable or util starts as a failing test, and "covered" means every branch plus the edge cases, with the coverage gate as the floor (100% lines, functions and statements; at most four uncovered branches, all of them unreachable Vue codegen artefacts). Three Vitest projects, split by directory: `test/unit` (node), `test/nuxt` (Nuxt runtime), `test/e2e` (built server). See `docs/agents/testing.md`.
 
 ### Worktrees
 
