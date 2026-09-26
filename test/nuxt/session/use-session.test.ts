@@ -1,9 +1,10 @@
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
- * `useSession()` holds no component state, so these tests call it directly
- * rather than reaching it through `Terminal`'s DOM.
+ * `useSession()` holds no component state, so every test here calls it
+ * directly rather than reaching it through `Terminal`'s DOM — no component is
+ * mounted in this file. `Terminal`'s own tests cover the wiring.
  */
 
 /**
@@ -584,47 +585,6 @@ describe('useSession', () => {
       session.contact.message = 'typed afterwards'
 
       expect(post.mock.calls[0]![1].body.message).toBe('as sent')
-    })
-  })
-
-  /** The only tests here that need a component: `provide` requires one. */
-  describe('provideSession', () => {
-    it('hands the same session to everything below it', async () => {
-      let provided: ReturnType<typeof useSession> | undefined
-      let injected: ReturnType<typeof useSession> | undefined
-
-      const Child = defineComponent({
-        setup() {
-          injected = injectSession()
-
-          return () => h('span')
-        },
-      })
-      const Host = defineComponent({
-        setup() {
-          provided = provideSession()
-
-          return () => h(Child)
-        },
-      })
-
-      await mountSuspended(Host)
-
-      expect(injected).toBe(provided)
-    })
-
-    it('says where it belongs when it is injected outside a session', async () => {
-      const Orphan = defineComponent({
-        setup() {
-          injectSession()
-
-          return () => h('span')
-        },
-      })
-
-      await expect(mountSuspended(Orphan)).rejects.toThrow(
-        'injectSession() must be called inside <SessionTerminal>',
-      )
     })
   })
 
