@@ -111,8 +111,10 @@ function focusPrompt() {
               profile.availability.open ? 'text-accent' : 'text-base-content/35'
             "
           >{{ profile.availability.label }}</span>
+          <!-- The label is the Profile's, and may or may not end in a full
+               stop, so the separator is this component's to supply. -->
           <span class="text-base-content/35">
-            Everything below is already printed — read on, or run a command.
+            · Everything below is already printed — read on, or run a command.
           </span>
         </p>
       </div>

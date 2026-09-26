@@ -195,6 +195,16 @@ describe('terminal', () => {
       expect(promptBar().text()).not.toContain('Available for freelance')
     })
 
+    it('separates the label from its own copy, whatever the label ends in', async () => {
+      const { banner } = await mountTerminal()
+
+      // The label is Content and may not end in a full stop, so the banner
+      // cannot let it run straight into the sentence that follows.
+      expect(banner().text()).toContain(
+        'Free from the equinox · Everything below is already printed',
+      )
+    })
+
     it('accents the availability while Pavel is open to work', async () => {
       const { availability } = await mountTerminal()
 
