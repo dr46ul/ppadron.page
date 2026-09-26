@@ -38,6 +38,20 @@ export interface SessionEntry {
   animate: boolean
 }
 
+/**
+ * A draft Enquiry, as it stands before it is sent. The session owns the draft;
+ * the form is handed it as a prop and reports a whole new one rather than
+ * writing into it.
+ */
+export interface Enquiry {
+  name: string
+  email: string
+  message: string
+}
+
+/** How far a submitted Enquiry has got. */
+export type EnquiryState = 'idle' | 'sending' | 'sent' | 'failed'
+
 export const commands: SessionCommand[] = [
   { cmd: 'whoami', output: 'whoami', label: 'who I am', think: 260 },
   {
@@ -136,8 +150,8 @@ export function useSession() {
   const history = ref<string[]>([])
   const historyIndex = ref(-1)
 
-  const contact = reactive({ name: '', email: '', message: '' })
-  const contactState = ref<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const contact = reactive<Enquiry>({ name: '', email: '', message: '' })
+  const contactState = ref<EnquiryState>('idle')
 
   function reducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
