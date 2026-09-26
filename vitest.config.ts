@@ -13,6 +13,17 @@ export default defineConfig({
       // .nuxt and the test files never enter the report.
       include: ['app/components/**', 'app/composables/**'],
       reporter: ['text', 'html', 'lcov'],
+      // The gate. `pnpm test` fails below these, and CI runs `pnpm test`.
+      thresholds: {
+        statements: 100,
+        functions: 100,
+        lines: 100,
+        // Negative is a maximum uncovered *count*, not a percentage. The four
+        // are Vue codegen artefacts in Terminal.vue that no test can reach; a
+        // count cannot drift as the tree grows, so a fifth fails the run. Cover
+        // it, don't raise this. See docs/agents/testing.md.
+        branches: -4,
+      },
     },
     projects: [
       {

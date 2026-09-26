@@ -31,9 +31,15 @@ first commit of a change is the test that describes the new behaviour.
 
 ## What covered means
 
-`pnpm test` (and CI) enforces 100% lines, branches, functions and statements
-on `app/components/**` and `app/composables/**`. That threshold is the
-**floor**, not the definition. A subject is covered when every branch is
+`pnpm test` (and CI) enforces 100% lines, functions and statements on
+`app/components/**` and `app/composables/**`, and **at most four uncovered
+branches** in that tree — a count, not a percentage, so the gate cannot drift as
+the tree grows. Exactly four exist today, all unreachable, all in `Terminal.vue`
+(see "A `.vue` file will not reach 100% branches" below); the cap is sized to
+them, so one new uncovered branch anywhere makes it five and the run fails.
+Cover a new branch, don't raise the cap.
+
+That threshold is the **floor**, not the definition. A subject is covered when every branch is
 exercised **and** the edge cases a reviewer would ask about have a test:
 
 - empty lists,
@@ -134,6 +140,13 @@ whichever source column is nearest, usually an innocent prop expression.
 `Terminal.vue` carries four of them (there is no conditional at any of the four
 positions, and they survived every test written for it). No test can reach them;
 do not chase them.
+
+This is why the branch gate is a count of four rather than 100% — `branches: -4`
+in `vitest.config.ts`. If the four ever move or multiply (a template edit shifts
+which prop expression the sourcemap lands on), confirm the newly-reported
+positions are artefacts the same way issue #19 did — compile the template with
+`@vue/compiler-sfc` and look for a conditional at that source position — before
+touching the cap. A real uncovered branch gets a test, not a bigger number.
 
 ## CI
 
