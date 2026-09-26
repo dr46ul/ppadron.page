@@ -19,7 +19,9 @@ import { roles } from '~/data/experience'
 import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
 
-const session = provideSession()
+// Terminal is the only session consumer: no output component injects it, so
+// there is nothing to provide down the tree. See
+// docs/adr/0007-output-components-are-pure.md.
 const {
   entries,
   trimmed,
@@ -32,7 +34,7 @@ const {
   contact,
   contactState,
   send,
-} = session
+} = useSession()
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
@@ -89,6 +91,7 @@ function focusPrompt() {
            with the rest of the scrollback; only `reset` brings it back. -->
       <div
         v-if="!cleared"
+        data-banner
         class="border-base-300 mb-12 border-b pb-6 text-[0.8125rem]"
       >
         <p class="text-base-content/35">
@@ -97,10 +100,17 @@ function focusPrompt() {
         <p class="mt-3">
           <span class="font-semibold">ppadron.page</span>
           <span class="text-base-content/35">
-            — Pavel Padron, frontend engineer</span>
+            — {{ profile.name }}, {{ profile.headline }}</span>
         </p>
-        <p class="text-accent mt-1">
-          Open for freelance work.
+        <!-- Whether Pavel is open is the Profile's to say, and so is how it is
+             worded; `open` decides only whether the line is accented. -->
+        <p class="mt-1">
+          <span
+            data-availability
+            :class="
+              profile.availability.open ? 'text-accent' : 'text-base-content/35'
+            "
+          >{{ profile.availability.label }}</span>
           <span class="text-base-content/35">
             Everything below is already printed — read on, or run a command.
           </span>
@@ -180,6 +190,7 @@ function focusPrompt() {
          hidden behind `help`, because a Visitor who does not already know that
          `help` exists is the Visitor this page is for. -->
     <div
+      data-prompt-bar
       class="border-base-300 bg-base-100/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
     >
       <div
@@ -239,10 +250,18 @@ function focusPrompt() {
         <span aria-hidden="true" class="caret shrink-0" />
 
         <span
-          class="text-accent ml-auto hidden shrink-0 items-center gap-2 pl-4 text-[0.6875rem] tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
+          data-availability
+          class="ml-auto hidden shrink-0 items-center gap-2 pl-4 text-[0.6875rem] tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
+          :class="
+            profile.availability.open ? 'text-accent' : 'text-base-content/35'
+          "
         >
-          <span aria-hidden="true" class="bg-success size-1.5" />
-          Available for freelance
+          <span
+            aria-hidden="true"
+            class="size-1.5"
+            :class="profile.availability.open ? 'bg-success' : 'bg-base-300'"
+          />
+          {{ profile.availability.label }}
         </span>
       </form>
     </div>

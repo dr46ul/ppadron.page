@@ -56,8 +56,23 @@ One file per subject, mirroring `app/`:
 
 Output components are pure: they print what they are handed as props and
 report through emits, so their tests mount them with props and never touch the
-session. `Terminal` is the only component that reads `app/data/` and owns the
-session, so its tests are the wiring tests.
+session — see `docs/adr/0007-output-components-are-pure.md`. `Terminal` is the
+only component that reads `app/data/` and calls `useSession()`, so its tests are
+the wiring tests.
+
+**`Terminal` takes no props, so its tests mock the data modules.** It reads
+`app/data/` by design, which makes those modules the only seam a wiring test can
+substitute at:
+
+```ts
+const data = vi.hoisted(() => ({ profile: {} as Profile }))
+vi.mock('~/data/profile', () => ({ profile: data.profile }))
+```
+
+The mocked binding is captured on import, so the fixture object keeps its
+identity and each test writes into it (`Object.assign`, `splice`) rather than
+reassigning it. This is also the only way to reach Content the real modules
+cannot express, such as `availability.open` being false.
 
 ## Rules that are not obvious
 
@@ -100,15 +115,25 @@ reach for one when a test actually needs it, not for completeness.
 `/api/contact` is a contract the tests pin rather than an endpoint they can call.
 
 **A composable does not always need a component.** `useSession()` holds no
-component state, so its tests call it directly. Only `provideSession` and
-`injectSession` need a host component.
+component state, so its tests call it directly and `use-session.test.ts` mounts
+nothing at all.
 
 ## Proving a test can fail
 
 A test written against code that already works is green from the start, which
 proves nothing. Break the code one way at a time and check that the test goes
 red — and that it is the one that catches it. `useSession.ts` was covered this
-way; the mutations and what each killed are on issue #14.
+way; the mutations and what each killed are on issue #14, and `Terminal.vue`'s
+25 on issue #18.
+
+**A `.vue` file will not reach 100% branches.** The v8 provider counts branches
+in the compiled render function and maps them back through the sourcemap, so
+Vue's own `_cache[n] || (_cache[n] = …)` guards for hoisted static vnodes and
+cached event handlers surface as uncovered `cond-expr` branches — attributed to
+whichever source column is nearest, usually an innocent prop expression.
+`Terminal.vue` carries four of them (there is no conditional at any of the four
+positions, and they survived every test written for it). No test can reach them;
+do not chase them.
 
 ## CI
 

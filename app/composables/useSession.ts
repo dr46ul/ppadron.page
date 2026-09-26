@@ -310,26 +310,3 @@ export function useSession() {
     send,
   }
 }
-
-/**
- * There is exactly one session on the page, and the Enquiry form lives inside
- * its output rather than beside it — so the shell is provided down the tree
- * rather than threaded through props on every block.
- */
-const SessionKey: InjectionKey<ReturnType<typeof useSession>>
-  = Symbol('session')
-
-export function provideSession() {
-  const session = useSession()
-  provide(SessionKey, session)
-
-  return session
-}
-
-export function injectSession() {
-  const session = inject(SessionKey)
-  if (!session)
-    throw new Error('injectSession() must be called inside <SessionTerminal>')
-
-  return session
-}
