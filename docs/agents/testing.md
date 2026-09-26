@@ -99,19 +99,16 @@ reach for one when a test actually needs it, not for completeness.
 `registerEndpoint` still has no subject: there is no `server/` directory, so
 `/api/contact` is a contract the tests pin rather than an endpoint they can call.
 
-**A composable does not always need a component.** `useSession()` is a plain
-object of refs and runs without mounting anything, which is why its tests read
-as a specification of the shell rather than as DOM poking. Only `provideSession`
-and `injectSession` need a host component.
+**A composable does not always need a component.** `useSession()` holds no
+component state, so its tests call it directly. Only `provideSession` and
+`injectSession` need a host component.
 
 ## Proving a test can fail
 
 A test written against code that already works is green from the start, which
-proves nothing. Break the code one way at a time and check that the test you
-just wrote goes red — and that it is the one that catches it. `useSession.ts`
-was covered this way: every test in its file is killed by at least one deliberate
-mutation, and the two mutations nothing caught were equivalent rewrites rather
-than gaps (see the resolution on issue #14).
+proves nothing. Break the code one way at a time and check that the test goes
+red — and that it is the one that catches it. `useSession.ts` was covered this
+way; the mutations and what each killed are on issue #14.
 
 ## CI
 

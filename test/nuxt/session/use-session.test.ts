@@ -2,24 +2,14 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
- * The shell itself, tested through the interface `useSession()` returns rather
- * than through `Terminal`'s DOM. The composable holds no component state, so it
- * runs without mounting anything — the session is a plain object of refs, and
- * every behaviour below is observable on it.
- *
- * The machine thinks before it prints, so the clock is faked in every test.
- * Delays are advanced deliberately rather than run out where the point is that
- * the beat exists (`THINK_UNKNOWN`, reduced motion); elsewhere
- * `runAllTimersAsync` stands in for "however long that command takes".
+ * `useSession()` holds no component state, so these tests call it directly
+ * rather than reaching it through `Terminal`'s DOM.
  */
 
 /**
- * `send()` posts an Enquiry to an endpoint this repo does not have yet, so the
- * one boundary the shell reaches across is mocked. `$fetch` is an auto-import
- * rather than a global, so `vi.stubGlobal` cannot reach it — a global stub
- * leaves the real `$fetch` in place, and a test asserting `failed` then passes
- * because the request really failed. `mockNuxtImport` is hoisted, so there is
- * one mock for the file and each test says what it should do.
+ * `$fetch` is an auto-import, not a global, so `vi.stubGlobal` cannot reach the
+ * binding the composable holds: the real request goes out and a test asserting
+ * `failed` passes because it genuinely failed.
  */
 const { post } = vi.hoisted(() => ({ post: vi.fn() }))
 mockNuxtImport('$fetch', () => post)
@@ -156,10 +146,7 @@ describe('useSession', () => {
   })
 
   describe('the scrollback cap', () => {
-    /**
-     * `help` rather than `mail pavel`: running the Enquiry form would filter the
-     * seeded copy out of the transcript and move the overflow arithmetic.
-     */
+    /** `mail pavel` would filter the seeded form out and move the arithmetic. */
     async function overflow(session: ReturnType<typeof useSession>, runs: number) {
       for (let i = 0; i < runs; i++) {
         session.exec('help')
@@ -409,14 +396,13 @@ describe('useSession', () => {
 
       session.complete()
 
-      // `clear` and `contact` also start with c; the canonical commands are
-      // offered first, so the completion advertises the real spelling.
+      // `clear` and `contact` start with c too, but a completion should teach
+      // the real spelling rather than the shortcut.
       expect(session.input.value).toBe('cat ~/recommendations')
     })
   })
 
   describe('recall', () => {
-    /** Two commands deep, most recent first. */
     function withHistory() {
       const session = useSession()
       session.exec('whoami')
@@ -498,7 +484,7 @@ describe('useSession', () => {
       const session = useSession()
       prefersReducedMotion(true)
 
-      // `help` is the quickest command there is and still takes a beat.
+      // Even `help`, the quickest command, normally takes a beat.
       session.exec('help')
       await vi.advanceTimersByTimeAsync(0)
 
@@ -601,11 +587,7 @@ describe('useSession', () => {
     })
   })
 
-  /**
-   * The shell is provided down the tree rather than threaded through props,
-   * because the Enquiry form lives inside the output. These are the only tests
-   * here that need a component at all.
-   */
+  /** The only tests here that need a component: `provide` requires one. */
   describe('provideSession', () => {
     it('hands the same session to everything below it', async () => {
       let provided: ReturnType<typeof useSession> | undefined
@@ -650,8 +632,7 @@ describe('useSession', () => {
     it('prints nothing and does not fall over', async () => {
       const session = useSession()
 
-      // The slowest command there is, pushed off the end of the scrollback by
-      // fifteen instant ones before its output ever lands.
+      // Fifteen: enough overflow to drop the slow command before its timer fires.
       session.exec('cat ~/recommendations')
       for (let i = 0; i < 15; i++)
         session.exec('help')
