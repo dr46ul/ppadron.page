@@ -81,15 +81,34 @@ with `vi.runAllTimersAsync()` — see `test/nuxt/session.test.ts`. A real-time
 
 **The `nuxt` environment shares global state between tests in a file.** A Nuxt
 app is initialised once before the tests run, so anything mutated globally must
-be reset afterwards.
+be reset afterwards. `vi.stubGlobal` needs a matching `vi.unstubAllGlobals`.
+
+**`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
+global: `useSession.ts` gets its own binding, and stubbing `globalThis.$fetch`
+leaves that binding pointing at the real thing. The stub then does nothing and a
+test asserting the failure path passes because the request genuinely failed —
+a green test proving nothing. Use `mockNuxtImport('$fetch', …)`.
 
 ## Adding a helper
 
-The suite deliberately uses only `mountSuspended`. `mockNuxtImport`,
-`mockComponent`, `renderSuspended` and Vitest browser mode are all available
-from `@nuxt/test-utils` but are not in use — reach for one when a test actually
-needs it, not for completeness. `registerEndpoint` has no subject: there is no
-`server/` directory.
+The suite uses `mountSuspended` for anything that needs a component, and
+`mockNuxtImport` for the one boundary the code reaches across (`$fetch`, in
+`test/nuxt/session/use-session.test.ts`). `mockComponent`, `renderSuspended` and
+Vitest browser mode are available from `@nuxt/test-utils` but are not in use —
+reach for one when a test actually needs it, not for completeness.
+`registerEndpoint` still has no subject: there is no `server/` directory, so
+`/api/contact` is a contract the tests pin rather than an endpoint they can call.
+
+**A composable does not always need a component.** `useSession()` holds no
+component state, so its tests call it directly. Only `provideSession` and
+`injectSession` need a host component.
+
+## Proving a test can fail
+
+A test written against code that already works is green from the start, which
+proves nothing. Break the code one way at a time and check that the test goes
+red — and that it is the one that catches it. `useSession.ts` was covered this
+way; the mutations and what each killed are on issue #14.
 
 ## CI
 
