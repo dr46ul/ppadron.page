@@ -68,7 +68,12 @@ export const commands: SessionCommand[] = [
 ]
 
 /** Commands that act on the session itself rather than printing anything. */
-export const metaCommands: { cmd: string, label: string }[] = [
+export interface MetaCommand {
+  cmd: string
+  label: string
+}
+
+export const metaCommands: MetaCommand[] = [
   { cmd: 'reset', label: 'back to how the page loaded' },
   { cmd: 'clear', label: 'empty the scrollback' },
 ]

@@ -1,3 +1,9 @@
+<script lang="ts" setup>
+import type { MetaCommand, SessionCommand } from '~/composables/useSession'
+
+defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
+</script>
+
 <template>
   <div>
     <ul class="flex flex-col gap-1 text-xs">
