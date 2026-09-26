@@ -16,6 +16,7 @@
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
 import { roles } from '~/data/experience'
+import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
 
 const session = provideSession()
@@ -123,7 +124,10 @@ function focusPrompt() {
             class="mt-3 pl-[1.1rem]"
             :class="entry.animate && 'session-print'"
           >
-            <SessionOutputWhoami v-if="entry.output === 'whoami'" />
+            <SessionOutputWhoami
+              v-if="entry.output === 'whoami'"
+              :profile="profile"
+            />
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
               :roles="roles"
@@ -133,7 +137,10 @@ function focusPrompt() {
               :recommendations="recommendations"
             />
             <SessionOutputContact v-else-if="entry.output === 'contact'" />
-            <SessionOutputColophon v-else-if="entry.output === 'colophon'" />
+            <SessionOutputColophon
+              v-else-if="entry.output === 'colophon'"
+              :profile="profile"
+            />
             <SessionOutputHelp
               v-else-if="entry.output === 'help'"
               :commands="commands"

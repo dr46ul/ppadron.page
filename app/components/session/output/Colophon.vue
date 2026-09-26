@@ -4,6 +4,14 @@
  * which is why the source link is given this much room rather than being
  * buried in a row of social icons.
  */
+import type { Profile } from '~/data/profile'
+
+const props = defineProps<{ profile: Profile }>()
+
+/** The repo URL as a terminal would print a path: no scheme in the way. */
+const repoLabel = computed(() =>
+  props.profile.links.repo.replace(/^https?:\/\//, ''),
+)
 </script>
 
 <template>
@@ -16,29 +24,37 @@
     <p>
       <a
         class="text-accent mt-3 inline-block hover:underline"
-        href="https://github.com/dr46ul/ppadron.page"
+        :href="profile.links.repo"
         rel="noopener"
         @click.stop
       >
-        → github.com/dr46ul/ppadron.page
+        → {{ repoLabel }}
       </a>
     </p>
-    <p class="text-base-content/35 mt-4 text-xs">
-      vue · nuxt · typescript · tailwind · daisyui · vitest · vercel
+    <p
+      v-if="profile.stack.length > 0"
+      class="text-base-content/35 mt-4 text-xs"
+    >
+      {{ profile.stack.join(' · ') }}
     </p>
     <p class="text-base-content/35 mt-6 text-xs">
-      © {{ new Date().getFullYear() }} Pavel Padron ·
+      © {{ new Date().getFullYear() }} {{ profile.name }} ·
       <a
         class="hover:text-base-content"
-        href="https://github.com/dr46ul"
+        :href="profile.links.github"
         rel="noopener"
         @click.stop
       >
         GitHub
       </a>
       ·
-      <a data-placeholder class="hover:text-base-content" href="#" @click.stop>
-        [LinkedIn]
+      <a
+        class="hover:text-base-content"
+        :href="profile.links.linkedin"
+        rel="noopener"
+        @click.stop
+      >
+        LinkedIn
       </a>
     </p>
   </div>

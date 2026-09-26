@@ -2,6 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { roles } from '~/data/experience'
+import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
 
 /**
@@ -22,6 +23,15 @@ async function mountTerminal() {
      */
     promptForm: () =>
       component.findAll('form').find(form => form.find('#prompt').exists())!,
+    /**
+     * The transcript block one command printed. The banner repeats Content of
+     * its own (Pavel's name), so a wiring assertion made against the whole
+     * page cannot fail — it has to be scoped to the output under test.
+     */
+    output: (cmd: string) =>
+      component
+        .findAll('[data-entry]')
+        .find(entry => entry.find('p')!.text().endsWith(cmd))!,
     chip: (label: string) =>
       component
         .findAll('button')
@@ -55,6 +65,25 @@ describe('session', () => {
 
     expect(printed).toHaveLength(roles.length)
     expect(printed[0]!.text()).toBe(roles[0]!.period)
+  })
+
+  it('hands the Profile to the Whoami output', async () => {
+    const { output } = await mountTerminal()
+    const whoami = output('whoami').text()
+
+    expect(whoami).toContain(profile.name)
+    expect(whoami).toContain(`${profile.headline} · ${profile.location}`)
+    expect(whoami).toContain(profile.intro)
+  })
+
+  it('hands the Profile to the Colophon output', async () => {
+    const { component } = await mountTerminal()
+    const hrefs = component.findAll('a').map(link => link.attributes('href'))
+
+    expect(hrefs).toContain(profile.links.repo)
+    expect(hrefs).toContain(profile.links.github)
+    expect(hrefs).toContain(profile.links.linkedin)
+    expect(component.text()).toContain(profile.stack.join(' · '))
   })
 
   it('hands the Recommendations to the Recommendations output', async () => {
