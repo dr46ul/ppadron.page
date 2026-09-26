@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 defineProps<{ cmd: string }>()
 
-const { exec } = injectSession()
+/** The session decides what `help` means; this only reports the ask. */
+const emit = defineEmits<{ help: [] }>()
 </script>
 
 <template>
@@ -10,7 +11,7 @@ const { exec } = injectSession()
     <button
       type="button"
       class="text-accent underline"
-      @click.stop="exec('help')"
+      @click.stop="emit('help')"
     >
       help
     </button>

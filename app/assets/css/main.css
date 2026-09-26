@@ -104,14 +104,6 @@
 }
 
 @layer components {
-  /* Content that is awaiting real copy. Reads as a template slot in a
-     terminal, not as a design flourish. Delete the rule once the last
-     [bracketed] string is gone. */
-  [data-placeholder] {
-    text-decoration: underline dotted color-mix(in oklch, var(--color-accent) 55%, transparent);
-    text-underline-offset: 0.25em;
-  }
-
   .caret {
     display: inline-block;
     width: 0.55em;
