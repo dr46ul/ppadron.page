@@ -20,8 +20,19 @@ import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
 
 const session = provideSession()
-const { entries, trimmed, cleared, scrollback, input, exec, complete, recall }
-  = session
+const {
+  entries,
+  trimmed,
+  cleared,
+  scrollback,
+  input,
+  exec,
+  complete,
+  recall,
+  contact,
+  contactState,
+  send,
+} = session
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
@@ -136,7 +147,16 @@ function focusPrompt() {
               v-else-if="entry.output === 'recommendations'"
               :recommendations="recommendations"
             />
-            <SessionOutputContact v-else-if="entry.output === 'contact'" />
+            <!-- The draft is the session's, so the form is handed a copy and
+                 its report is written back here. -->
+            <SessionOutputContact
+              v-else-if="entry.output === 'contact'"
+              :model-value="contact"
+              :state="contactState"
+              :email="profile.email"
+              @update:model-value="Object.assign(contact, $event)"
+              @submit="send"
+            />
             <SessionOutputColophon
               v-else-if="entry.output === 'colophon'"
               :profile="profile"
@@ -146,7 +166,11 @@ function focusPrompt() {
               :commands="commands"
               :meta-commands="metaCommands"
             />
-            <SessionOutputUnknown v-else :cmd="entry.cmd" />
+            <SessionOutputUnknown
+              v-else
+              :cmd="entry.cmd"
+              @help="exec('help')"
+            />
           </div>
         </div>
       </div>

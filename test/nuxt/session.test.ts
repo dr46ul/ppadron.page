@@ -23,6 +23,9 @@ async function mountTerminal() {
      */
     promptForm: () =>
       component.findAll('form').find(form => form.find('#prompt').exists())!,
+    /** The Enquiry form: the only other form on the page. */
+    enquiryForm: () =>
+      component.findAll('form').find(form => !form.find('#prompt').exists())!,
     /**
      * The transcript block one command printed. The banner repeats Content of
      * its own (Pavel's name), so a wiring assertion made against the whole
@@ -103,6 +106,55 @@ describe('session', () => {
     const help = session.entries().at(-1)!
     for (const command of [...commands, ...metaCommands])
       expect(help.text()).toContain(command.label)
+  })
+
+  it('hands the shared draft to the Contact output', async () => {
+    const session = await mountTerminal()
+
+    await session.chip('mail pavel').trigger('click')
+    await session.settle()
+    await session
+      .component
+      .find('[name="name"]')
+      .setValue('Dagny Vole')
+
+    // Running it again replaces the entry, so the form is a fresh instance:
+    // the typed name can only come back through the session's own draft.
+    await session.chip('mail pavel').trigger('click')
+    await session.settle()
+
+    expect(
+      (session.component.find('[name="name"]').element as HTMLInputElement)
+        .value,
+    ).toBe('Dagny Vole')
+  })
+
+  it('hands the Profile address to the Contact output when a send fails', async () => {
+    const session = await mountTerminal()
+
+    await session.chip('mail pavel').trigger('click')
+    await session.settle()
+    // There is no `server/` directory, so the post genuinely fails — which is
+    // the path that reveals the address.
+    await session.enquiryForm().trigger('submit')
+    await session.settle()
+
+    expect(session.component.find('[role="alert"]').text()).toContain(
+      profile.email,
+    )
+  })
+
+  it('runs help for the Unknown output when it is asked', async () => {
+    const session = await mountTerminal()
+
+    await session.component.find('#prompt').setValue('sudo rm -rf /')
+    await session.promptForm().trigger('submit')
+    await session.settle()
+
+    await session.output('sudo rm -rf /').find('button').trigger('click')
+    await session.settle()
+
+    expect(session.entries().at(-1)!.text()).toContain('empty the scrollback')
   })
 
   it('prints output after the think delay when a command is run', async () => {

@@ -8,7 +8,40 @@
  * Rendered as command output, so it is a mail client's header block rather
  * than a card: labelled fields on one axis, the body beneath them.
  */
-const { contact, contactState, send } = injectSession()
+import type { Enquiry, EnquiryState } from '~/composables/useSession'
+
+const props = defineProps<{
+  /** The draft the session owns. Reported back whole, never written through. */
+  modelValue: Enquiry
+  state: EnquiryState
+  /** Pavel's own address, revealed when a send fails. */
+  email: string
+}>()
+
+const emit = defineEmits<{
+  'update:modelValue': [enquiry: Enquiry]
+  'submit': []
+}>()
+
+/**
+ * A keystroke reports a whole new draft rather than writing into the one it
+ * was handed — the session owns that object. Each field is named as the form
+ * labels it, because `email` on this component is already Pavel's address.
+ */
+function field(key: keyof Enquiry) {
+  return computed({
+    get: () => props.modelValue[key],
+    set: (typed: string) => {
+      const draft: Enquiry = { ...props.modelValue }
+      draft[key] = typed
+      emit('update:modelValue', draft)
+    },
+  })
+}
+
+const from = field('name')
+const replyTo = field('email')
+const body = field('message')
 </script>
 
 <template>
@@ -18,11 +51,8 @@ const { contact, contactState, send } = injectSession()
       message myself.
     </p>
 
-    <form class="max-w-xl" @submit.prevent="send" @click.stop>
-      <fieldset
-        class="flex flex-col gap-4"
-        :disabled="contactState === 'sending'"
-      >
+    <form class="max-w-xl" @submit.prevent="emit('submit')" @click.stop>
+      <fieldset class="flex flex-col gap-4" :disabled="state === 'sending'">
         <legend class="sr-only">
           Send an enquiry
         </legend>
@@ -30,7 +60,7 @@ const { contact, contactState, send } = injectSession()
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
           <input
-            v-model="contact.name"
+            v-model="from"
             class="border-base-300 focus:border-accent w-full border-b bg-transparent pb-1 outline-none"
             type="text"
             name="name"
@@ -43,7 +73,7 @@ const { contact, contactState, send } = injectSession()
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
           <input
-            v-model="contact.email"
+            v-model="replyTo"
             class="border-base-300 focus:border-accent w-full border-b bg-transparent pb-1 outline-none"
             type="email"
             name="email"
@@ -56,7 +86,7 @@ const { contact, contactState, send } = injectSession()
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">body:</span>
           <textarea
-            v-model="contact.message"
+            v-model="body"
             class="border-base-300 focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 leading-relaxed outline-none"
             name="message"
             required
@@ -70,7 +100,7 @@ const { contact, contactState, send } = injectSession()
             type="submit"
             class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-xs tracking-[0.15em] uppercase"
           >
-            {{ contactState === 'sending' ? 'sending…' : 'send' }}
+            {{ state === 'sending' ? 'sending…' : 'send' }}
           </button>
           <!-- ADR-0003 makes this line literally true. If persistence is ever
                added, this copy changes in the same commit. -->
@@ -78,19 +108,19 @@ const { contact, contactState, send } = injectSession()
         </div>
 
         <p
-          v-if="contactState === 'sent'"
+          v-if="state === 'sent'"
           role="status"
           class="text-success text-xs sm:pl-[6.75rem]"
         >
           Sent. It is in my inbox and I will reply to the address you gave.
         </p>
         <p
-          v-if="contactState === 'failed'"
+          v-if="state === 'failed'"
           role="alert"
           class="text-error text-xs sm:pl-[6.75rem]"
         >
           That did not send, and nothing was saved. Email me at
-          <span data-placeholder class="text-accent">[direct email]</span>
+          <span class="text-accent">{{ email }}</span>
           and the message reaches me all the same.
         </p>
       </fieldset>
