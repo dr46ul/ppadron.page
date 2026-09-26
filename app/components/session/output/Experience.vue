@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { roles } from '~/data/experience'
+import type { Role } from '~/data/experience'
+
+defineProps<{ roles: Role[] }>()
 </script>
 
 <template>
@@ -28,17 +30,15 @@ import { roles } from '~/data/experience'
 
         <div>
           <p class="flex flex-wrap items-baseline gap-x-3">
-            <span data-placeholder class="font-semibold">{{
-              role.company
-            }}</span>
-            <span data-placeholder class="text-base-content/45 text-xs">
+            <span class="font-semibold">{{ role.company }}</span>
+            <span class="text-base-content/45 text-xs">
               {{ role.title }}
             </span>
           </p>
-          <p data-placeholder class="text-base-content/75 mt-1 max-w-prose">
+          <p class="text-base-content/75 mt-1 max-w-prose">
             {{ role.summary }}
           </p>
-          <p data-placeholder class="text-base-content/35 mt-1 text-xs">
+          <p class="text-base-content/35 mt-1 text-xs">
             {{ role.tech.join(' · ') }}
           </p>
         </div>

@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { recommendations } from '~/data/recommendations'
+import type { Recommendation } from '~/data/recommendations'
+
+defineProps<{ recommendations: Recommendation[] }>()
 </script>
 
 <template>
@@ -17,15 +19,15 @@ import { recommendations } from '~/data/recommendations'
         :style="{ '--i': index }"
         class="border-accent/30 max-w-prose border-l pl-4"
       >
-        <blockquote data-placeholder class="text-base-content/85">
+        <blockquote class="text-base-content/85">
           {{ recommendation.quote }}
         </blockquote>
         <p class="text-base-content/45 mt-2 text-xs">
-          <span data-placeholder class="text-base-content/70">
+          <span class="text-base-content/70">
             {{ recommendation.name }}
           </span>
           —
-          <span data-placeholder>
+          <span>
             {{ recommendation.title }}, {{ recommendation.company }}
           </span>
         </p>
