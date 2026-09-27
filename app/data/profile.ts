@@ -5,7 +5,7 @@
  * Profile, and it is not a Role.
  *
  * `[bracketed]` fields are placeholders and stay that way until Pavel writes
- * the real copy; see the map's Out of scope.
+ * the real copy.
  */
 export interface Profile {
   /** As Pavel writes it. */

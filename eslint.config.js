@@ -13,10 +13,10 @@ export default antfu(
       // it twice over and on the wrong branch.
       '.worktrees/**',
 
-      // The preset ignores `**/output` by default, next to `**/dist`, so the
-      // Command output components were skipped by every lint run until this
-      // negation put them back. The directory keeps its name: "Output" is the
-      // domain's word for what a Command prints (CONTEXT.md).
+      // The preset ignores `**/output` by default, next to `**/dist`, which
+      // takes the Command output components with it. The directory keeps its
+      // name: "Output" is the domain's word for what a Command prints
+      // (CONTEXT.md).
       '!app/components/session/output/**',
     ],
   },
