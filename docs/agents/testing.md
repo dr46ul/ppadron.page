@@ -194,6 +194,26 @@ There is nothing to do but break the render one way at a time; `ssr.test.ts`'s
 seven are on issue #29. The same applies to any assertion added to code that
 already works.
 
+**Commit the green change before you mutate, and make the script refuse to run
+a mutation that did not apply.** A mutation script reverts each break with
+`git checkout -- <file>`, which restores from `HEAD` — so if the code under test
+is still only in the working tree, the first revert deletes it. Every later
+mutation then edits a file that no longer contains what it was looking for,
+silently changes nothing, and runs against unmutated code. The failures that
+come back are real, identical for every mutation, and prove nothing; the tell is
+that each "mutation" kills exactly the same tests. Guard it:
+
+```sh
+if git diff --quiet -- "$FILE"; then
+  echo "mutation did not apply"
+  return
+fi
+```
+
+This cost a re-apply and one worthless run on issue #47, using a script copied
+from issue #29 — where the code under test was already merged, so reverting was
+safe there and destructive here.
+
 **A `.vue` file will not reach 100% branches.** The v8 provider counts branches
 in the compiled render function and maps them back through the sourcemap, so
 Vue's own `_cache[n] || (_cache[n] = …)` guards for hoisted static vnodes and
