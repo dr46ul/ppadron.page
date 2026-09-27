@@ -12,8 +12,6 @@ export interface Recommendation {
   name: string
   title: string
   company: string
-  /** How this person knows Pavel — the claim the site makes plainly. */
-  relationship: string
 }
 
 export const recommendations: Recommendation[] = [
@@ -23,7 +21,6 @@ export const recommendations: Recommendation[] = [
     name: '[Name]',
     title: '[Title]',
     company: '[Company]',
-    relationship: 'Worked with Pavel at [Company]',
   },
   {
     quote:
@@ -31,7 +28,6 @@ export const recommendations: Recommendation[] = [
     name: '[Name]',
     title: '[Title]',
     company: '[Company]',
-    relationship: 'Managed Pavel at [Company]',
   },
   {
     quote:
@@ -39,6 +35,5 @@ export const recommendations: Recommendation[] = [
     name: '[Name]',
     title: '[Title]',
     company: '[Company]',
-    relationship: 'Worked with Pavel at [Company]',
   },
 ]

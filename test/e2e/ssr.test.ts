@@ -124,9 +124,9 @@ describe('home page', async () => {
 
     /**
      * The quote, because it is what a Recommendation is — and because every
-     * field this block prints is a placeholder shared with `roles`, so there
-     * is no real-copy field to anchor on here. `relationship` is not printed
-     * at all: the block makes that claim once, in its own interface copy.
+     * other field this block prints (`name`, `title`, `company`) is a
+     * placeholder shared with `roles`, so there is no real-copy field to
+     * anchor on here.
      */
     it('prints the Recommendations in the recommendations block', () => {
       expect(entry('cat ~/recommendations')?.textContent).toContain(

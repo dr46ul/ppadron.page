@@ -11,7 +11,6 @@ function recommendation(
     name: 'Alex Rivers',
     title: 'Staff Engineer',
     company: 'Acme',
-    relationship: 'Worked with Pavel at Acme',
     ...overrides,
   }
 }

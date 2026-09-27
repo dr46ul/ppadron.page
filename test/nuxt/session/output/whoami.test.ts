@@ -47,6 +47,32 @@ describe('whoami output', () => {
     expect(component.text()).toContain('Systems plumber · Reykjavík')
   })
 
+  it('prints the tagline it is handed', async () => {
+    const component = await mount({
+      tagline: 'Unblocks the pipes nobody else will crawl into.',
+    })
+
+    expect(component.text()).toContain(
+      'Unblocks the pipes nobody else will crawl into.',
+    )
+  })
+
+  it('sets the tagline between the headline and the intro', async () => {
+    const component = await mount({
+      headline: 'Systems plumber',
+      location: 'Reykjavík',
+      tagline: 'Unblocks the pipes nobody else will crawl into.',
+      intro: 'Works with teams whose build takes longer than their standup.',
+    })
+
+    expect(component.findAll('p').map(paragraph => paragraph.text())).toEqual([
+      'Wilhelmina Ashgrove',
+      'Systems plumber · Reykjavík',
+      'Unblocks the pipes nobody else will crawl into.',
+      'Works with teams whose build takes longer than their standup.',
+    ])
+  })
+
   it('prints the intro', async () => {
     const component = await mount({
       intro: 'Works with teams whose build takes longer than their standup.',
@@ -63,15 +89,18 @@ describe('whoami output', () => {
     })
 
     expect(component.text()).toContain('Keeps bees, badly.')
-    expect(component.findAll('p')).toHaveLength(4)
+    expect(component.findAll('p')).toHaveLength(5)
   })
 
   it('leaves no empty line behind when the Profile has no aside', async () => {
     const withAside = await mount({ aside: 'Keeps bees, badly.' })
     const without = await mount({ aside: undefined })
 
-    expect(withAside.findAll('p')).toHaveLength(4)
-    expect(without.findAll('p')).toHaveLength(3)
+    // The delta is the assertion: exactly one paragraph goes, and the count it
+    // goes from is not this test's business.
+    expect(without.findAll('p')).toHaveLength(
+      withAside.findAll('p').length - 1,
+    )
   })
 
   it('prints nothing but the Profile it is handed', async () => {
