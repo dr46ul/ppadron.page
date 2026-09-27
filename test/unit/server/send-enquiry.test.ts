@@ -10,15 +10,11 @@ const enquiry: Enquiry = {
 
 const delivery = {
   apiKey: 're_test_key',
-  to: 'pavel@ppadron.page',
-  from: 'enquiries@ppadron.page',
+  to: 'pavel@ppadron.example',
+  from: 'enquiries@ppadron.example',
 }
 
-/**
- * The real `fetch`, not Nuxt's `$fetch`: this module is a plain function that
- * looks the global up on each call, so a stub genuinely replaces it. The
- * auto-import trap in docs/agents/testing.md does not apply here.
- */
+/** Why the real `fetch` stubs where `$fetch` does not: docs/agents/testing.md. */
 let send: ReturnType<typeof vi.fn>
 
 beforeEach(() => {
@@ -42,8 +38,8 @@ describe('sendEnquiry', () => {
     expect(init.headers.Authorization).toBe('Bearer re_test_key')
 
     expect(JSON.parse(init.body)).toMatchObject({
-      from: 'enquiries@ppadron.page',
-      to: 'pavel@ppadron.page',
+      from: 'enquiries@ppadron.example',
+      to: 'pavel@ppadron.example',
       reply_to: 'dana@whitfield.example',
     })
   })

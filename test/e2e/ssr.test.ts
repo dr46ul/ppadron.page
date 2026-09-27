@@ -146,7 +146,7 @@ describe('home page', () => {
  * that is not an Enquiry is refused before delivery is ever reached, so no mail
  * can leave and CI needs no credential.
  */
-describe('pOST /api/contact', () => {
+describe('the contact route', () => {
   async function post(body: unknown) {
     return fetch('/api/contact', {
       method: 'POST',

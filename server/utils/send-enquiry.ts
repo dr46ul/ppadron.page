@@ -1,6 +1,5 @@
 import type { Enquiry } from './enquiry'
 
-/** Where a delivered Enquiry comes from and goes to, and what authorises it. */
 export interface EnquiryDelivery {
   apiKey: string
   to: string

@@ -115,4 +115,13 @@ describe('parseEnquiry', () => {
   ])('refuses a %s one character over its cap', (field, value) => {
     expect(parseEnquiry(body({ [field]: value }))).toBeUndefined()
   })
+
+  it('collapses whitespace inside the name, which reaches the mail subject', () => {
+    expect(parseEnquiry(body({ name: 'Dana\n\nWhitfield' }))?.name).toBe(
+      'Dana Whitfield',
+    )
+    expect(parseEnquiry(body({ name: 'Dana \t Whitfield' }))?.name).toBe(
+      'Dana Whitfield',
+    )
+  })
 })

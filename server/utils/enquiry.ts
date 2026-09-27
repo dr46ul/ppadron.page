@@ -23,10 +23,9 @@ const LIMITS = { name: 200, email: 320, message: 5000 } as const
 const MESSAGE_MIN = 20
 
 /**
- * Enough of an address that a reply has somewhere to go: one @, no spaces, and
- * a dot in the domain. Whether the address is real is not knowable here — the
- * only test that matters is whether Pavel's reply lands, so a stricter pattern
- * would only reject addresses that work.
+ * Whether an address is real is not knowable here, and the only test that
+ * matters is whether Pavel's reply lands — so a stricter pattern would only
+ * reject addresses that work.
  */
 const PLAUSIBLE_ADDRESS = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
 
@@ -48,7 +47,9 @@ export function parseEnquiry(body: unknown): Enquiry | undefined {
   }
 
   const enquiry: Enquiry = {
-    name: name.trim(),
+    // Collapsed, not just trimmed: the name goes into the mail's subject, and
+    // an interior newline there is a second header line.
+    name: name.trim().replace(/\s+/g, ' '),
     email: email.trim(),
     message: message.trim(),
   }
