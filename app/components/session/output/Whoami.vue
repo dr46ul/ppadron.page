@@ -12,6 +12,11 @@ defineProps<{ profile: Profile }>()
     <p class="text-base-content/50">
       {{ profile.headline }} · {{ profile.location }}
     </p>
+    <!-- The hook carries more weight than the intro it introduces, so it is
+         the one line here at full strength. -->
+    <p class="text-base-content mt-4 max-w-prose">
+      {{ profile.tagline }}
+    </p>
     <p class="text-base-content/80 mt-4 max-w-prose">
       {{ profile.intro }}
     </p>
