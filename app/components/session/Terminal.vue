@@ -149,15 +149,15 @@ function focusPrompt() {
           >
             <SessionOutputWhoami
               v-if="entry.output === 'whoami'"
-              :profile="profile"
+              :profile
             />
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
-              :roles="roles"
+              :roles
             />
             <SessionOutputRecommendations
               v-else-if="entry.output === 'recommendations'"
-              :recommendations="recommendations"
+              :recommendations
             />
             <!-- The draft is the session's, so the form is handed a copy and
                  its report is written back here. -->
@@ -171,12 +171,12 @@ function focusPrompt() {
             />
             <SessionOutputColophon
               v-else-if="entry.output === 'colophon'"
-              :profile="profile"
+              :profile
             />
             <SessionOutputHelp
               v-else-if="entry.output === 'help'"
-              :commands="commands"
-              :meta-commands="metaCommands"
+              :commands
+              :meta-commands
             />
             <SessionOutputUnknown
               v-else
