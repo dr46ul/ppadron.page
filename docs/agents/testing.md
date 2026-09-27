@@ -32,12 +32,27 @@ first commit of a change is the test that describes the new behaviour.
 ## What covered means
 
 `pnpm test` (and CI) enforces 100% lines, functions and statements on
-`app/components/**` and `app/composables/**`, and **at most four uncovered
-branches** in that tree — a count, not a percentage, so the gate cannot drift as
+`app/components/**`, `app/composables/**` and `server/utils/**`, and **at most
+four uncovered branches** in that tree — a count, not a percentage, so the gate cannot drift as
 the tree grows. Exactly four exist today, all unreachable, all in `Terminal.vue`
 (see "A `.vue` file will not reach 100% branches" below); the cap is sized to
 them, so one new uncovered branch anywhere makes it five and the run fails.
 Cover a new branch, don't raise the cap.
+
+**`server/api/**` is outside the allowlist on purpose, and that shapes how a
+route is written.** A route handler only ever runs inside the built server the
+`e2e` project starts as its own process, so v8 collects no coverage from it and
+an included route file would report 0% and fail the gate. The rule that follows:
+**a route handler holds no logic.** It reads the body, calls into
+`server/utils/`, and maps a refusal to a status code; everything it decides
+lives in a `server/utils/` module a `test/unit` test imports directly.
+`server/api/contact.post.ts` is the worked example.
+
+What the e2e project adds for a route is the one thing only it can prove: that
+the path is served at all. `ssr.test.ts` posts a body that is not an Enquiry and
+expects a 400. It never posts a valid one — validation is refused before
+delivery is reached, so nothing leaves, and a valid Enquiry would be delivered
+for real the moment a credential exists in `.env.local`.
 
 That threshold is the **floor**, not the definition. A subject is covered when every branch is
 exercised **and** the edge cases a reviewer would ask about have a test:
@@ -59,6 +74,7 @@ One file per subject, mirroring `app/`:
 | `app/components/session/output/<Name>.vue` | `test/nuxt/session/output/<name>.test.ts` |
 | `app/components/session/Terminal.vue`      | `test/nuxt/session/terminal.test.ts`      |
 | `app/composables/useSession.ts`            | `test/nuxt/session/use-session.test.ts`   |
+| `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
 
 Output components are pure: they print what they are handed as props and
 report through emits, so their tests mount them with props and never touch the
@@ -144,6 +160,12 @@ leaves that binding pointing at the real thing. The stub then does nothing and a
 test asserting the failure path passes because the request genuinely failed —
 a green test proving nothing. Use `mockNuxtImport('$fetch', …)`.
 
+**Server code uses the real `fetch`, and that one does stub.** `server/utils/`
+runs in the `unit` project, where there are no auto-imports: `sendEnquiry` looks
+`fetch` up on the global at each call, so `vi.stubGlobal('fetch', …)` genuinely
+replaces it and no mail leaves. The trap above is about Nuxt's `$fetch`
+specifically, not about every name that resembles it.
+
 **An assertion against the whole page cannot fail. Scope it.** The same Content
 is printed in more than one place, so a page-wide `toContain` is satisfied by a
 region other than the one under test, and it stays green when the region under
@@ -172,8 +194,10 @@ The suite uses `mountSuspended` for anything that needs a component, and
 `test/nuxt/session/use-session.test.ts`). `mockComponent`, `renderSuspended` and
 Vitest browser mode are available from `@nuxt/test-utils` but are not in use —
 reach for one when a test actually needs it, not for completeness.
-`registerEndpoint` still has no subject: there is no `server/` directory, so
-`/api/contact` is a contract the tests pin rather than an endpoint they can call.
+`registerEndpoint` still has no subject, though `/api/contact` now exists. It
+registers a substitute handler rather than running the real one, so pointing it
+at that path would only re-prove the client contract `use-session.test.ts`
+already holds.
 
 **A composable does not always need a component.** `useSession()` holds no
 component state, so its tests call it directly and `use-session.test.ts` mounts

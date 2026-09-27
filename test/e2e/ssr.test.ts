@@ -10,6 +10,10 @@ import { recommendations } from '../../app/data/recommendations'
  * document shell, the response, and that the real `app/data` Content reaches
  * the HTML a Visitor is served before any JavaScript runs.
  *
+ * It also owns the one thing only a built server can prove about
+ * `/api/contact`: that the route is served at that path at all. Everything the
+ * route decides is proved in `test/unit`.
+ *
  * Per-block wiring and per-field Content belong to `test/nuxt`, which mocks
  * the three data modules and so can never prove that join — the e2e project
  * cannot mock them, which is exactly what makes it the seam for this.
@@ -36,9 +40,9 @@ function parse(html: string) {
   return window.document
 }
 
-describe('home page', async () => {
-  await setup()
+await setup()
 
+describe('home page', () => {
   let page: ReturnType<typeof parse>
   let response: Awaited<ReturnType<typeof fetch>>
 
@@ -133,5 +137,35 @@ describe('home page', async () => {
         recommendations[0]!.quote,
       )
     })
+  })
+})
+
+/**
+ * The rejection path only, and deliberately: a valid Enquiry posted here would
+ * be delivered for real the moment a credential exists in `.env.local`. A body
+ * that is not an Enquiry is refused before delivery is ever reached, so no mail
+ * can leave and CI needs no credential.
+ */
+describe('pOST /api/contact', () => {
+  async function post(body: unknown) {
+    return fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  }
+
+  it('refuses a body that is not an Enquiry', async () => {
+    expect((await post({})).status).toBe(400)
+  })
+
+  it('refuses a message under the form\'s own minimum', async () => {
+    const response = await post({
+      name: 'Dana Whitfield',
+      email: 'dana@whitfield.example',
+      message: 'too short',
+    })
+
+    expect(response.status).toBe(400)
   })
 })
