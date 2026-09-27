@@ -22,6 +22,6 @@ jobs:
       # Moderate rather than the action's `low` default: a portfolio site pulls
       # few runtime dependencies, so the level that would actually block a merge
       # is the one worth failing on.
-      - uses: actions/dependency-review-action@v4
+      - uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: moderate
