@@ -36,4 +36,14 @@ export default antfu(
       'slop/no-em-dash': 'off',
     },
   },
+  {
+    files: ['**/*.vue'],
+    rules: {
+      // `sameNameShorthand` defaults to `ignore`, so `:profile="profile"` and
+      // `:profile` both pass unless it is named. Vue camelises the argument of
+      // a same-name shorthand, so `:meta-commands` still binds `metaCommands`.
+      // See .agents/rules/vue-same-name-shorthand.md.
+      'vue/v-bind-style': ['error', 'shorthand', { sameNameShorthand: 'always' }],
+    },
+  },
 )

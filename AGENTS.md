@@ -16,6 +16,10 @@ Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `read
 
 Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+### Coding rules
+
+House rules the generated code has to satisfy live as one file each under `.agents/rules/`, which `.claude/rules` symlinks so Claude Code loads them. Read them before writing code.
+
 ### Testing
 
 Test-first, always: every new component, page, composable or util starts as a failing test, and "covered" means every branch plus the edge cases, with the coverage gate as the floor (100% lines, functions and statements; at most four uncovered branches, all of them unreachable Vue codegen artefacts). Three Vitest projects, split by directory: `test/unit` (node), `test/nuxt` (Nuxt runtime), `test/e2e` (built server). See `docs/agents/testing.md`.
