@@ -36,6 +36,15 @@ is substantially what it was. What went is the second, competing entry point:
 the `format` and `format:check` scripts, `.prettierrc.json`, `.prettierignore`,
 the direct devDependency, and the `lint-staged` step.
 
+**Never break a line inside a `` ` `` span in Markdown.** Prose is left exactly
+as written — the formatter does not reflow paragraphs — but a code span split
+across two lines has its continuation dedented to column 0, so inside a list
+item it stops lining up with the text above it and reads as a mistake. Nothing
+is broken: the dedent only happens where the line reparses identically, and the
+indent is kept where it would not (`> ` stays put rather than becoming a
+blockquote). It is a source-legibility trap, not a rendering one. If a snippet
+does not fit the line, shorten it or use a fenced block.
+
 **This makes ESLint the authority on formatting, not on everything.** The same
 config carries a `pnpm/yaml-enforce-settings` rule that writes settings into
 `pnpm-workspace.yaml`, one of which — `trustPolicy: no-downgrade` — rejects this
