@@ -5,8 +5,7 @@ import Contact from '~/components/session/output/Contact.vue'
 
 /**
  * A draft and an address the real `app/data/profile.ts` cannot supply, so
- * nothing here can go green off the component's own markup — see the map's
- * Notes.
+ * nothing here can go green off the component's own markup.
  */
 function enquiry(overrides: Partial<Enquiry> = {}): Enquiry {
   return {

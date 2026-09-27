@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest'
 import Whoami from '~/components/session/output/Whoami.vue'
 
 /**
- * A Profile the real `app/data/profile.ts` cannot supply. Borrowing the real
- * spelling would go green against the unconverted component, which prints
- * exactly that from its own markup — see the map's Notes.
+ * A Profile the real `app/data/profile.ts` cannot supply. Every assertion
+ * names a fixture value, so a Whoami that printed copy of its own instead of
+ * the Profile it was handed could not go green.
  */
 function profile(overrides: Partial<Profile> = {}): Profile {
   return {

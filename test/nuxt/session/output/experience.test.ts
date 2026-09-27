@@ -3,7 +3,6 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
 
-/** A Role with every field filled; spread and override for the case at hand. */
 function role(overrides: Partial<Role> = {}): Role {
   return {
     company: 'Acme',
