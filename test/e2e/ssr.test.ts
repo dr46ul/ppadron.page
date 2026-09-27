@@ -1,47 +1,67 @@
 import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
+import { Window } from 'happy-dom'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { roles } from '../../app/data/experience'
+import { profile } from '../../app/data/profile'
+import { recommendations } from '../../app/data/recommendations'
 
-function htmlTag(html: string) {
-  return html.match(/<html\b[^>]*>/i)?.[0] ?? ''
-}
+/**
+ * This project asserts only what only the server render can prove: the
+ * document shell, the response, and that the real `app/data` Content reaches
+ * the HTML a Visitor is served before any JavaScript runs.
+ *
+ * Per-block wiring and per-field Content belong to `test/nuxt`, which mocks
+ * the three data modules and so can never prove that join — the e2e project
+ * cannot mock them, which is exactly what makes it the seam for this.
+ * See docs/agents/testing.md.
+ */
 
-function htmlAttribute(html: string, name: string) {
-  return htmlTag(html).match(new RegExp(`\\b${name}="([^"]*)"`, 'i'))?.[1]
-}
+/**
+ * A parser, not a browser: the fetched HTML is read as a document so an
+ * assertion can be scoped to one region and compare decoded text rather than
+ * escaped markup. Script and stylesheet loading stays off — nothing here
+ * needs the page to run.
+ */
+function parse(html: string) {
+  const window = new Window({
+    settings: {
+      disableJavaScriptEvaluation: true,
+      disableJavaScriptFileLoading: true,
+      disableCSSFileLoading: true,
+    },
+  })
 
-function titleText(html: string) {
-  return html.match(/<title>([^<]*)<\/title>/i)?.[1]
-}
+  window.document.write(html)
 
-function metaContent(html: string, name: string) {
-  const tags = html.match(/<meta\b[^>]*>/gi) ?? []
-  const tag = tags.find(entry =>
-    new RegExp(`\\bname="${name}"`, 'i').test(entry),
-  )
-
-  return tag?.match(/\bcontent="([^"]*)"/i)?.[1]
-}
-
-function charset(html: string) {
-  const tags = html.match(/<meta\b[^>]*>/gi) ?? []
-  const tag = tags.find(entry => /charset/i.test(entry))
-
-  return (
-    tag?.match(/charset="([^"]*)"/i)?.[1]
-    ?? tag?.match(/charset=([^\s>/]+)/i)?.[1]
-  )
+  return window.document
 }
 
 describe('home page', async () => {
   await setup()
 
-  let html = ''
+  let page: ReturnType<typeof parse>
   let response: Awaited<ReturnType<typeof fetch>>
 
   beforeAll(async () => {
     response = await fetch('/')
-    html = await $fetch<string>('/')
+    page = parse(await $fetch<string>('/'))
   })
+
+  function meta(name: string) {
+    return page.querySelector(`meta[name="${name}"]`)?.getAttribute('content')
+  }
+
+  /**
+   * The transcript block one command printed, found by the command it echoes
+   * rather than by its `data-entry` id — the ids are just TOUR's order, and
+   * that order is TOUR's to change. Mirrors `output(cmd)` in
+   * test/nuxt/session/terminal.test.ts.
+   */
+  function entry(cmd: string) {
+    return [...page.querySelectorAll('[data-entry]')].find(block =>
+      block.querySelector('p')?.textContent?.endsWith(cmd),
+    )
+  }
 
   it('responds with HTML', () => {
     expect(response.headers.get('content-type')).toContain('text/html')
@@ -52,28 +72,66 @@ describe('home page', async () => {
   })
 
   it('sets html lang to en', () => {
-    expect(htmlAttribute(html, 'lang')).toBe('en')
+    expect(page.documentElement.getAttribute('lang')).toBe('en')
   })
 
   it('sets html data-theme to terminal', () => {
-    expect(htmlAttribute(html, 'data-theme')).toBe('terminal')
+    expect(page.documentElement.getAttribute('data-theme')).toBe('terminal')
   })
 
   it('sets the description meta tag', () => {
-    expect(metaContent(html, 'description')).toBe('Pavel Padron\'s portfolio')
+    expect(meta('description')).toBe('Pavel Padron\'s portfolio')
   })
 
   it('sets the charset to utf-8', () => {
-    expect(charset(html)?.toLowerCase()).toBe('utf-8')
+    expect(
+      page.querySelector('meta[charset]')?.getAttribute('charset')?.toLowerCase(),
+    ).toBe('utf-8')
   })
 
   it('sets the viewport meta tag', () => {
-    expect(metaContent(html, 'viewport')).toBe(
-      'width=device-width, initial-scale=1',
-    )
+    expect(meta('viewport')).toBe('width=device-width, initial-scale=1')
   })
 
   it('renders the document title', () => {
-    expect(titleText(html)).toBe('Pavel Padron — Frontend Engineer')
+    expect(page.title).toBe('Pavel Padron — Frontend Engineer')
+  })
+
+  /**
+   * One assertion per seam — the banner, then each of the three data modules
+   * in the transcript block that consumes it. Every expected value is read
+   * from the module rather than spelled out, so the placeholders can be
+   * replaced without touching this file.
+   *
+   * Each one is scoped to its region. A whole-page assertion here cannot
+   * fail: `profile.name` is in the document title and the description, and
+   * `'[Company]'` is a field of both `roles` and `recommendations`.
+   */
+  describe('server-rendered Content', () => {
+    it('prints the availability from the Profile in the login banner', () => {
+      expect(page.querySelector('[data-banner]')?.textContent).toContain(
+        profile.availability.label,
+      )
+    })
+
+    it('prints the Profile in the whoami block', () => {
+      expect(entry('whoami')?.textContent).toContain(profile.headline)
+    })
+
+    it('prints the Roles in the experience block', () => {
+      expect(entry('ls ~/experience')?.textContent).toContain(roles[0]!.period)
+    })
+
+    /**
+     * The quote, because it is what a Recommendation is — and because every
+     * field this block prints is a placeholder shared with `roles`, so there
+     * is no real-copy field to anchor on here. `relationship` is not printed
+     * at all: the block makes that claim once, in its own interface copy.
+     */
+    it('prints the Recommendations in the recommendations block', () => {
+      expect(entry('cat ~/recommendations')?.textContent).toContain(
+        recommendations[0]!.quote,
+      )
+    })
   })
 })
