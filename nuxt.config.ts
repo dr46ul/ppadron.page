@@ -1,6 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
 
-/** https://nuxt.com/docs/api/configuration/nuxt-config */
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
@@ -29,7 +28,7 @@ export default defineNuxtConfig({
   ignore: ['.worktrees/**'],
 
   fonts: {
-    // One register, one family. The serif went with the editorial layout.
+    // The page is a terminal, so one register and one family.
     families: [
       { name: 'IBM Plex Mono', provider: 'google', weights: [400, 500, 600, 700] },
     ],

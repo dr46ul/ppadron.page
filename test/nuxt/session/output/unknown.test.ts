@@ -4,7 +4,7 @@ import Unknown from '~/components/session/output/Unknown.vue'
 
 /**
  * A command the real list cannot supply, so the assertion cannot go green off
- * the component's own markup — see the map's Notes.
+ * the component's own markup.
  */
 function mount(cmd = 'sudo make me a sandwich') {
   return mountSuspended(Unknown, { props: { cmd } })

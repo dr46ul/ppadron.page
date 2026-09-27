@@ -9,10 +9,9 @@ import Terminal from '~/components/session/Terminal.vue'
  * Terminal is the only component that reads `app/data/`, so it takes no props
  * and the data modules are the only seam a wiring test can substitute at.
  *
- * The fixtures below are Content the real `app/data/` cannot supply. Borrowing
- * a real spelling would go green against an unwired Terminal — the component
- * it hands the prop to already prints exactly that — so every assertion here
- * names a fixture value and checks the real Content has not leaked in.
+ * The fixtures below are Content the real `app/data/` cannot supply, so every
+ * assertion names a fixture value and checks the real Content has not leaked
+ * in. A Terminal that stopped handing an output its prop fails both halves.
  */
 const data = vi.hoisted(() => ({
   profile: {} as Profile,
@@ -77,7 +76,6 @@ async function mountTerminal() {
     entries: () => component.findAll('[data-entry]'),
     /** The login banner, which prints Profile Content of its own. */
     banner: () => component.find('[data-banner]'),
-    /** The sticky bar at the foot: the command chips and the prompt. */
     promptBar: () => component.find('[data-prompt-bar]'),
     /**
      * The availability, which the banner and the prompt bar each print. Both
@@ -106,12 +104,10 @@ async function mountTerminal() {
     /** The Enquiry form: the only other form on the page. */
     enquiryForm: () =>
       component.findAll('form').find(form => !form.find('#prompt').exists())!,
-    /** Run out every pending think delay and let the DOM catch up. */
     async settle() {
       await vi.runAllTimersAsync()
       await component.vm.$nextTick()
     },
-    /** Type a command at the prompt and let it print. */
     async run(cmd: string) {
       const prompt = component.find('#prompt')
       await prompt.setValue(cmd)
@@ -189,7 +185,8 @@ describe('terminal', () => {
       for (const shown of availability())
         expect(shown.text()).toBe('Free from the equinox')
 
-      // The two places used to spell the one fact two different ways.
+      // Neither place words the availability itself; these two are what
+      // they would say if they did.
       expect(banner().text()).not.toContain('Open for freelance work')
       expect(promptBar().text()).not.toContain('Available for freelance')
     })

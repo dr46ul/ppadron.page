@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Colophon from '~/components/session/output/Colophon.vue'
 
 /**
- * A Profile the real `app/data/profile.ts` cannot supply. Borrowing the real
- * links or stack would go green against the unconverted component, which
- * prints exactly those from its own markup — see the map's Notes.
+ * A Profile the real `app/data/profile.ts` cannot supply. Every assertion
+ * names a fixture value, so a Colophon that printed links of its own instead
+ * of the Profile it was handed could not go green.
  */
 function profile(overrides: Partial<Profile> = {}): Profile {
   return {
