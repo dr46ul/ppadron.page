@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Nothing here writes to the repository, and the default token for a workflow
+# without this block carries write access across most of the repo's scopes.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
