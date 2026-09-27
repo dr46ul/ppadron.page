@@ -17,7 +17,7 @@ jobs:
     if: github.event.repository.visibility == 'public'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Moderate rather than the action's `low` default: a portfolio site pulls
       # few runtime dependencies, so the level that would actually block a merge
