@@ -62,7 +62,6 @@ function recommendationFixture(): Recommendation {
     name: 'Ingrid Vole',
     title: 'Kiln foreman',
     company: 'Kiln & Ash',
-    relationship: 'Worked alongside him for three years',
   }
 }
 

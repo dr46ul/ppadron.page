@@ -60,7 +60,7 @@ _Avoid_: Content, labels, strings
 ### The person
 
 **Profile**:
-The facts about Pavel the site presents: name, headline, location, an
+The facts about Pavel the site presents: name, headline, location, a tagline, an
 introduction, how to reach him, where else to find him, and whether he is open
 for work. There is exactly one Profile, and it is not a Role.
 _Avoid_: User (that word is wrong for the Visitor and would collide), owner,
