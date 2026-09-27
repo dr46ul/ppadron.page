@@ -31,7 +31,7 @@ const MESSAGE_MIN = 20
 const PLAUSIBLE_ADDRESS = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
 
 export function parseEnquiry(body: unknown): Enquiry | undefined {
-  if (typeof body !== 'object' || body === null || Array.isArray(body))
+  if (typeof body !== 'object' || body === null)
     return undefined
 
   const fields = body as Record<string, unknown>
