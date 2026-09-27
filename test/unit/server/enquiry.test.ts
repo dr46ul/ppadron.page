@@ -123,5 +123,9 @@ describe('parseEnquiry', () => {
     expect(parseEnquiry(body({ name: 'Dana \t Whitfield' }))?.name).toBe(
       'Dana Whitfield',
     )
+    // Two runs, so a collapse that stops after the first is caught.
+    expect(parseEnquiry(body({ name: '  Dana   Mary\n\nWhitfield ' }))?.name).toBe(
+      'Dana Mary Whitfield',
+    )
   })
 })
