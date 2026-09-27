@@ -20,6 +20,16 @@ export default defineNuxtConfig({
     },
   },
 
+  // Delivering an Enquiry needs a Resend key and the two addresses. All three
+  // are empty here and set as Vercel project environment variables, which Nuxt
+  // maps from NUXT_RESEND_API_KEY, NUXT_ENQUIRY_TO and NUXT_ENQUIRY_FROM. An
+  // unset key makes the send throw rather than sending anonymously.
+  runtimeConfig: {
+    resendApiKey: '',
+    enquiryTo: '',
+    enquiryFrom: '',
+  },
+
   css: ['@/assets/css/main.css'],
 
   // Git worktrees live under `.worktrees/` (docs/agents/worktrees.md). Nuxt

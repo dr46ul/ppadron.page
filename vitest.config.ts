@@ -8,10 +8,11 @@ export default defineConfig({
     // `@nuxt/test-utils` sees the argv flag and turns on client source maps.
     coverage: {
       provider: 'v8',
-      // An allowlist: only these two trees are reported, and files under them
+      // An allowlist: only these three trees are reported, and files under them
       // that no test loads are still listed (at 0%). app/data, nuxt.config.ts,
-      // .nuxt and the test files never enter the report.
-      include: ['app/components/**', 'app/composables/**'],
+      // .nuxt and the test files never enter the report. `server/api/**` is
+      // outside it deliberately — see docs/agents/testing.md.
+      include: ['app/components/**', 'app/composables/**', 'server/utils/**'],
       reporter: ['text', 'html', 'lcov'],
       // The gate. `pnpm test` fails below these, and CI runs `pnpm test`.
       thresholds: {
