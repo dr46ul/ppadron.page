@@ -142,7 +142,7 @@ describe('home page', () => {
 
 /**
  * The rejection path only, and deliberately: a valid Enquiry posted here would
- * be delivered for real the moment a credential exists in `.env.local`. A body
+ * be delivered for real the moment a credential exists in `.env`. A body
  * that is not an Enquiry is refused before delivery is ever reached, so no mail
  * can leave and CI needs no credential.
  */

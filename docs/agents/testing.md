@@ -52,7 +52,7 @@ What the e2e project adds for a route is the one thing only it can prove: that
 the path is served at all. `ssr.test.ts` posts a body that is not an Enquiry and
 expects a 400. It never posts a valid one — validation is refused before
 delivery is reached, so nothing leaves, and a valid Enquiry would be delivered
-for real the moment a credential exists in `.env.local`.
+for real the moment a credential exists in `.env`.
 
 That threshold is the **floor**, not the definition. A subject is covered when every branch is
 exercised **and** the edge cases a reviewer would ask about have a test:
