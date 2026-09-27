@@ -1,0 +1,21 @@
+name: Dependency review
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: Review new dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Moderate rather than the action's `low` default: a portfolio site pulls
+      # few runtime dependencies, so the level that would actually block a merge
+      # is the one worth failing on.
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
