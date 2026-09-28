@@ -2,6 +2,7 @@ import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
+import { roleOf } from '../../text-role'
 
 function role(overrides: Partial<Role> = {}): Role {
   return {
@@ -110,5 +111,28 @@ describe('experience output', () => {
     const component = await mount([role()])
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
+  })
+
+  describe('text roles', () => {
+    it('sets the summary as prose, the title as a label, the tech as chrome', async () => {
+      const component = await mount([
+        role({
+          title: 'Kiln technician',
+          summary: 'Built the thing that made the other thing work.',
+          tech: ['TypeScript', 'Vue'],
+        }),
+      ])
+
+      expect(roleOf(component, 'p', 'Built the thing that made')).toBe('text-body')
+      expect(roleOf(component, 'span', 'Kiln technician')).toBe('text-muted')
+      expect(roleOf(component, 'p', 'TypeScript · Vue')).toBe('text-subtle')
+    })
+
+    it('sets the NDA note as chrome and leaves the company at full strength', async () => {
+      const component = await mount([role({ company: 'Kiln & Ash' })])
+
+      expect(roleOf(component, 'p', 'under NDA')).toBe('text-subtle')
+      expect(roleOf(component, 'span', 'Kiln & Ash')).toBeUndefined()
+    })
   })
 })

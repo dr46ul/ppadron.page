@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Colophon from '~/components/session/output/Colophon.vue'
+import { roleOf } from '../../text-role'
 
 /**
  * A Profile the real `app/data/profile.ts` cannot supply. Every assertion
@@ -146,5 +147,15 @@ describe('colophon output', () => {
     const component = await mount()
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
+  })
+
+  describe('text roles', () => {
+    it('sets the lede as prose and the stack and copyright as chrome', async () => {
+      const component = await mount()
+
+      expect(roleOf(component, 'p', 'No projects gallery')).toBe('text-body')
+      expect(roleOf(component, 'p', 'fortran · cobol')).toBe('text-subtle')
+      expect(roleOf(component, 'p', '©')).toBe('text-subtle')
+    })
   })
 })

@@ -2,6 +2,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Recommendations from '~/components/session/output/Recommendations.vue'
+import { roleOf } from '../../text-role'
 
 function recommendation(
   overrides: Partial<Recommendation> = {},
@@ -80,5 +81,30 @@ describe('recommendations output', () => {
     const component = await mount([recommendation()])
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
+  })
+
+  describe('text roles', () => {
+    it('sets the quote and the name as prose, the rest as chrome', async () => {
+      const component = await mount([
+        recommendation({
+          quote: 'Pavel shipped the migration nobody else would touch.',
+          name: 'Alex Rivers',
+          title: 'Staff Engineer',
+          company: 'Acme',
+        }),
+      ])
+
+      expect(roleOf(component, 'blockquote', 'Pavel shipped')).toBe('text-body')
+      // The name has to carry out of the attribution line it sits inside, and
+      // colour is the only device distinguishing it from the title beside it.
+      expect(roleOf(component, 'span', 'Alex Rivers')).toBe('text-body')
+      expect(roleOf(component, 'p', 'Staff Engineer, Acme')).toBe('text-subtle')
+    })
+
+    it('sets the provenance note as chrome', async () => {
+      const component = await mount([recommendation()])
+
+      expect(roleOf(component, 'p', 'Verbatim from LinkedIn')).toBe('text-subtle')
+    })
   })
 })

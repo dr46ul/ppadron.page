@@ -4,6 +4,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
+import { roleOf, rolesOf } from '../text-role'
 
 /**
  * Terminal is the only component that reads `app/data/`, so it takes no props
@@ -503,6 +504,39 @@ describe('terminal', () => {
       await promptBar().find('div').trigger('click')
 
       expect(focus).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('text roles', () => {
+    it('sets the whole login banner as chrome, bar the domain it is named for', async () => {
+      const { banner } = await mountTerminal()
+
+      expect(roleOf(banner(), 'p', 'Last login')).toBe('text-subtle')
+      expect(roleOf(banner(), 'span', 'Wilhelmina Ashgrove, Systems plumber')).toBe('text-subtle')
+      expect(roleOf(banner(), 'span', 'Everything below is already printed')).toBe('text-subtle')
+      expect(roleOf(banner(), 'span', 'ppadron.page')).toBeUndefined()
+    })
+
+    it('sets the dropped-blocks notice as chrome', async () => {
+      const session = await mountTerminal()
+
+      for (let i = 0; i < 10; i++) {
+        await session.chip('whoami').trigger('click')
+        await session.settle()
+      }
+
+      expect(roleOf(session.component, 'p', 'earlier block dropped')).toBe('text-subtle')
+    })
+
+    it('sets every chip as a label and the rail they sit on as chrome', async () => {
+      const { promptBar } = await mountTerminal()
+
+      // The meta chips are control text too, not a footnote, so they read at
+      // the same step as the commands rather than a step below them.
+      expect(rolesOf(promptBar(), 'button')).toEqual(
+        [...commands, ...metaCommands].map(() => 'text-muted'),
+      )
+      expect(roleOf(promptBar(), 'span', 'Run')).toBe('text-subtle')
     })
   })
 })

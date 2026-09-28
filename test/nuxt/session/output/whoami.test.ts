@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Whoami from '~/components/session/output/Whoami.vue'
+import { roleOf } from '../../text-role'
 
 /**
  * A Profile the real `app/data/profile.ts` cannot supply. Every assertion
@@ -115,5 +116,24 @@ describe('whoami output', () => {
     const component = await mount()
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
+  })
+
+  describe('text roles', () => {
+    it('steps the byline and the aside back to chrome, and the intro to prose', async () => {
+      const component = await mount({ aside: 'Keeps bees, badly.' })
+
+      expect(roleOf(component, 'p', 'Systems plumber · Reykjavík')).toBe('text-subtle')
+      expect(roleOf(component, 'p', 'Keeps bees, badly.')).toBe('text-subtle')
+      expect(roleOf(component, 'p', 'Works with teams whose build')).toBe('text-body')
+    })
+
+    it('leaves the tagline and the name at full strength', async () => {
+      const component = await mount()
+
+      // Full strength is the absence of a step, which is the emphasis device
+      // the tagline depends on: it carries more weight than the intro below it.
+      expect(roleOf(component, 'p', 'Unblocks the pipes')).toBeUndefined()
+      expect(roleOf(component, 'p', 'Wilhelmina Ashgrove')).toBeUndefined()
+    })
   })
 })

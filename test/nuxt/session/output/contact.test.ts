@@ -2,6 +2,7 @@ import type { Enquiry, EnquiryState } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import Contact from '~/components/session/output/Contact.vue'
+import { roleOf } from '../../text-role'
 
 /**
  * A draft and an address the real `app/data/profile.ts` cannot supply, so
@@ -160,5 +161,14 @@ describe('contact output', () => {
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
     expect(component.text()).not.toContain('[direct email]')
+  })
+
+  describe('text roles', () => {
+    it('sets the lede as a label and the retention note as chrome', async () => {
+      const component = await mount()
+
+      expect(roleOf(component, 'p', 'Tell me what you are building')).toBe('text-muted')
+      expect(roleOf(component, 'span', 'stored nowhere else')).toBe('text-subtle')
+    })
   })
 })
