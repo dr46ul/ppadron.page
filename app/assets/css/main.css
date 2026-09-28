@@ -4,12 +4,14 @@
    Terminal Brutalist
    Are.na's raw grid + Bloomberg Terminal's density.
 
-   The palette below started as daisyUI's `dracula` and is now declared in full
-   as the site's own, because the theme name ends up in `<html data-theme>` and
-   that is not a place to advertise a borrowed identity. The hues are unchanged
-   — nothing here is a new colour — but they are written out rather than
+   The palette below started as daisyUI's `dracula` and is now declared as the
+   site's own, because the theme name ends up in `<html data-theme>` and that
+   is not a place to advertise a borrowed identity. The hues are unchanged —
+   nothing here is a new colour — but they are written out rather than
    inherited, so the tokens the components actually depend on are visible in
-   the repository instead of resolved out of node_modules.
+   the repository instead of resolved out of node_modules. Only the ones that
+   render are declared: a token no pixel resolves works against that, so the
+   list shrinks rather than grows.
 
    Two families of override sit inside the declaration rather than beside it:
 
@@ -45,22 +47,11 @@
   --color-accent: oklch(83.392% 0.124 66.558);
   --color-accent-content: oklch(16.678% 0.024 66.558);
 
-  --color-primary: oklch(75.461% 0.183 346.812);
-  --color-primary-content: oklch(15.092% 0.036 346.812);
-  --color-secondary: oklch(74.202% 0.148 301.883);
-  --color-secondary-content: oklch(14.84% 0.029 301.883);
-  --color-neutral: oklch(39.445% 0.032 275.524);
-  --color-neutral-content: oklch(87.889% 0.006 275.524);
-
   /* Status. `success` is the availability dot; `error` is a failed Enquiry. */
   --color-success: oklch(87.099% 0.219 148.024);
   --color-success-content: oklch(17.419% 0.043 148.024);
   --color-error: oklch(68.22% 0.206 24.43);
   --color-error-content: oklch(13.644% 0.041 24.43);
-  --color-warning: oklch(95.533% 0.134 112.757);
-  --color-warning-content: oklch(19.106% 0.026 112.757);
-  --color-info: oklch(88.263% 0.093 212.846);
-  --color-info-content: oklch(17.652% 0.018 212.846);
 
   /* Square, flat, hairlines only. */
   --radius-selector: 0rem;
@@ -75,6 +66,25 @@
 
 @theme {
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* The three steps below `base-content` that text is allowed to take, so that
+     stepping back is a named role rather than an opacity a component invents.
+     Everything on this site renders at 10-13px, so WCAG asks 4.5:1 of all of
+     it and no large-text exemption applies anywhere; the ratios are measured
+     over base-100 and the first passing step of the ramp is 50%.
+
+     Mixed `in srgb` because that is the space the ratios were measured in —
+     oklab lands on a different colour, and so a different ratio. */
+
+  /* 11.63:1 — prose the Visitor reads through, a notch under the one line a
+     block puts at full strength. */
+  --color-body: color-mix(in srgb, var(--color-base-content) 80%, var(--color-base-100));
+
+  /* 6.86:1 — labels and ledes standing beside the thing they support. */
+  --color-muted: color-mix(in srgb, var(--color-base-content) 60%, var(--color-base-100));
+
+  /* 5.07:1 — the quietest tier: session chrome, footnotes, metadata. */
+  --color-subtle: color-mix(in srgb, var(--color-base-content) 50%, var(--color-base-100));
 }
 
 @layer base {

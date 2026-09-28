@@ -8,7 +8,7 @@ defineProps<{ roles: Role[] }>()
   <div>
     <!-- ADR-0001: there is no Work section, and a visitor arriving at a
          developer's site will notice. Say why rather than let them wonder. -->
-    <p class="text-base-content/40 max-w-prose text-xs">
+    <p class="text-subtle max-w-prose text-xs">
       Freelance client work is under NDA, so there is no projects gallery. This
       is the work itself.
     </p>
@@ -23,7 +23,7 @@ defineProps<{ roles: Role[] }>()
         <time
           :datetime="role.since"
           class="text-xs tabular-nums"
-          :class="index === 0 ? 'text-accent' : 'text-base-content/40'"
+          :class="index === 0 ? 'text-accent' : 'text-muted'"
         >
           {{ role.period }}
         </time>
@@ -31,14 +31,14 @@ defineProps<{ roles: Role[] }>()
         <div>
           <p class="flex flex-wrap items-baseline gap-x-3">
             <span class="font-semibold">{{ role.company }}</span>
-            <span class="text-base-content/45 text-xs">
+            <span class="text-muted text-xs">
               {{ role.title }}
             </span>
           </p>
-          <p class="text-base-content/75 mt-1 max-w-prose">
+          <p class="text-body mt-1 max-w-prose">
             {{ role.summary }}
           </p>
-          <p class="text-base-content/35 mt-1 text-xs">
+          <p class="text-subtle mt-1 text-xs">
             {{ role.tech.join(' · ') }}
           </p>
         </div>

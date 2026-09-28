@@ -94,12 +94,12 @@ function focusPrompt() {
         data-banner
         class="border-base-300 mb-12 border-b pb-6 text-[0.8125rem]"
       >
-        <p class="text-base-content/35">
+        <p class="text-subtle">
           Last login: {{ lastLogin }} UTC on ttys002
         </p>
         <p class="mt-3">
           <span class="font-semibold">ppadron.page</span>
-          <span class="text-base-content/35">
+          <span class="text-subtle">
             — {{ profile.name }}, {{ profile.headline }}</span>
         </p>
         <!-- Whether Pavel is open is the Profile's to say, and so is how it is
@@ -108,18 +108,18 @@ function focusPrompt() {
           <span
             data-availability
             :class="
-              profile.availability.open ? 'text-accent' : 'text-base-content/35'
+              profile.availability.open ? 'text-accent' : 'text-subtle'
             "
           >{{ profile.availability.label }}</span>
           <!-- The label is the Profile's, and may or may not end in a full
                stop, so the separator is this component's to supply. -->
-          <span class="text-base-content/35">
+          <span class="text-subtle">
             · Everything below is already printed — read on, or run a command.
           </span>
         </p>
       </div>
 
-      <p v-if="trimmed > 0" class="text-base-content/25 mb-10 text-xs">
+      <p v-if="trimmed > 0" class="text-subtle mb-10 text-xs">
         [ {{ trimmed }} earlier {{ trimmed === 1 ? 'block' : 'blocks' }} dropped
         — scrollback is {{ scrollback }} ]
       </p>
@@ -200,7 +200,7 @@ function focusPrompt() {
         @click.stop
       >
         <span
-          class="text-base-content/30 shrink-0 text-[0.625rem] tracking-[0.2em] uppercase"
+          class="text-subtle shrink-0 text-[0.625rem] tracking-[0.2em] uppercase"
         >
           Run
         </span>
@@ -208,7 +208,7 @@ function focusPrompt() {
           v-for="command in commands"
           :key="command.cmd"
           type="button"
-          class="border-base-300 text-base-content/60 hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
+          class="border-base-300 text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
           :title="command.label"
           @click="exec(command.cmd)"
         >
@@ -221,7 +221,7 @@ function focusPrompt() {
           v-for="command in metaCommands"
           :key="command.cmd"
           type="button"
-          class="text-base-content/35 hover:text-base-content shrink-0 px-1 py-0.5 text-[0.6875rem] whitespace-nowrap"
+          class="text-muted hover:text-base-content shrink-0 px-1 py-0.5 text-[0.6875rem] whitespace-nowrap"
           :title="command.label"
           @click="exec(command.cmd)"
         >
@@ -255,7 +255,7 @@ function focusPrompt() {
           data-availability
           class="ml-auto hidden shrink-0 items-center gap-2 pl-4 text-[0.6875rem] tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
           :class="
-            profile.availability.open ? 'text-accent' : 'text-base-content/35'
+            profile.availability.open ? 'text-accent' : 'text-subtle'
           "
         >
           <span

@@ -9,7 +9,7 @@ defineProps<{ profile: Profile }>()
     <p class="text-lg font-semibold tracking-tight">
       {{ profile.name }}
     </p>
-    <p class="text-base-content/50">
+    <p class="text-subtle">
       {{ profile.headline }} · {{ profile.location }}
     </p>
     <!-- The hook carries more weight than the intro it introduces, so it is
@@ -17,12 +17,12 @@ defineProps<{ profile: Profile }>()
     <p class="text-base-content mt-4 max-w-prose">
       {{ profile.tagline }}
     </p>
-    <p class="text-base-content/80 mt-4 max-w-prose">
+    <p class="text-body mt-4 max-w-prose">
       {{ profile.intro }}
     </p>
     <p
       v-if="profile.aside"
-      class="text-base-content/50 mt-3 max-w-prose text-xs"
+      class="text-subtle mt-3 max-w-prose text-xs"
     >
       {{ profile.aside }}
     </p>

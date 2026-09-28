@@ -77,7 +77,7 @@ describe('experience output', () => {
     expect(first!.classes()).toContain('text-accent')
     for (const other of rest) {
       expect(other!.classes()).not.toContain('text-accent')
-      expect(other!.classes()).toContain('text-base-content/40')
+      expect(other!.classes()).toContain('text-muted')
     }
   })
 

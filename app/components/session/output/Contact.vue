@@ -46,7 +46,7 @@ const body = field('message')
 
 <template>
   <div>
-    <p class="text-base-content/60 mb-5 max-w-prose">
+    <p class="text-muted mb-5 max-w-prose">
       Tell me what you are building and what is in the way. I answer every
       message myself.
     </p>
@@ -104,7 +104,7 @@ const body = field('message')
           </button>
           <!-- ADR-0003 makes this line literally true. If persistence is ever
                added, this copy changes in the same commit. -->
-          <span class="text-base-content/35 text-xs">stored nowhere else</span>
+          <span class="text-subtle text-xs">stored nowhere else</span>
         </div>
 
         <p
