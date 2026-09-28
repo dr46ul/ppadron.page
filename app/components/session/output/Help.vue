@@ -14,7 +14,7 @@ defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
         class="grid max-w-md gap-x-4 sm:grid-cols-[13rem_1fr]"
       >
         <span class="text-accent">{{ command.cmd }}</span>
-        <span class="text-base-content/50">{{ command.label }}</span>
+        <span class="text-subtle">{{ command.label }}</span>
       </li>
       <li
         v-for="(command, index) in metaCommands"
@@ -23,14 +23,14 @@ defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
         class="grid max-w-md gap-x-4 sm:grid-cols-[13rem_1fr]"
       >
         <span class="text-accent">{{ command.cmd }}</span>
-        <span class="text-base-content/50">{{ command.label }}</span>
+        <span class="text-subtle">{{ command.label }}</span>
       </li>
     </ul>
 
-    <p class="text-base-content/35 mt-4 text-xs">
+    <p class="text-subtle mt-4 text-xs">
       Tab completes · ↑ ↓ walk the history · plain words work too
-      (<span class="text-base-content/55">experience</span>,
-      <span class="text-base-content/55">contact</span>).
+      (<span class="text-muted">experience</span>,
+      <span class="text-muted">contact</span>).
     </p>
   </div>
 </template>

@@ -8,7 +8,7 @@ defineProps<{ recommendations: Recommendation[] }>()
   <div>
     <!-- CONTEXT.md: say plainly where these come from, rather than letting a
          visitor infer client references. -->
-    <p class="text-base-content/40 max-w-prose text-xs">
+    <p class="text-subtle max-w-prose text-xs">
       Verbatim from LinkedIn. Colleagues and managers, not clients.
     </p>
 
@@ -19,11 +19,11 @@ defineProps<{ recommendations: Recommendation[] }>()
         :style="{ '--i': index }"
         class="border-accent/30 max-w-prose border-l pl-4"
       >
-        <blockquote class="text-base-content/85">
+        <blockquote class="text-body">
           {{ recommendation.quote }}
         </blockquote>
-        <p class="text-base-content/45 mt-2 text-xs">
-          <span class="text-base-content/70">
+        <p class="text-subtle mt-2 text-xs">
+          <span class="text-body">
             {{ recommendation.name }}
           </span>
           —

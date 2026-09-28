@@ -206,7 +206,7 @@ describe('terminal', () => {
 
       for (const shown of availability()) {
         expect(shown.classes()).toContain('text-accent')
-        expect(shown.classes()).not.toContain('text-base-content/35')
+        expect(shown.classes()).not.toContain('text-subtle')
       }
 
       expect(
@@ -220,7 +220,7 @@ describe('terminal', () => {
 
       for (const shown of availability()) {
         expect(shown.text()).toBe('Booked till spring')
-        expect(shown.classes()).toContain('text-base-content/35')
+        expect(shown.classes()).toContain('text-subtle')
         expect(shown.classes()).not.toContain('text-accent')
       }
 
