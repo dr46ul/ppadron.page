@@ -11,7 +11,9 @@ function vueFiles(dir: string): string[] {
   })
 }
 
-const components = vueFiles('app/components').map(path => ({
+// Every `.vue` under `app/`, not just the components: `app.vue`, `error.vue`
+// and the page carry classes too, and a step added there renders like any other.
+const components = vueFiles('app').map(path => ({
   path,
   source: readFileSync(path, 'utf8'),
 }))
