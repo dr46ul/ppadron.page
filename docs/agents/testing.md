@@ -203,6 +203,15 @@ already holds.
 component state, so its tests call it directly and `use-session.test.ts` mounts
 nothing at all.
 
+**`test/unit/contrast.ts` is the palette's oracle.** It converts oklch to sRGB,
+composites `in srgb` and returns a WCAG ratio, so a test can recompute what a
+token renders at instead of trusting a number in a comment.
+`theme-tokens.test.ts` parses each role token out of `main.css` and checks it
+against the interface audit's measured ramp; the oracle reproduces that ramp
+exactly (`/100` 18.10, `/60` 6.86, `/50` 5.07, `/45` 4.31), which is what makes
+it usable as one. Reuse it for any new colour pair rather than measuring by
+hand — including the 3:1 WCAG 1.4.11 asks of a control's boundary.
+
 ## Proving a test can fail
 
 A test written against code that already works is green from the start, which
@@ -253,6 +262,51 @@ which prop expression the sourcemap lands on), confirm the newly-reported
 positions are artefacts the same way issue #19 did — compile the template with
 `@vue/compiler-sfc` and look for a conditional at that source position — before
 touching the cap. A real uncovered branch gets a test, not a bigger number.
+
+## Verifying what the browser actually paints
+
+**No Vitest project can see colour, focus or geometry.** happy-dom computes no
+styles, and the `e2e` project asserts the markup the server sent. So a claim
+about a contrast ratio, a focus ring, an overflow or a tap target is not
+something the suite can make — it needs a real browser, driven out of band. The
+suite's job is then narrower and still worth doing: assert the **token** a
+component renders, and recompute the **value** that token resolves to from the
+stylesheet (see `test/unit/contrast.ts` above). Between them, the unit test
+guards the number and the browser run proves the number reaches the element.
+
+`playwright-core` is already in `devDependencies`. Two things about it:
+
+- **It is CommonJS**, so an ESM script reaches it with `createRequire` and an
+  absolute path rather than an `import`.
+- **It ships no browser.** A fresh clone fails with `Executable doesn't exist`;
+  run `npx playwright install chromium-headless-shell` first. Neither install
+  nor CI does this, because no committed test needs a browser.
+
+Drive the server built into `.output`, not the dev server, so what is measured
+is what deploys.
+
+**Two traps make a contrast measurement silently wrong, in opposite
+directions.** Both cost a full false result on issue #32:
+
+- **`getComputedStyle(el).color` is not always `rgb()`.** Chrome serialises a
+  `color-mix()` of `oklch` as `color(srgb 0.8 0.79 0.78)` — channels in 0–1, not
+  0–255. Parsed as 8-bit, every colour collapses toward black and **every** pair
+  reports ≈1.00:1, so the whole page looks like it fails.
+- **`body` paints no background here.** The surface is `--color-base-100` on
+  `:root`, so `getComputedStyle(document.body).backgroundColor` is
+  `rgba(0, 0, 0, 0)`. Composited against pure black, every ratio comes out
+  **higher** than the truth (5.53:1 where the real figure is 5.07:1), so the
+  page looks like it passes.
+
+The fix for the first is to let the browser do the conversion: paint the
+computed value into a 1x1 canvas and read the pixel back with `getImageData`,
+which is 8-bit sRGB whatever the input notation. The fix for the second is to
+walk up from `body` to the first ancestor whose `backgroundColor` is not
+transparent, and composite against that.
+
+Sanity-check the harness before trusting it. A run where every element fails, or
+where every element passes by a suspiciously even margin, is measuring the
+harness rather than the page.
 
 ## CI
 
