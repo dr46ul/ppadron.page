@@ -184,4 +184,15 @@ describe('contact output', () => {
       }
     })
   })
+
+  it('holds every field at 16px on a phone so iOS does not zoom the page', async () => {
+    const component = await mount()
+
+    for (const name of ['name', 'email', 'message']) {
+      const classes = component.find(`[name="${name}"]`).classes()
+
+      expect(classes).toContain('text-base')
+      expect(classes).toContain('sm:text-[0.875rem]')
+    }
+  })
 })
