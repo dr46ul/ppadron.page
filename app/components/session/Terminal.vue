@@ -239,7 +239,7 @@ function focusPrompt() {
           id="prompt"
           ref="inputEl"
           v-model="input"
-          class="w-full bg-transparent outline-none"
+          class="w-full bg-transparent"
           type="text"
           autocomplete="off"
           autocapitalize="off"
