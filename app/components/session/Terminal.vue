@@ -9,7 +9,7 @@
  *    wait for a typewriter is a cost with no return.
  * 2. Everything run by hand prints the way a console prints — the command
  *    echoes instantly because they typed it, the machine thinks for a beat,
- *    then the output lands a line at a time.
+ *    then the output lands, a line at a time where it is a list.
  *
  * There is no header bar. A session opens with a login banner, and the chrome
  * lives in the prompt at the foot, which is where a terminal's status line has
