@@ -85,6 +85,12 @@
 
   /* 5.07:1 — the quietest tier: session chrome, footnotes, metadata. */
   --color-subtle: color-mix(in srgb, var(--color-base-content) 50%, var(--color-base-100));
+
+  /* 3.20:1 — the boundary of a control: a chip's border, an Enquiry field's
+     underline, the rule over the prompt bar. WCAG 1.4.11 asks 3:1 of these and
+     `base-300` measures 1.44:1, but it stays the divider, since lightening it
+     would lighten every rule on the page. */
+  --color-edge: oklch(50% 0.03 277);
 }
 
 @layer base {

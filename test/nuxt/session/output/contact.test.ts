@@ -171,4 +171,17 @@ describe('contact output', () => {
       expect(roleOf(component, 'span', 'stored nowhere else')).toBe('text-subtle')
     })
   })
+
+  describe('control edges', () => {
+    it('underlines every field with the control-edge token, not the divider', async () => {
+      const component = await mount()
+
+      for (const name of ['name', 'email', 'message']) {
+        const classes = component.find(`[name="${name}"]`).classes()
+
+        expect(classes).toContain('border-edge')
+        expect(classes).not.toContain('border-base-300')
+      }
+    })
+  })
 })

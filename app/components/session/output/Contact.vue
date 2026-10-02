@@ -61,7 +61,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
           <input
             v-model="from"
-            class="border-base-300 focus:border-accent w-full border-b bg-transparent pb-1"
+            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1"
             type="text"
             name="name"
             autocomplete="name"
@@ -74,7 +74,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
           <input
             v-model="replyTo"
-            class="border-base-300 focus:border-accent w-full border-b bg-transparent pb-1"
+            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1"
             type="email"
             name="email"
             autocomplete="email"
@@ -87,7 +87,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">body:</span>
           <textarea
             v-model="body"
-            class="border-base-300 focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 leading-relaxed"
+            class="border-edge focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 leading-relaxed"
             name="message"
             required
             minlength="20"
