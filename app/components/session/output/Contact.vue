@@ -39,6 +39,17 @@ function field(key: keyof Enquiry) {
   })
 }
 
+const sending = computed(() => props.state === 'sending')
+
+/**
+ * Not `disabled` on the button: disabling the element that holds focus drops
+ * it to <body>, so a second press is refused here instead.
+ */
+function submit() {
+  if (!sending.value)
+    emit('submit')
+}
+
 const from = field('name')
 const replyTo = field('email')
 const body = field('message')
@@ -51,10 +62,10 @@ const body = field('message')
       message myself.
     </p>
 
-    <form class="max-w-xl" @submit.prevent="emit('submit')" @click.stop>
+    <form class="max-w-xl" @submit.prevent="submit" @click.stop>
       <!-- The fields are 16px below `sm`: iOS Safari zooms the page on
            focusing a smaller input and does not zoom back out. -->
-      <fieldset class="flex flex-col gap-4" :disabled="state === 'sending'">
+      <fieldset class="flex flex-col gap-4">
         <legend class="sr-only">
           Send an enquiry
         </legend>
@@ -68,6 +79,7 @@ const body = field('message')
             name="name"
             autocomplete="name"
             required
+            :disabled="sending"
             placeholder="your name"
           >
         </label>
@@ -81,6 +93,7 @@ const body = field('message')
             name="email"
             autocomplete="email"
             required
+            :disabled="sending"
             placeholder="you@company.com"
           >
         </label>
@@ -92,6 +105,7 @@ const body = field('message')
             class="border-edge focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
             name="message"
             required
+            :disabled="sending"
             minlength="20"
             placeholder="what are you building, and what is in the way?"
           />
@@ -100,6 +114,7 @@ const body = field('message')
         <div class="flex flex-wrap items-center gap-4 sm:pl-[6.75rem]">
           <button
             type="submit"
+            :aria-disabled="sending || undefined"
             class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-xs tracking-[0.15em] uppercase"
           >
             {{ state === 'sending' ? 'sending…' : 'send' }}
@@ -108,24 +123,24 @@ const body = field('message')
                added, this copy changes in the same commit. -->
           <span class="text-subtle text-xs">stored nowhere else</span>
         </div>
-
-        <p
-          v-if="state === 'sent'"
-          role="status"
-          class="text-success text-xs sm:pl-[6.75rem]"
-        >
-          Sent. It is in my inbox and I will reply to the address you gave.
-        </p>
-        <p
-          v-if="state === 'failed'"
-          role="alert"
-          class="text-error text-xs sm:pl-[6.75rem]"
-        >
-          That did not send, and nothing was saved. Email me at
-          <span class="text-accent">{{ email }}</span>
-          and the message reaches me all the same.
-        </p>
       </fieldset>
+
+      <p
+        v-if="state === 'sent'"
+        role="status"
+        class="text-success text-xs mt-4 sm:pl-[6.75rem]"
+      >
+        Sent. It is in my inbox and I will reply to the address you gave.
+      </p>
+      <p
+        v-if="state === 'failed'"
+        role="alert"
+        class="text-error text-xs mt-4 sm:pl-[6.75rem]"
+      >
+        That did not send, and nothing was saved. Email me at
+        <span class="text-accent">{{ email }}</span>
+        and the message reaches me all the same.
+      </p>
     </form>
   </div>
 </template>
