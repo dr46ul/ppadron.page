@@ -74,7 +74,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
           <input
             v-model="from"
-            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
             type="text"
             name="name"
             autocomplete="name"
@@ -88,7 +88,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
           <input
             v-model="replyTo"
-            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
             type="email"
             name="email"
             autocomplete="email"
@@ -102,7 +102,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">body:</span>
           <textarea
             v-model="body"
-            class="border-edge focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
             name="message"
             required
             :disabled="sending"

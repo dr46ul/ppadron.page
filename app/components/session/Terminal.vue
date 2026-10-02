@@ -279,7 +279,7 @@ function focusPrompt(event: MouseEvent) {
           @keydown.up.prevent="recall(1)"
           @keydown.down.prevent="recall(-1)"
         >
-        <span aria-hidden="true" class="caret shrink-0" />
+        <span aria-hidden="true" class="caret prompt-caret shrink-0" />
 
         <span
           data-availability

@@ -594,6 +594,14 @@ describe('terminal', () => {
   })
 
   describe('the caret', () => {
+    it('marks the prompt caret so its focus state can be styled off the input', async () => {
+      const { component } = await mountTerminal()
+      const caret = component.find('#prompt ~ .caret')
+
+      expect(caret.exists()).toBe(true)
+      expect(caret.classes()).toContain('prompt-caret')
+    })
+
     it('goes back to the prompt when the dead space is clicked', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
