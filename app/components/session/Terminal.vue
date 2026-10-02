@@ -78,8 +78,17 @@ const lastLogin = computed(() => {
   ].join(' ')
 })
 
-/** Clicking the dead space puts the caret back, the way a terminal does. */
-function focusPrompt() {
+/**
+ * Clicking the dead space puts the caret back, the way a terminal does. Not
+ * over a selection, which a drag or a double-click leaves behind and focusing
+ * the input would discard, and not on touch, where it raises the on-screen
+ * keyboard over the text just tapped.
+ */
+function focusPrompt(event: MouseEvent) {
+  if ((event as PointerEvent).pointerType === 'touch')
+    return
+  if (window.getSelection()!.toString())
+    return
   inputEl.value?.focus()
 }
 </script>

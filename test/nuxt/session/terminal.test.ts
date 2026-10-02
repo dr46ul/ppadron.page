@@ -570,6 +570,52 @@ describe('terminal', () => {
       expect(focus).toHaveBeenCalled()
     })
 
+    it('leaves the Visitor alone when they have selected text in the transcript', async () => {
+      const { component } = await mountTerminal()
+      const focus = vi.spyOn(
+        component.find('#prompt').element as HTMLInputElement,
+        'focus',
+      )
+      const selection = vi.spyOn(window, 'getSelection').mockReturnValue({
+        toString: () => 'He rewired the kiln',
+      } as Selection)
+
+      await component.find('[data-entry]').trigger('click')
+      selection.mockRestore()
+
+      expect(focus).not.toHaveBeenCalled()
+    })
+
+    it('does not raise the keyboard when the transcript is tapped on touch', async () => {
+      const { component } = await mountTerminal()
+      const focus = vi.spyOn(
+        component.find('#prompt').element as HTMLInputElement,
+        'focus',
+      )
+
+      component
+        .find('[data-entry]')
+        .element
+        .dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'touch' }))
+
+      expect(focus).not.toHaveBeenCalled()
+    })
+
+    it('still goes back to the prompt on a mouse click', async () => {
+      const { component } = await mountTerminal()
+      const focus = vi.spyOn(
+        component.find('#prompt').element as HTMLInputElement,
+        'focus',
+      )
+
+      component
+        .find('[data-entry]')
+        .element
+        .dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'mouse' }))
+
+      expect(focus).toHaveBeenCalled()
+    })
+
     it('stays put when a chip is clicked, so the page does not jump', async () => {
       const { component, promptBar } = await mountTerminal()
       const focus = vi.spyOn(
