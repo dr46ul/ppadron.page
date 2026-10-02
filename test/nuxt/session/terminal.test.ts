@@ -464,6 +464,66 @@ describe('terminal', () => {
       )
     })
 
+    describe('keeping the keyboard free', () => {
+      async function press(
+        prompt: { element: Element },
+        init: KeyboardEventInit,
+      ) {
+        const event = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        })
+        prompt.element.dispatchEvent(event)
+        await nextTick()
+        return event
+      }
+
+      it('takes Tab only when there is a completion to apply', async () => {
+        const { component } = await mountTerminal()
+        const prompt = component.find('#prompt')
+        await prompt.setValue('reco')
+
+        expect((await press(prompt, {})).defaultPrevented).toBe(true)
+      })
+
+      it.each([
+        ['an empty prompt', ''],
+        ['text that matches nothing', 'zzz'],
+        ['a prompt already complete', 'whoami'],
+      ])('lets Tab move focus on from %s', async (_, typed) => {
+        const { component } = await mountTerminal()
+        const prompt = component.find('#prompt')
+        await prompt.setValue(typed)
+
+        expect((await press(prompt, {})).defaultPrevented).toBe(false)
+      })
+
+      it.each(['ctrlKey', 'altKey', 'metaKey'])(
+        'never takes Tab chorded with %s',
+        async (modifier) => {
+          const { component } = await mountTerminal()
+          const prompt = component.find('#prompt')
+          await prompt.setValue('reco')
+
+          expect((await press(prompt, { [modifier]: true })).defaultPrevented)
+            .toBe(false)
+        },
+      )
+
+      it('never takes Shift+Tab, even over a completable prompt', async () => {
+        const { component } = await mountTerminal()
+        const prompt = component.find('#prompt')
+        await prompt.setValue('reco')
+
+        const event = await press(prompt, { shiftKey: true })
+
+        expect(event.defaultPrevented).toBe(false)
+        expect((prompt.element as HTMLInputElement).value).toBe('reco')
+      })
+    })
+
     it('walks back through the history on ArrowUp and forward on ArrowDown', async () => {
       const session = await mountTerminal()
 

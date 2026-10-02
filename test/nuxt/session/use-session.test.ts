@@ -401,6 +401,35 @@ describe('useSession', () => {
       // the real spelling rather than the shortcut.
       expect(session.input.value).toBe('cat ~/recommendations')
     })
+
+    describe('reporting whether it took the Tab', () => {
+      it.each([
+        ['an empty prompt', ''],
+        ['whitespace', '  '],
+        ['text that matches nothing', 'zzz'],
+        ['a prompt already complete', 'whoami'],
+      ])('reports nothing applied for %s', (_, typed) => {
+        const session = useSession()
+        session.input.value = typed
+
+        expect(session.complete()).toBe(false)
+      })
+
+      it('reports a completion it applied', () => {
+        const session = useSession()
+        session.input.value = 'reco'
+
+        expect(session.complete()).toBe(true)
+      })
+
+      it('reports a case-fix as applied, because the prompt did change', () => {
+        const session = useSession()
+        session.input.value = 'WHOAMI'
+
+        expect(session.complete()).toBe(true)
+        expect(session.input.value).toBe('whoami')
+      })
+    })
   })
 
   describe('recall', () => {

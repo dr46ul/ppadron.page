@@ -38,6 +38,16 @@ const {
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
+// A page may only take Tab when it has something to do with it; otherwise the
+// prompt is a keyboard trap (WCAG 2.1.2).
+function onTab(event: KeyboardEvent) {
+  if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+    return
+
+  if (complete())
+    event.preventDefault()
+}
+
 /** Seeded on the server so the banner's timestamp survives hydration. */
 const openedAt = useState('session-opened', () => Date.now())
 
@@ -245,7 +255,7 @@ function focusPrompt() {
           autocapitalize="off"
           spellcheck="false"
           placeholder="type a command, or click one above"
-          @keydown.tab.prevent="complete"
+          @keydown.tab="onTab"
           @keydown.up.prevent="recall(1)"
           @keydown.down.prevent="recall(-1)"
         >
