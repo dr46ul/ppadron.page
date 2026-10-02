@@ -258,11 +258,15 @@ export function useSession() {
     )
   }
 
-  /** Tab completion over every spelling a visitor might be part-way through. */
+  /**
+   * Tab completion over every spelling a visitor might be part-way through.
+   * Reports whether it changed the prompt, so the caller can hand Tab back to
+   * the browser when it had nothing to do with it.
+   */
   function complete() {
     const typed = input.value.trim().toLowerCase()
     if (!typed)
-      return
+      return false
 
     const pool = [
       ...commands.map(entry => entry.cmd),
@@ -271,8 +275,11 @@ export function useSession() {
     ]
 
     const hit = pool.find(entry => entry.startsWith(typed))
-    if (hit)
-      input.value = hit
+    if (!hit || hit === input.value)
+      return false
+
+    input.value = hit
+    return true
   }
 
   function recall(offset: number) {
