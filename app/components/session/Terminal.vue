@@ -203,7 +203,7 @@ function focusPrompt() {
          `help` exists is the Visitor this page is for. -->
     <div
       data-prompt-bar
-      class="border-base-300 bg-base-100/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
+      class="border-edge bg-base-100/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
     >
       <div
         class="border-base-300 flex items-center gap-2 overflow-x-auto border-b px-4 py-2 sm:px-6"
@@ -218,7 +218,7 @@ function focusPrompt() {
           v-for="command in commands"
           :key="command.cmd"
           type="button"
-          class="border-base-300 text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
+          class="border-edge text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
           :title="command.label"
           @click="exec(command.cmd)"
         >

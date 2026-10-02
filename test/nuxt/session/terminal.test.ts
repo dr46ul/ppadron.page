@@ -599,4 +599,29 @@ describe('terminal', () => {
       expect(roleOf(promptBar(), 'span', 'Run')).toBe('text-subtle')
     })
   })
+
+  describe('edges', () => {
+    it('draws every chip and the prompt bar rule in the control-edge token', async () => {
+      const { promptBar } = await mountTerminal()
+
+      const chips = promptBar().findAll('button').filter(button =>
+        button.classes().includes('border'),
+      )
+
+      expect(chips).toHaveLength(commands.length)
+      for (const chip of chips) {
+        expect(chip.classes()).toContain('border-edge')
+        expect(chip.classes()).not.toContain('border-base-300')
+      }
+      expect(promptBar().classes()).toContain('border-edge')
+      expect(promptBar().classes()).not.toContain('border-base-300')
+    })
+
+    it('keeps the banner rule and the chip-row divider on the divider token', async () => {
+      const { banner, promptBar } = await mountTerminal()
+
+      expect(banner().classes()).toContain('border-base-300')
+      expect(promptBar().find('div').classes()).toContain('border-base-300')
+    })
+  })
 })
