@@ -228,29 +228,33 @@ function focusPrompt(event: MouseEvent) {
         >
           Run
         </span>
-        <button
-          v-for="command in commands"
-          :key="command.cmd"
-          type="button"
-          class="border-edge text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
-          :title="command.label"
-          @click="exec(command.cmd)"
-        >
-          {{ command.cmd }}
-        </button>
+        <template v-for="(command, index) in commands" :key="command.cmd">
+          <button
+            type="button"
+            class="border-edge text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
+            :title="command.label"
+            :aria-describedby="`chip-hint-${index}`"
+            @click="exec(command.cmd)"
+          >
+            {{ command.cmd }}
+          </button>
+          <span :id="`chip-hint-${index}`" class="sr-only">{{ command.label }}</span>
+        </template>
 
         <span aria-hidden="true" class="bg-base-300 mx-1 h-4 w-px shrink-0" />
 
-        <button
-          v-for="command in metaCommands"
-          :key="command.cmd"
-          type="button"
-          class="text-muted hover:text-base-content shrink-0 px-1 py-0.5 text-[0.6875rem] whitespace-nowrap"
-          :title="command.label"
-          @click="exec(command.cmd)"
-        >
-          {{ command.cmd }}
-        </button>
+        <template v-for="(command, index) in metaCommands" :key="command.cmd">
+          <button
+            type="button"
+            class="text-muted hover:text-base-content shrink-0 px-1 py-0.5 text-[0.6875rem] whitespace-nowrap"
+            :title="command.label"
+            :aria-describedby="`meta-hint-${index}`"
+            @click="exec(command.cmd)"
+          >
+            {{ command.cmd }}
+          </button>
+          <span :id="`meta-hint-${index}`" class="sr-only">{{ command.label }}</span>
+        </template>
       </div>
 
       <form
@@ -270,7 +274,7 @@ function focusPrompt(event: MouseEvent) {
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder="type a command, or click one above"
+          placeholder="type a command, or pick one above"
           @keydown.tab="onTab"
           @keydown.up.prevent="recall(1)"
           @keydown.down.prevent="recall(-1)"

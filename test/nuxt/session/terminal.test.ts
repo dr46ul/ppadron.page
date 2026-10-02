@@ -467,6 +467,26 @@ describe('terminal', () => {
         expect(chip(command.cmd).attributes('title')).toBe(command.label)
     })
 
+    it('describes each chip to a keyboard or screen-reader user', async () => {
+      const { chip, component } = await mountTerminal()
+
+      // `title` is a pointer-only tooltip; the description is what reaches
+      // focus and touch.
+      for (const command of [...commands, ...metaCommands]) {
+        const id = chip(command.cmd).attributes('aria-describedby')!
+
+        expect(component.find(`#${id}`).text()).toBe(command.label)
+      }
+    })
+
+    it('invites a pick rather than a click', async () => {
+      const { component } = await mountTerminal()
+
+      expect(component.find('#prompt').attributes('placeholder')).toBe(
+        'type a command, or pick one above',
+      )
+    })
+
     it('runs the command a chip names', async () => {
       const session = await mountTerminal()
 
