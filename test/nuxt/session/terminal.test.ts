@@ -686,4 +686,34 @@ describe('terminal', () => {
       expect(promptBar().find('div').classes()).toContain('border-base-300')
     })
   })
+
+  describe('landmarks', () => {
+    it('puts the banner and the transcript in main, and the chrome outside it', async () => {
+      const { component, banner, promptBar } = await mountTerminal()
+      const main = component.find('main')
+
+      expect(component.findAll('main')).toHaveLength(1)
+      expect(main.find('[data-banner]').exists()).toBe(true)
+      expect(main.find('[data-entry]').exists()).toBe(true)
+      expect(main.find('[data-prompt-bar]').exists()).toBe(false)
+      expect(main.find('#prompt').exists()).toBe(false)
+      expect(banner().exists()).toBe(true)
+      expect(promptBar().exists()).toBe(true)
+    })
+
+    it('keeps the skip link outside main, pointing at the prompt', async () => {
+      const { component } = await mountTerminal()
+      const skip = component.find('a[href="#prompt"]')
+
+      expect(skip.text()).toBe('Skip to the prompt')
+      expect(component.find('main').find('a[href="#prompt"]').exists()).toBe(false)
+    })
+
+    it('titles the page with the name Whoami prints', async () => {
+      const { component, entries } = await mountTerminal()
+
+      expect(entries().length).toBeGreaterThan(0)
+      expect(component.findAll('h1')).toHaveLength(1)
+    })
+  })
 })

@@ -33,6 +33,22 @@ function mount(overrides: Partial<Profile> = {}) {
 }
 
 describe('whoami output', () => {
+  it('prints the name as the page title, with the look it already had', async () => {
+    const component = await mount({ name: 'Wilhelmina Ashgrove' })
+    const title = component.find('h1')
+
+    expect(title.text()).toBe('Wilhelmina Ashgrove')
+    expect(title.classes()).toEqual(
+      expect.arrayContaining(['text-lg', 'font-semibold', 'tracking-tight']),
+    )
+  })
+
+  it('gives the page no other heading, so the outline stops at the title', async () => {
+    const component = await mount()
+
+    expect(component.findAll('h2, h3, h4, h5, h6')).toHaveLength(0)
+  })
+
   it('prints the name it is handed', async () => {
     const component = await mount({ name: 'Wilhelmina Ashgrove' })
 
@@ -66,7 +82,7 @@ describe('whoami output', () => {
       intro: 'Works with teams whose build takes longer than their standup.',
     })
 
-    expect(component.findAll('p').map(paragraph => paragraph.text())).toEqual([
+    expect(component.findAll('h1, p').map(paragraph => paragraph.text())).toEqual([
       'Wilhelmina Ashgrove',
       'Systems plumber · Reykjavík',
       'Unblocks the pipes nobody else will crawl into.',
@@ -90,7 +106,7 @@ describe('whoami output', () => {
     })
 
     expect(component.text()).toContain('Keeps bees, badly.')
-    expect(component.findAll('p')).toHaveLength(5)
+    expect(component.findAll('h1, p')).toHaveLength(5)
   })
 
   it('leaves no empty line behind when the Profile has no aside', async () => {
@@ -133,7 +149,7 @@ describe('whoami output', () => {
       // Full strength is the absence of a step, which is the emphasis device
       // the tagline depends on: it carries more weight than the intro below it.
       expect(roleOf(component, 'p', 'Unblocks the pipes')).toBeUndefined()
-      expect(roleOf(component, 'p', 'Wilhelmina Ashgrove')).toBeUndefined()
+      expect(roleOf(component, 'h1', 'Wilhelmina Ashgrove')).toBeUndefined()
     })
   })
 })
