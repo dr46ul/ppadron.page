@@ -436,6 +436,14 @@ describe('terminal', () => {
       expect(row.classes()).not.toContain('overflow-x-auto')
     })
 
+    it('holds the prompt at 16px on a phone so iOS does not zoom the page', async () => {
+      const { component } = await mountTerminal()
+      const classes = component.find('#prompt').classes()
+
+      expect(classes).toContain('text-base')
+      expect(classes).toContain('sm:text-[0.875rem]')
+    })
+
     it('titles each chip with what it does', async () => {
       const { chip } = await mountTerminal()
 

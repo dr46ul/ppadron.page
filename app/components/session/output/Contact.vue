@@ -52,6 +52,8 @@ const body = field('message')
     </p>
 
     <form class="max-w-xl" @submit.prevent="emit('submit')" @click.stop>
+      <!-- The fields are 16px below `sm`: iOS Safari zooms the page on
+           focusing a smaller input and does not zoom back out. -->
       <fieldset class="flex flex-col gap-4" :disabled="state === 'sending'">
         <legend class="sr-only">
           Send an enquiry
@@ -61,7 +63,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
           <input
             v-model="from"
-            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1"
+            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
             type="text"
             name="name"
             autocomplete="name"
@@ -74,7 +76,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
           <input
             v-model="replyTo"
-            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1"
+            class="border-edge focus:border-accent w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
             type="email"
             name="email"
             autocomplete="email"
@@ -87,7 +89,7 @@ const body = field('message')
           <span class="text-accent w-24 shrink-0 text-xs">body:</span>
           <textarea
             v-model="body"
-            class="border-edge focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 leading-relaxed"
+            class="border-edge focus:border-accent h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
             name="message"
             required
             minlength="20"

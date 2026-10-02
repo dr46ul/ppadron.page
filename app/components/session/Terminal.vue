@@ -247,11 +247,13 @@ function focusPrompt() {
       >
         <label class="sr-only" for="prompt">Run a command</label>
         <span aria-hidden="true" class="text-accent shrink-0 select-none">$</span>
+        <!-- 16px below `sm`: iOS Safari zooms the page on focusing a smaller
+             input and does not zoom back out. -->
         <input
           id="prompt"
           ref="inputEl"
           v-model="input"
-          class="w-full bg-transparent"
+          class="w-full bg-transparent text-base sm:text-[0.875rem]"
           type="text"
           autocomplete="off"
           autocapitalize="off"
