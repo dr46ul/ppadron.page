@@ -200,13 +200,15 @@ function focusPrompt() {
 
     <!-- The prompt bar. The commands are listed here as chips rather than
          hidden behind `help`, because a Visitor who does not already know that
-         `help` exists is the Visitor this page is for. -->
+         `help` exists is the Visitor this page is for. The row wraps rather
+         than scrolls for the same reason: on a phone a scrolled-off chip,
+         `mail pavel` among them, is hidden just the same. -->
     <div
       data-prompt-bar
       class="border-edge bg-base-100/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
     >
       <div
-        class="border-base-300 flex items-center gap-2 overflow-x-auto border-b px-4 py-2 sm:px-6"
+        class="border-base-300 flex flex-wrap items-center gap-2 border-b px-4 py-2 sm:px-6"
         @click.stop
       >
         <span
