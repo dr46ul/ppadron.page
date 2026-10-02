@@ -146,7 +146,7 @@ function focusPrompt(event: MouseEvent) {
         — scrollback is {{ scrollback }} ]
       </p>
 
-      <div aria-live="polite">
+      <div>
         <div
           v-for="entry in entries"
           :key="entry.id"
@@ -161,7 +161,7 @@ function focusPrompt(event: MouseEvent) {
           <!-- The beat between the command and its output. -->
           <p v-if="entry.output === null" class="mt-3 pl-[1.1rem]">
             <span aria-hidden="true" class="caret session-busy" />
-            <span class="sr-only">Working…</span>
+            <span class="sr-only" role="status">Working…</span>
           </p>
 
           <div

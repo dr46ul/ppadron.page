@@ -335,6 +335,21 @@ describe('terminal', () => {
       )
     })
 
+    it('announces the Enquiry result from a single live region', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('mail pavel').trigger('click')
+      await session.settle()
+      await session.enquiryForm().trigger('submit')
+      await session.settle()
+
+      // The result's own role is the announcement; a polite region around the
+      // Transcript would read it a second time, or not at all.
+      expect(
+        session.component.find('[role="alert"]').element.closest('[aria-live]'),
+      ).toBeNull()
+    })
+
     it('prints the Unknown output for a command it does not have', async () => {
       const session = await mountTerminal()
 
@@ -367,6 +382,7 @@ describe('terminal', () => {
 
       expect(thinking.find('.session-busy').exists()).toBe(true)
       expect(thinking.text()).toContain('Working…')
+      expect(thinking.find('[role="status"]').text()).toBe('Working…')
 
       await session.settle()
 

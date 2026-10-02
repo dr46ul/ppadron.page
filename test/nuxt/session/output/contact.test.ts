@@ -109,8 +109,47 @@ describe('contact output', () => {
     const component = await mount({ state: 'sending' })
 
     expect(component.find('button[type="submit"]').text()).toBe('sending…')
-    expect(component.find('fieldset').attributes('disabled')).toBeDefined()
+    for (const name of ['name', 'email', 'message'])
+      expect(component.find(`[name="${name}"]`).attributes('disabled')).toBeDefined()
   })
+
+  it('keeps the send button focusable while it is sending', async () => {
+    const component = await mount({ state: 'sending' })
+    const button = component.find('button[type="submit"]')
+
+    // A disabled element drops focus to <body>, so the Visitor would lose
+    // their place while waiting to hear the result.
+    expect(component.find('fieldset').attributes('disabled')).toBeUndefined()
+    expect(button.attributes('disabled')).toBeUndefined()
+    expect(button.attributes('aria-disabled')).toBe('true')
+  })
+
+  it('does not ask the session to send again while it is sending', async () => {
+    const component = await mount({ state: 'sending' })
+
+    await component.find('form').trigger('submit')
+
+    expect(component.emitted('submit')).toBeUndefined()
+  })
+
+  it('leaves the button enabled in every other state', async () => {
+    const component = await mount({ state: 'idle' })
+
+    expect(
+      component.find('button[type="submit"]').attributes('aria-disabled'),
+    ).toBeUndefined()
+  })
+
+  it.each(['sent', 'failed'] as const)(
+    'prints the %s result outside the fieldset',
+    async (state) => {
+      const component = await mount({ state })
+
+      expect(
+        component.find('[role="status"], [role="alert"]').element.closest('fieldset'),
+      ).toBeNull()
+    },
+  )
 
   it('confirms a sent Enquiry to a screen reader', async () => {
     const component = await mount({ state: 'sent' })
