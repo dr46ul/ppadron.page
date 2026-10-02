@@ -6,9 +6,9 @@ defineProps<{ profile: Profile }>()
 
 <template>
   <div>
-    <p class="text-lg font-semibold tracking-tight">
+    <h1 class="text-lg font-semibold tracking-tight">
       {{ profile.name }}
-    </p>
+    </h1>
     <p class="text-subtle">
       {{ profile.headline }} · {{ profile.location }}
     </p>

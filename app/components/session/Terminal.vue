@@ -98,6 +98,9 @@ function focusPrompt(event: MouseEvent) {
     class="flex min-h-screen flex-col text-[0.875rem] leading-[1.7]"
     @click="focusPrompt"
   >
+    <!-- Skips past the Transcript to the prompt, not past navigation to the
+         content: the prompt is the control, and the Transcript is already
+         printed. -->
     <a
       href="#prompt"
       class="border-accent text-accent bg-base-100 sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:border focus:px-4 focus:py-2"
@@ -105,7 +108,7 @@ function focusPrompt(event: MouseEvent) {
       Skip to the prompt
     </a>
 
-    <div class="flex-1 px-4 py-8 sm:px-6">
+    <main class="flex-1 px-4 py-8 sm:px-6">
       <!-- A session opens with a login banner, not a header. `clear` takes it
            with the rest of the scrollback; only `reset` brings it back. -->
       <div
@@ -205,7 +208,7 @@ function focusPrompt(event: MouseEvent) {
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <!-- The prompt bar. The commands are listed here as chips rather than
          hidden behind `help`, because a Visitor who does not already know that
