@@ -135,10 +135,12 @@
     animation: caret-blink 400ms steps(2, start) infinite;
   }
 
-  /* Output printed in response to a command, revealed a line at a time the way
-     a real one arrives. Only ever applied to entries the Visitor ran
-     themselves — the transcript printed on load appears at once, because
-     making someone wait to read is a cost with no return.
+  /* Output printed in response to a command. An Output fades in as one block;
+     the three list Outputs also stagger their items off the `--i` they set,
+     since a few paragraphs 45ms apart read as a flicker rather than a print.
+     Only ever applied to entries the Visitor ran themselves — the transcript
+     printed on load appears at once, because making someone wait to read is a
+     cost with no return.
 
      Transform and opacity only: a block therefore occupies its full height the
      moment it renders, so following it with a single scroll lands correctly
@@ -151,25 +153,6 @@
 
   .session-print li {
     animation-delay: calc((var(--i, 0) + 2) * 45ms);
-  }
-
-  .session-print > *:nth-child(1) {
-    --i: 0;
-  }
-  .session-print > *:nth-child(2) {
-    --i: 1;
-  }
-  .session-print > *:nth-child(3) {
-    --i: 2;
-  }
-  .session-print > *:nth-child(4) {
-    --i: 3;
-  }
-  .session-print > *:nth-child(5) {
-    --i: 4;
-  }
-  .session-print > *:nth-child(6) {
-    --i: 5;
   }
 }
 
