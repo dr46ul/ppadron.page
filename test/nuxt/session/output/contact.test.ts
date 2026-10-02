@@ -224,6 +224,24 @@ describe('contact output', () => {
     })
   })
 
+  describe('focus', () => {
+    /**
+     * Focus is a 2px accent underline: the 1px border turns accent and a 1px
+     * shadow thickens it without moving the layout. The rectangle is gone from
+     * these fields, so this is what a Visitor sees.
+     */
+    it('thickens a focused field\'s underline to 2px in the accent', async () => {
+      const component = await mount()
+
+      for (const name of ['name', 'email', 'message']) {
+        const classes = component.find(`[name="${name}"]`).classes()
+
+        expect(classes).toContain('focus:border-accent')
+        expect(classes).toContain('focus:shadow-[0_1px_0_var(--color-accent)]')
+      }
+    })
+  })
+
   it('holds every field at 16px on a phone so iOS does not zoom the page', async () => {
     const component = await mount()
 

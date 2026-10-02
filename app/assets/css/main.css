@@ -113,6 +113,15 @@
     border-radius: 0;
   }
 
+  /* A terminal never boxes its input. The prompt says it is focused with its
+     caret (`.prompt-caret`) and an Enquiry field with a 2px underline; both
+     stay visible, so this takes the rectangle off, not the focus. Same layer
+     as the ring and more specific, so no utility is needed to win. */
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+  }
+
   ::selection {
     background: var(--color-accent);
     color: var(--color-accent-content);
@@ -127,6 +136,15 @@
     translate: 0 0.18em;
     background: var(--color-accent);
     animation: caret-blink 1.06s steps(2, start) infinite;
+  }
+
+  /* A terminal draws a solid block while it has focus and a hollow one while it
+     does not. The blink is dropped with the fill, so a still outline is what
+     tells a Visitor the prompt is not listening. */
+  input:not(:focus) ~ .prompt-caret {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+    animation: none;
   }
 
   /* The machine thinking, for exactly as long as it takes the first line to
