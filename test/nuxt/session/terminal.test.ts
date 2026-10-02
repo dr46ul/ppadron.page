@@ -428,6 +428,14 @@ describe('terminal', () => {
       ])
     })
 
+    it('wraps the chips onto further rows rather than scrolling them out of sight', async () => {
+      const { promptBar } = await mountTerminal()
+      const row = promptBar().find('div')
+
+      expect(row.classes()).toContain('flex-wrap')
+      expect(row.classes()).not.toContain('overflow-x-auto')
+    })
+
     it('titles each chip with what it does', async () => {
       const { chip } = await mountTerminal()
 
