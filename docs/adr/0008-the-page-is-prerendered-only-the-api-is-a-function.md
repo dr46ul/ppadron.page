@@ -31,13 +31,18 @@ time of the request. Prerendered, it is when the page was last built: the last
 time anyone logged in to this machine. It is held in `useState('built-at')`,
 so it rides the inline payload and hydration keeps it instead of reading the
 Visitor's clock. Rewriting it on the client was rejected — it would visibly
-change the first line on the page after load.
+change the first line on the page after load. _Superseded in part by
+[ADR-0009](./0009-dates-are-formatted-for-the-visitor-after-load.md): the time
+is still the build's, but it is now re-formatted for the Visitor after load._
 
 **The © year is the build's year**, handed to the Colophon by `Terminal` from
 the same state. A clock read in the component would print one year in the
 prerendered HTML and patch in another on hydration the first time the site
 went a New Year without a deploy. Going a whole year without one leaves the
 notice a year behind, which for a year of publication is correct.
+_Superseded by [ADR-0009](./0009-dates-are-formatted-for-the-visitor-after-load.md):
+the notice is the Visitor's current year, read after load, and the build's
+year is only the prerendered fallback._
 
 **Payload extraction is off.** On a prerendered route Nuxt moves part of the
 payload to `_payload.json`, and the client awaits a fetch of it before it
