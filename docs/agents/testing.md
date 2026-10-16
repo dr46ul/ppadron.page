@@ -32,7 +32,7 @@ first commit of a change is the test that describes the new behaviour.
 ## What covered means
 
 `pnpm test` (and CI) enforces 100% lines, functions and statements on
-`app/components/**`, `app/composables/**` and `server/utils/**`, and **at most
+`app/components/**`, `app/composables/**`, `app/utils/**` and `server/utils/**`, and **at most
 four uncovered branches** in that tree — a count, not a percentage, so the gate cannot drift as
 the tree grows. Exactly four exist today, all unreachable, all in `Terminal.vue`
 (see "A `.vue` file will not reach 100% branches" below); the cap is sized to
@@ -74,6 +74,9 @@ One file per subject, mirroring `app/`:
 | `app/components/session/output/<Name>.vue` | `test/nuxt/session/output/<name>.test.ts` |
 | `app/components/session/Terminal.vue`      | `test/nuxt/session/terminal.test.ts`      |
 | `app/composables/useSession.ts`            | `test/nuxt/session/use-session.test.ts`   |
+| `app/composables/useDateContext.ts`        | `test/nuxt/use-date-context.test.ts`      |
+| `app/composables/useVisitedAt.ts`          | `test/nuxt/use-visited-at.test.ts`        |
+| `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
 | `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
 
 Output components are pure: they print what they are handed as props and
@@ -137,6 +140,14 @@ checks for `public/index.html` in the output `setup()` built, found through
 `node-server` preset the e2e build uses, so the check holds there; what it
 cannot see is the Vercel preset's own layout. See ADR-0008.
 
+**The dates a Visitor is served are asserted here too.** The build has no
+Visitor, so the banner and the © ship in English and UTC and are re-dated once
+the page is mounted (ADR-0009). The composables' tests see the fallback
+during setup, but only the prerendered HTML shows the page actually ships it.
+The expected banner is formatted from the build's own instant, read out of the
+inline payload (`$sbuilt-at`, decoded with `devalue`), with the English and UTC
+spelled out rather than imported, so a changed fallback fails here.
+
 ## Rules that are not obvious
 
 **`@nuxt/test-utils/runtime` and `@nuxt/test-utils/e2e` cannot be used in the
@@ -160,6 +171,31 @@ with `vi.runAllTimersAsync()` — see `test/nuxt/session.test.ts`. A real-time
 **The `nuxt` environment shares global state between tests in a file.** A Nuxt
 app is initialised once before the tests run, so anything mutated globally must
 be reset afterwards. `vi.stubGlobal` needs a matching `vi.unstubAllGlobals`.
+
+**Stub the Visitor's time zone with `vi.stubEnv('TZ', …)`, not by spying on
+`Intl`.** Node re-reads `TZ` whenever it changes, so the zone `Intl` resolves
+to moves with it. A spy on `Intl.DateTimeFormat.prototype.resolvedOptions`
+does not reach the component in the `nuxt` environment, and the test quietly
+runs in the machine's own zone instead — green on a laptop in one zone, red in
+CI in another. Unstub with `vi.unstubAllEnvs()`. `navigator.languages` does
+stub with `vi.spyOn(navigator, 'languages', 'get')`. Both are in `visitFrom`,
+`test/nuxt/visit-from.ts`.
+
+**`mountSuspended` resolves with the component already mounted**, so anything
+a component holds before `onMounted` is invisible to an assertion made after
+it. To see it, mount a small probe component that copies the value out during
+`setup()` — `test/nuxt/use-date-context.test.ts` does.
+
+**A hydration mismatch is tested at the composable, and checked in a browser
+for the page.** `use-date-context.test.ts` plays the build with
+`renderToString` under English and UTC, re-stubs the Visitor, hydrates the HTML
+with `createSSRApp`, and fails on any console message mentioning `Hydration`
+— Vue's dev build reports each mismatch. Reading the browser before mount is
+the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
+still checked against `.output`: open it in a Playwright context with a
+`locale` and `timezoneId` unlike the build's, and watch the console. Vue's
+production build logs `Hydration completed but contains mismatches.` when the
+two differ, and nothing when they do not.
 
 **`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
 global: `useSession.ts` gets its own binding, and stubbing `globalThis.$fetch`

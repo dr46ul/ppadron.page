@@ -6,7 +6,7 @@
  */
 import type { Profile } from '~/data/profile'
 
-const props = defineProps<{ profile: Profile, year: number }>()
+const props = defineProps<{ profile: Profile, year: string }>()
 
 /** The repo URL as a terminal would print a path: no scheme in the way. */
 const repoLabel = computed(() =>

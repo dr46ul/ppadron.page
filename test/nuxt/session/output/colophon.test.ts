@@ -28,7 +28,7 @@ function profile(overrides: Partial<Profile> = {}): Profile {
   }
 }
 
-function mount(overrides: Partial<Profile> = {}, year = 2031) {
+function mount(overrides: Partial<Profile> = {}, year = '2031') {
   return mountSuspended(Colophon, {
     props: { profile: profile(overrides), year },
   })
@@ -118,8 +118,12 @@ describe('colophon output', () => {
   it('dates the notice by the year it is handed, not by the clock', async () => {
     vi.setSystemTime(new Date('2033-06-01T00:00:00Z'))
 
-    expect((await mount({}, 2031)).text()).toContain('© 2031')
-    expect((await mount({}, 2032)).text()).toContain('© 2032')
+    expect((await mount({}, '2031')).text()).toContain('© 2031')
+    expect((await mount({}, '2032')).text()).toContain('© 2032')
+  })
+
+  it('prints the year in the digits it is handed', async () => {
+    expect((await mount({}, '٢٠٢٦')).text()).toContain('© ٢٠٢٦')
   })
 
   it('prints nothing but the Profile it is handed', async () => {

@@ -35,6 +35,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "@vue/test-utils": "^2.5.1",
     "daisyui": "^5.7.50",
+    "devalue": "^6.0.2",
     "eslint": "^10.12.0",
     "eslint-plugin-format": "^2.0.1",
     "eslint-plugin-slop": "^0.1.3",
