@@ -1,12 +1,13 @@
 # Static prerendering with an inline theme script, not SSR
 
-> **Partly superseded by [ADR-0004](./0004-the-site-is-a-terminal-session.md).**
-> The site is dark only: there is no theme toggle, no cookie, and the inline
-> `<head>` script described below has been removed. What stands is the decision
-> this record is really about — the page is statically prerendered to the CDN
-> rather than server-rendered, with `server/api/` deploying as a serverless
-> function through Nitro's hybrid rendering. The reasoning under "Considered
-> Options" for rejecting SSR is unchanged; the theme mechanics are history.
+> **Superseded by [ADR-0004](./0004-the-site-is-a-terminal-session.md) and
+> [ADR-0008](./0008-the-page-is-prerendered-only-the-api-is-a-function.md).**
+> ADR-0004 made the site dark only, which removed the theme toggle, the cookie
+> and the inline `<head>` script described below. ADR-0008 now carries the
+> decision that outlived them — the page is prerendered to the CDN and only
+> `server/api/` runs as a function — and is the first record of it that the
+> build actually implements. Kept for the reasoning against SSR, which ADR-0008
+> cites.
 
 The site offers a light/dark toggle (`corporate` / `dracula`) whose choice must survive a reload without a flash of the wrong theme. The obvious implementation is SSR with a cookie: the server reads the theme per request and emits the right `data-theme`. We chose static prerendering instead, and handle the override with a small inline `<head>` script that reads the cookie and sets `data-theme` before first paint. The contact endpoint still deploys as a serverless function via Nitro's hybrid rendering, so the page is CDN-static while `server/api/contact.post.ts` is dynamic.
 

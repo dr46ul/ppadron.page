@@ -130,6 +130,13 @@ Two mechanics this depends on:
 A transcript block is found by the command it echoes, not by its `data-entry`
 id — the ids are only `TOUR`'s order, and that order is `TOUR`'s to change.
 
+**That `/` is prerendered is asserted against the build, not a response.** A
+static file and a per-request render serve the same HTML, so `ssr.test.ts`
+checks for `public/index.html` in the output `setup()` built, found through
+`useTestContext().nuxt.options.nitro.output.dir`. Nitro prerenders under the
+`node-server` preset the e2e build uses, so the check holds there; what it
+cannot see is the Vercel preset's own layout. See ADR-0008.
+
 ## Rules that are not obvious
 
 **`@nuxt/test-utils/runtime` and `@nuxt/test-utils/e2e` cannot be used in the
