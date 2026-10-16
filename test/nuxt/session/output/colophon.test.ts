@@ -28,8 +28,10 @@ function profile(overrides: Partial<Profile> = {}): Profile {
   }
 }
 
-function mount(overrides: Partial<Profile> = {}) {
-  return mountSuspended(Colophon, { props: { profile: profile(overrides) } })
+function mount(overrides: Partial<Profile> = {}, year = 2031) {
+  return mountSuspended(Colophon, {
+    props: { profile: profile(overrides), year },
+  })
 }
 
 /** The href of every link the Colophon prints, in document order. */
@@ -113,14 +115,11 @@ describe('colophon output', () => {
       expect(link.attributes('rel')).toBe('noopener')
   })
 
-  it('dates the notice by the clock, not by a year written down', async () => {
-    vi.setSystemTime(new Date('2031-06-01T00:00:00Z'))
+  it('dates the notice by the year it is handed, not by the clock', async () => {
+    vi.setSystemTime(new Date('2033-06-01T00:00:00Z'))
 
-    expect((await mount()).text()).toContain('© 2031')
-
-    vi.setSystemTime(new Date('2032-06-01T00:00:00Z'))
-
-    expect((await mount()).text()).toContain('© 2032')
+    expect((await mount({}, 2031)).text()).toContain('© 2031')
+    expect((await mount({}, 2032)).text()).toContain('© 2032')
   })
 
   it('prints nothing but the Profile it is handed', async () => {

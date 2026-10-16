@@ -48,11 +48,19 @@ function onTab(event: KeyboardEvent) {
     event.preventDefault()
 }
 
-/** Seeded on the server so the banner's timestamp survives hydration. */
-const openedAt = useState('session-opened', () => Date.now())
+/**
+ * The page is prerendered (ADR-0008), so this is when it was built, and the
+ * banner's "Last login" is the last deploy on purpose: the last time anyone
+ * logged in to this machine. It rides the payload, so hydration keeps it
+ * rather than reading the Visitor's clock.
+ */
+const builtAt = useState('built-at', () => Date.now())
+
+/** The notice is dated by the build too, so it never disagrees with the banner. */
+const year = computed(() => new Date(builtAt.value).getUTCFullYear())
 
 const lastLogin = computed(() => {
-  const at = new Date(openedAt.value)
+  const at = new Date(builtAt.value)
   const pad = (value: number) => String(value).padStart(2, '0')
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const months = [
@@ -194,6 +202,7 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputColophon
               v-else-if="entry.output === 'colophon'"
               :profile
+              :year
             />
             <SessionOutputHelp
               v-else-if="entry.output === 'help'"
