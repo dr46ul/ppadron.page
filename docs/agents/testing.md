@@ -74,6 +74,8 @@ One file per subject, mirroring `app/`:
 | `app/components/session/output/<Name>.vue` | `test/nuxt/session/output/<name>.test.ts` |
 | `app/components/session/Terminal.vue`      | `test/nuxt/session/terminal.test.ts`      |
 | `app/composables/useSession.ts`            | `test/nuxt/session/use-session.test.ts`   |
+| `app/composables/useDateContext.ts`        | `test/nuxt/use-date-context.test.ts`      |
+| `app/composables/useVisitedAt.ts`          | `test/nuxt/use-visited-at.test.ts`        |
 | `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
 | `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
 
@@ -140,10 +142,11 @@ cannot see is the Vercel preset's own layout. See ADR-0008.
 
 **The dates a Visitor is served are asserted here too.** The build has no
 Visitor, so the banner and the © ship in English and UTC and are re-dated once
-the page is mounted (ADR-0009). `test/nuxt` cannot see that fallback —
-`mountSuspended` resolves with the component already mounted — so the
-prerendered HTML is the only place it shows. The banner is matched by its
-shape, since the time is whenever `setup()` built.
+the page is mounted (ADR-0009). The composables' tests see the fallback
+during setup, but only the prerendered HTML shows the page actually ships it.
+The expected banner is formatted from the build's own instant, read out of the
+inline payload (`$sbuilt-at`, decoded with `devalue`), with the English and UTC
+spelled out rather than imported, so a changed fallback fails here.
 
 ## Rules that are not obvious
 
@@ -175,8 +178,13 @@ to moves with it. A spy on `Intl.DateTimeFormat.prototype.resolvedOptions`
 does not reach the component in the `nuxt` environment, and the test quietly
 runs in the machine's own zone instead — green on a laptop in one zone, red in
 CI in another. Unstub with `vi.unstubAllEnvs()`. `navigator.languages` does
-stub with `vi.spyOn(navigator, 'languages', 'get')`. See `visitFrom` in
-`test/nuxt/session/terminal.test.ts`.
+stub with `vi.spyOn(navigator, 'languages', 'get')`. Both are in `visitFrom`,
+`test/nuxt/visit-from.ts`.
+
+**`mountSuspended` resolves with the component already mounted**, so anything
+a component holds before `onMounted` is invisible to an assertion made after
+it. To see it, mount a small probe component that copies the value out during
+`setup()` — `test/nuxt/use-date-context.test.ts` does.
 
 **`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
 global: `useSession.ts` gets its own binding, and stubbing `globalThis.$fetch`
@@ -328,13 +336,16 @@ which is 8-bit sRGB whatever the input notation. The fix for the second is to
 walk up from `body` to the first ancestor whose `backgroundColor` is not
 transparent, and composite against that.
 
-**A hydration mismatch is only visible in a browser.** No Vitest project
-hydrates server HTML, so whether the client renders what the prerendered page
-served is checked against `.output`: open it in a Playwright context with a
+**A hydration mismatch is tested at the composable, and checked in a browser
+for the page.** `use-date-context.test.ts` plays the build with
+`renderToString` under English and UTC, re-stubs the Visitor, hydrates the HTML
+with `createSSRApp`, and fails on any console message mentioning `Hydration`
+— Vue's dev build reports each mismatch. Reading the browser before mount is
+the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
+still checked against `.output`: open it in a Playwright context with a
 `locale` and `timezoneId` unlike the build's, and watch the console. Vue's
 production build logs `Hydration completed but contains mismatches.` when the
-two differ, and nothing when they do not. Reading the browser before mount is
-the mistake this catches (ADR-0009).
+two differ, and nothing when they do not.
 
 Sanity-check the harness before trusting it. A run where every element fails, or
 where every element passes by a suspiciously even margin, is measuring the
