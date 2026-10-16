@@ -144,6 +144,25 @@ describe('home page', () => {
       )
     })
   })
+
+  /**
+   * The build has no Visitor, so the page ships in English and UTC and the
+   * browser re-dates it once mounted. The time is whenever `setup()` built, so
+   * the banner is matched by its shape.
+   */
+  describe('prerendered dates', () => {
+    it('prints the banner in English and UTC', () => {
+      expect(page.querySelector('[data-banner]')?.textContent).toMatch(
+        /Last login: [A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, \d{2}:\d{2}:\d{2} [AP]M UTC on ttys002/,
+      )
+    })
+
+    it('prints the build\'s year in the notice', () => {
+      expect(entry('cat ~/colophon')?.textContent).toContain(
+        `© ${new Date().getUTCFullYear()}`,
+      )
+    })
+  })
 })
 
 describe('the build', () => {
