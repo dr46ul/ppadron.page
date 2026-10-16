@@ -32,16 +32,17 @@ in `UTC`, so a Visitor who matches it sees nothing move.
 
 **The browser is read in two composables, both on mount.** `useDateContext`
 holds the language and the time zone, and `useVisitedAt` the moment of the
-visit. Nothing else reads `navigator`, the time zone or the clock to print a
-date. They are separate because only the first moves to the i18n library: the
+visit. Nothing else reads `navigator`, the time zone or the Visitor's clock to
+print a date. They are separate because only the first moves to the i18n library: the
 library knows the page's language, not when the Visitor arrived.
 
 **Formats are named, never spelled out at a call site.** `app/utils/date-format.ts`
 holds them as `Intl.DateTimeFormatOptions` shaped like vue-i18n's
 `datetimeFormats`. When an i18n library arrives, the formats copy under each
-locale unchanged, the calls become `d(value, name)`, and `useDateContext`
-takes the locale from the library's current one instead of the browser, so
-translated text never sits beside dates in another language.
+locale unchanged and the calls become `d(value, { key: name, timeZone })`.
+`useDateContext` still supplies the zone, but takes the locale from the
+library's current one instead of the browser, so translated text never sits
+beside dates in another language.
 
 **The locale decides the format.** Field order, separators and a 12- or 24-hour
 clock follow the Visitor, at the cost of the Unix `last` look the banner had.
@@ -56,6 +57,6 @@ year and hands the Colophon a finished string.
 a word to translate, not a date to format; it moves with the i18n work.
 
 The tests split the same way. `test/unit/utils/date-format.test.ts` pins the
-exact strings. The composables' tests pin the build's values before mount, the
-browser's after, and a hydration without a mismatch. `Terminal`'s tests pin the
+exact strings. The composables' tests pin the build's values before mount and
+the browser's after, and `useDateContext`'s pin a hydration without a mismatch. `Terminal`'s tests pin the
 wiring, and `test/e2e/ssr.test.ts` pins the English and UTC the build ships.

@@ -186,6 +186,17 @@ a component holds before `onMounted` is invisible to an assertion made after
 it. To see it, mount a small probe component that copies the value out during
 `setup()` — `test/nuxt/use-date-context.test.ts` does.
 
+**A hydration mismatch is tested at the composable, and checked in a browser
+for the page.** `use-date-context.test.ts` plays the build with
+`renderToString` under English and UTC, re-stubs the Visitor, hydrates the HTML
+with `createSSRApp`, and fails on any console message mentioning `Hydration`
+— Vue's dev build reports each mismatch. Reading the browser before mount is
+the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
+still checked against `.output`: open it in a Playwright context with a
+`locale` and `timezoneId` unlike the build's, and watch the console. Vue's
+production build logs `Hydration completed but contains mismatches.` when the
+two differ, and nothing when they do not.
+
 **`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
 global: `useSession.ts` gets its own binding, and stubbing `globalThis.$fetch`
 leaves that binding pointing at the real thing. The stub then does nothing and a
@@ -335,17 +346,6 @@ computed value into a 1x1 canvas and read the pixel back with `getImageData`,
 which is 8-bit sRGB whatever the input notation. The fix for the second is to
 walk up from `body` to the first ancestor whose `backgroundColor` is not
 transparent, and composite against that.
-
-**A hydration mismatch is tested at the composable, and checked in a browser
-for the page.** `use-date-context.test.ts` plays the build with
-`renderToString` under English and UTC, re-stubs the Visitor, hydrates the HTML
-with `createSSRApp`, and fails on any console message mentioning `Hydration`
-— Vue's dev build reports each mismatch. Reading the browser before mount is
-the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
-still checked against `.output`: open it in a Playwright context with a
-`locale` and `timezoneId` unlike the build's, and watch the console. Vue's
-production build logs `Hydration completed but contains mismatches.` when the
-two differ, and nothing when they do not.
 
 Sanity-check the harness before trusting it. A run where every element fails, or
 where every element passes by a suspiciously even margin, is measuring the
