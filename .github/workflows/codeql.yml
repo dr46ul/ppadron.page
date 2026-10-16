@@ -28,7 +28,7 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # No build step: CodeQL reads TypeScript and Vue sources directly, and a
       # Nuxt build would only hide them behind bundled output.
