@@ -66,6 +66,17 @@ function recommendationFixture(): Recommendation {
 }
 
 /**
+ * Where the Visitor is, as their browser reports it. Left alone, the time zone
+ * is the machine's own, and the banner would read differently on a laptop and
+ * in CI. Node re-reads `TZ` whenever it changes, so stubbing it moves the zone
+ * `Intl` resolves to.
+ */
+function visitFrom(languages: string[], timeZone: string) {
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages)
+  vi.stubEnv('TZ', timeZone)
+}
+
+/**
  * The machine prints its output behind a per-command think delay, so the clock
  * is faked and run out rather than waited on.
  */
@@ -127,6 +138,7 @@ describe('terminal', () => {
     // The banner stamps the session with the time it was built, so the clock
     // is pinned rather than merely faked.
     vi.useFakeTimers({ now: new Date('2026-03-14T09:05:07Z') })
+    visitFrom(['en-GB'], 'Europe/London')
 
     Object.assign(data.profile, profileFixture())
     data.roles.splice(0, data.roles.length, roleFixture())
@@ -139,6 +151,8 @@ describe('terminal', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
   describe('the login banner', () => {
@@ -149,11 +163,21 @@ describe('terminal', () => {
       expect(banner().text()).toContain('Systems plumber')
     })
 
-    it('stamps the session with the time it was built, in UTC', async () => {
+    it('stamps the session with the time it was built, as the Visitor tells time', async () => {
+      visitFrom(['de-DE', 'en'], 'Europe/Berlin')
       const { banner } = await mountTerminal()
 
       expect(banner().text()).toContain(
-        'Last login: Sat Mar 14 09:05:07 UTC on ttys002',
+        'Last login: Sa., 14. März, 10:05:07 MEZ on ttys002',
+      )
+    })
+
+    it('falls back to English when none of the Visitor\'s languages will do', async () => {
+      visitFrom(['en_US', 'zz'], 'UTC')
+      const { banner } = await mountTerminal()
+
+      expect(banner().text()).toContain(
+        'Last login: Sat, Mar 14, 09:05:07 AM UTC on ttys002',
       )
     })
 
@@ -291,16 +315,24 @@ describe('terminal', () => {
       expect(printed.text()).toContain('duct tape · a longer wrench')
     })
 
-    it('dates the Colophon and the banner by the build, not the visit', async () => {
+    it('dates the Colophon by the visit, and the banner by the build', async () => {
       await mountTerminal()
       vi.setSystemTime(new Date('2027-01-01T00:00:01Z'))
 
-      // The second mount is the hydration: a visit a year later, reading the
-      // state the build left in the payload.
+      // The second mount is a visit a year after the build, reading the
+      // `built-at` state the first one left behind.
       const { banner, output } = await mountTerminal()
 
-      expect(output('cat ~/colophon').text()).toContain('© 2026')
-      expect(banner().text()).toContain('Last login: Sat Mar 14 09:05:07 UTC')
+      expect(output('cat ~/colophon').text()).toContain('© 2027')
+      expect(banner().text()).toContain('Last login: Sat 14 Mar, 09:05:07 GMT')
+    })
+
+    it('dates the Colophon in the Visitor\'s own time zone and digits', async () => {
+      vi.setSystemTime(new Date('2026-12-31T23:30:00Z'))
+      visitFrom(['ar-EG'], 'Asia/Tokyo')
+      const { output } = await mountTerminal()
+
+      expect(output('cat ~/colophon').text()).toContain('© ٢٠٢٧')
     })
 
     it('hands the command list to the Help output', async () => {

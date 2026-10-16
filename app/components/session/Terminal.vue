@@ -55,36 +55,14 @@ function onTab(event: KeyboardEvent) {
  * rather than reading the Visitor's clock.
  */
 const builtAt = useState('built-at', () => Date.now())
+const visitor = useVisitorClock(builtAt.value)
 
-/** The notice is dated by the build too, so it never disagrees with the banner. */
-const year = computed(() => new Date(builtAt.value).getUTCFullYear())
+const lastLogin = computed(() =>
+  formatDate(builtAt.value, 'lastLogin', visitor.value),
+)
 
-const lastLogin = computed(() => {
-  const at = new Date(builtAt.value)
-  const pad = (value: number) => String(value).padStart(2, '0')
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ]
-
-  return [
-    days[at.getUTCDay()],
-    months[at.getUTCMonth()],
-    pad(at.getUTCDate()),
-    `${pad(at.getUTCHours())}:${pad(at.getUTCMinutes())}:${pad(at.getUTCSeconds())}`,
-  ].join(' ')
-})
+/** The Visitor's year, not the build's, so the notice is never out of date between deploys. */
+const year = computed(() => formatDate(visitor.value.now, 'year', visitor.value))
 
 /**
  * Clicking the dead space puts the caret back, the way a terminal does. Not
@@ -125,7 +103,7 @@ function focusPrompt(event: MouseEvent) {
         class="border-base-300 mb-12 border-b pb-6 text-[0.8125rem]"
       >
         <p class="text-subtle">
-          Last login: {{ lastLogin }} UTC on ttys002
+          Last login: {{ lastLogin }} on ttys002
         </p>
         <p class="mt-3">
           <span class="font-semibold">ppadron.page</span>
