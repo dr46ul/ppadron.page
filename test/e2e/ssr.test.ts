@@ -1,11 +1,13 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { $fetch, fetch, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { parse as parsePayload } from 'devalue'
 import { Window } from 'happy-dom'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { roles } from '../../app/data/experience'
 import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
+import { formatDate } from '../../app/utils/date-format'
 
 /**
  * This project asserts only what only the server render can prove: the
@@ -147,19 +149,35 @@ describe('home page', () => {
 
   /**
    * The build has no Visitor, so the page ships in English and UTC and the
-   * browser re-dates it once mounted. The time is whenever `setup()` built, so
-   * the banner is matched by its shape.
+   * browser re-dates it once mounted. The expected context is spelled out
+   * rather than imported, so a change to the fallback fails here.
    */
   describe('prerendered dates', () => {
-    it('prints the banner in English and UTC', () => {
-      expect(page.querySelector('[data-banner]')?.textContent).toMatch(
-        /Last login: [A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, \d{2}:\d{2}:\d{2} [AP]M UTC on ttys002/,
+    let builtAt: number
+
+    /**
+     * The build's instant, from the inline payload hydration resumes from.
+     * Nuxt serialises it with devalue and its own reactive wrappers, which
+     * carry nothing a test needs, so each is unwrapped as it is met.
+     */
+    beforeAll(() => {
+      const unwrap = (value: unknown) => value
+      const payload = parsePayload(
+        page.querySelector('#__NUXT_DATA__')!.textContent!,
+        { Reactive: unwrap, ShallowReactive: unwrap, Ref: unwrap, ShallowRef: unwrap },
+      )
+      builtAt = payload.state['$sbuilt-at']
+    })
+
+    it('prints the banner for the build, in English and UTC', () => {
+      expect(page.querySelector('[data-banner]')?.textContent).toContain(
+        `Last login: ${formatDate(builtAt, 'lastLogin', { locale: 'en', timeZone: 'UTC' })} on ttys002`,
       )
     })
 
     it('prints the build\'s year in the notice', () => {
       expect(entry('cat ~/colophon')?.textContent).toContain(
-        `© ${new Date().getUTCFullYear()}`,
+        `© ${new Date(builtAt).getUTCFullYear()}`,
       )
     })
   })
