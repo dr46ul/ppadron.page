@@ -6,7 +6,7 @@
  */
 import type { Profile } from '~/data/profile'
 
-const props = defineProps<{ profile: Profile }>()
+const props = defineProps<{ profile: Profile, year: number }>()
 
 /** The repo URL as a terminal would print a path: no scheme in the way. */
 const repoLabel = computed(() =>
@@ -38,7 +38,7 @@ const repoLabel = computed(() =>
       {{ profile.stack.join(' · ') }}
     </p>
     <p class="text-subtle mt-6 text-xs">
-      © {{ new Date().getFullYear() }} {{ profile.name }} ·
+      © {{ year }} {{ profile.name }} ·
       <a
         class="hover:text-base-content"
         :href="profile.links.github"

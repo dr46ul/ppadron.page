@@ -124,8 +124,8 @@ async function mountTerminal() {
 
 describe('terminal', () => {
   beforeEach(() => {
-    // The banner stamps the session with the time it opened, so the clock is
-    // pinned rather than merely faked.
+    // The banner stamps the session with the time it was built, so the clock
+    // is pinned rather than merely faked.
     vi.useFakeTimers({ now: new Date('2026-03-14T09:05:07Z') })
 
     Object.assign(data.profile, profileFixture())
@@ -149,7 +149,7 @@ describe('terminal', () => {
       expect(banner().text()).toContain('Systems plumber')
     })
 
-    it('stamps the session with the time it opened, in UTC', async () => {
+    it('stamps the session with the time it was built, in UTC', async () => {
       const { banner } = await mountTerminal()
 
       expect(banner().text()).toContain(
@@ -289,6 +289,18 @@ describe('terminal', () => {
       expect(hrefs).toContain('https://example.test/gh-ashgrove')
       expect(hrefs).toContain('https://example.test/li-ashgrove')
       expect(printed.text()).toContain('duct tape · a longer wrench')
+    })
+
+    it('dates the Colophon and the banner by the build, not the visit', async () => {
+      await mountTerminal()
+      vi.setSystemTime(new Date('2027-01-01T00:00:01Z'))
+
+      // The second mount is the hydration: a visit a year later, reading the
+      // state the build left in the payload.
+      const { banner, output } = await mountTerminal()
+
+      expect(output('cat ~/colophon').text()).toContain('© 2026')
+      expect(banner().text()).toContain('Last login: Sat Mar 14 09:05:07 UTC')
     })
 
     it('hands the command list to the Help output', async () => {
