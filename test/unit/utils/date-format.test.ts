@@ -4,19 +4,20 @@ import { formatDate, pickLocale } from '../../../app/utils/date-format'
 const builtAt = Date.UTC(2026, 2, 14, 9, 5, 7)
 
 describe('formatDate', () => {
-  it.each([
-    ['en', 'UTC', 'Sat, Mar 14, 09:05:07 AM UTC'],
-    ['en-US', 'America/New_York', 'Sat, Mar 14, 05:05:07 AM EDT'],
-    ['en-GB', 'Europe/London', 'Sat 14 Mar, 09:05:07 GMT'],
-    ['de-DE', 'Europe/Berlin', 'Sa., 14. März, 10:05:07 MEZ'],
-    ['ar-EG', 'Africa/Cairo', 'السبت، ١٤ مارس، ١١:٠٥:٠٧ ص غرينتش+٢'],
-  ])('prints the last login for %s in %s', (locale, timeZone, expected) => {
-    expect(formatDate(builtAt, 'lastLogin', { locale, timeZone })).toBe(expected)
-  })
+  describe.each([
+    ['en', 'UTC', 'Sat, Mar 14, 09:05:07 AM UTC', '2026'],
+    ['en-US', 'America/New_York', 'Sat, Mar 14, 05:05:07 AM EDT', '2026'],
+    ['en-GB', 'Europe/London', 'Sat 14 Mar, 09:05:07 GMT', '2026'],
+    ['de-DE', 'Europe/Berlin', 'Sa., 14. März, 10:05:07 MEZ', '2026'],
+    ['ar-EG', 'Africa/Cairo', 'السبت، ١٤ مارس، ١١:٠٥:٠٧ ص غرينتش+٢', '٢٠٢٦'],
+  ])('for %s in %s', (locale, timeZone, lastLogin, year) => {
+    it('prints the last login', () => {
+      expect(formatDate(builtAt, 'lastLogin', { locale, timeZone })).toBe(lastLogin)
+    })
 
-  it('prints the year in the locale\'s own digits', () => {
-    expect(formatDate(builtAt, 'year', { locale: 'en', timeZone: 'UTC' })).toBe('2026')
-    expect(formatDate(builtAt, 'year', { locale: 'ar-EG', timeZone: 'Africa/Cairo' })).toBe('٢٠٢٦')
+    it('prints the year', () => {
+      expect(formatDate(builtAt, 'year', { locale, timeZone })).toBe(year)
+    })
   })
 
   it('takes the year from the time zone, not from UTC', () => {

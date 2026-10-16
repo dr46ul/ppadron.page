@@ -5,6 +5,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { roleOf, rolesOf } from '../text-role'
+import { visitFrom } from '../visit-from'
 
 /**
  * Terminal is the only component that reads `app/data/`, so it takes no props
@@ -63,17 +64,6 @@ function recommendationFixture(): Recommendation {
     title: 'Kiln foreman',
     company: 'Kiln & Ash',
   }
-}
-
-/**
- * Where the Visitor is, as their browser reports it. Left alone, the time zone
- * is the machine's own, and the banner would read differently on a laptop and
- * in CI. Node re-reads `TZ` whenever it changes, so stubbing it moves the zone
- * `Intl` resolves to.
- */
-function visitFrom(languages: string[], timeZone: string) {
-  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages)
-  vi.stubEnv('TZ', timeZone)
 }
 
 /**
@@ -169,15 +159,6 @@ describe('terminal', () => {
 
       expect(banner().text()).toContain(
         'Last login: Sa., 14. März, 10:05:07 MEZ on ttys002',
-      )
-    })
-
-    it('falls back to English when none of the Visitor\'s languages will do', async () => {
-      visitFrom(['en_US', 'zz'], 'UTC')
-      const { banner } = await mountTerminal()
-
-      expect(banner().text()).toContain(
-        'Last login: Sat, Mar 14, 09:05:07 AM UTC on ttys002',
       )
     })
 

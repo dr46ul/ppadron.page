@@ -1,11 +1,9 @@
 /**
  * Every date the Session prints goes through a named format here, never
  * through `Intl` options at the call site. The formats are shaped as vue-i18n
- * `datetimeFormats` entries, so adopting it means copying them under each
- * locale and swapping `formatDate` for `d(value, name)`, with no caller
- * touched.
+ * `datetimeFormats` entries, so adopting it copies them over unchanged.
  */
-export const dateFormats = {
+const dateFormats = {
   lastLogin: {
     weekday: 'short',
     month: 'short',
@@ -20,7 +18,8 @@ export const dateFormats = {
 
 export type DateFormat = keyof typeof dateFormats
 
-export interface DateLocale {
+/** The language and time zone a date is written for. */
+export interface DateContext {
   locale: string
   timeZone: string
 }
@@ -29,9 +28,9 @@ export interface DateLocale {
  * What the page is prerendered in: the build has no Visitor, so it prints the
  * page's own language in UTC until the browser says otherwise.
  */
-export const buildLocale: DateLocale = { locale: 'en', timeZone: 'UTC' }
+export const buildDateContext: DateContext = { locale: 'en', timeZone: 'UTC' }
 
-export function formatDate(at: number, format: DateFormat, { locale, timeZone }: DateLocale) {
+export function formatDate(at: number, format: DateFormat, { locale, timeZone }: DateContext) {
   return new Intl.DateTimeFormat(locale, { ...dateFormats[format], timeZone }).format(at)
 }
 
@@ -49,5 +48,5 @@ export function pickLocale(languages: readonly string[]) {
     }
   }
 
-  return buildLocale.locale
+  return buildDateContext.locale
 }

@@ -55,14 +55,15 @@ function onTab(event: KeyboardEvent) {
  * rather than reading the Visitor's clock.
  */
 const builtAt = useState('built-at', () => Date.now())
-const visitor = useVisitorClock(builtAt.value)
+const visitedAt = useVisitedAt(builtAt.value)
+const dateContext = useDateContext()
 
 const lastLogin = computed(() =>
-  formatDate(builtAt.value, 'lastLogin', visitor.value),
+  formatDate(builtAt.value, 'lastLogin', dateContext.value),
 )
 
 /** The Visitor's year, not the build's, so the notice is never out of date between deploys. */
-const year = computed(() => formatDate(visitor.value.now, 'year', visitor.value))
+const year = computed(() => formatDate(visitedAt.value, 'year', dateContext.value))
 
 /**
  * Clicking the dead space puts the caret back, the way a terminal does. Not
