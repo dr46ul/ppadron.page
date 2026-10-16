@@ -1,4 +1,6 @@
-import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { $fetch, fetch, setup, useTestContext } from '@nuxt/test-utils/e2e'
 import { Window } from 'happy-dom'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { roles } from '../../app/data/experience'
@@ -13,6 +15,10 @@ import { recommendations } from '../../app/data/recommendations'
  * It also owns the one thing only a built server can prove about
  * `/api/contact`: that the route is served at that path at all. Everything the
  * route decides is proved in `test/unit`.
+ *
+ * And it owns the one thing only the build can prove about `/`: that it ships
+ * as a file. A prerendered page and one rendered per request return the same
+ * HTML, so that is read off the build output rather than a response.
  *
  * Per-block wiring and per-field Content belong to `test/nuxt`, which mocks
  * the three data modules and so can never prove that join — the e2e project
@@ -137,6 +143,14 @@ describe('home page', () => {
         recommendations[0]!.quote,
       )
     })
+  })
+})
+
+describe('the build', () => {
+  it('prerenders the page to a static file, per ADR-0008', () => {
+    const output = useTestContext().nuxt!.options.nitro.output!.dir!
+
+    expect(existsSync(join(output, 'public/index.html'))).toBe(true)
   })
 })
 

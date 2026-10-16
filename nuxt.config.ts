@@ -30,6 +30,19 @@ export default defineNuxtConfig({
     enquiryFrom: '',
   },
 
+  // The page ships as a CDN file and only `server/api/` runs as a function:
+  // see docs/adr/0008-the-page-is-prerendered-only-the-api-is-a-function.md.
+  routeRules: {
+    '/': { prerender: true },
+  },
+
+  experimental: {
+    // An extracted `_payload.json` serves client-side navigation between
+    // prerendered pages, and there is one page. Left on, hydration waits on a
+    // fetch of it that adds nothing the inline payload does not already hold.
+    payloadExtraction: false,
+  },
+
   css: ['@/assets/css/main.css'],
 
   // Git worktrees live under `.worktrees/` (docs/agents/worktrees.md). Nuxt
