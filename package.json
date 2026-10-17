@@ -17,7 +17,7 @@
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",
     "test:e2e": "vitest --project e2e",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "nuxt typecheck --checker vue-tsc"
   },
   "dependencies": {
     "@nuxt/fonts": "0.14.0",

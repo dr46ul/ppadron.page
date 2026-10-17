@@ -104,6 +104,7 @@ One file per subject, mirroring `app/`:
 | `app/components/session/output/<Name>.vue` | `test/nuxt/session/output/<name>.test.ts` |
 | `app/components/session/Terminal.vue`      | `test/nuxt/session/terminal.test.ts`      |
 | `app/composables/useSession.ts`            | `test/nuxt/session/use-session.test.ts`   |
+| `app/composables/useEnquiry.ts`            | `test/nuxt/session/use-enquiry.test.ts`   |
 | `app/composables/useDateContext.ts`        | `test/nuxt/use-date-context.test.ts`      |
 | `app/composables/useVisitedAt.ts`          | `test/nuxt/use-visited-at.test.ts`        |
 | `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
@@ -191,6 +192,13 @@ auto-imports resolve there. Tests elsewhere must import from real paths. If a
 new directory needs the Nuxt context, add it under `typescript.tsConfig.include`
 in `nuxt.config.ts`.
 
+**`test/unit` and `test/e2e` are type-checked in Nuxt's node project.** Nuxt
+generates no project for them, so `nuxt.config.ts` adds both to
+`typescript.nodeTsConfig.include`, along with the `#shared` alias that the
+`server/utils` they import reach for. That project has no auto-imports, which
+is the rule above enforced by the compiler. A new test directory goes in the
+same list, or `pnpm typecheck` never sees it.
+
 **Unit tests must not reach for Nuxt features.** If a test in `test/unit` needs
 an auto-import or a composable, it belongs in `test/nuxt` instead.
 
@@ -229,7 +237,7 @@ production build logs `Hydration completed but contains mismatches.` when the
 two differ, and nothing when they do not.
 
 **`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
-global: `useSession.ts` gets its own binding, and stubbing `globalThis.$fetch`
+global: `useEnquiry.ts` gets its own binding, and stubbing `globalThis.$fetch`
 leaves that binding pointing at the real thing. The stub then does nothing and a
 test asserting the failure path passes because the request genuinely failed —
 a green test proving nothing. Use `mockNuxtImport('$fetch', …)`.
@@ -265,12 +273,12 @@ the moment real copy reuses one. Scope the assertion instead.
 
 The suite uses `mountSuspended` for anything that needs a component, and
 `mockNuxtImport` for the one boundary the code reaches across (`$fetch`, in
-`test/nuxt/session/use-session.test.ts`). `mockComponent`, `renderSuspended` and
+`test/nuxt/session/use-enquiry.test.ts`). `mockComponent`, `renderSuspended` and
 Vitest browser mode are available from `@nuxt/test-utils` but are not in use —
 reach for one when a test actually needs it, not for completeness.
 `registerEndpoint` still has no subject, though `/api/contact` now exists. It
 registers a substitute handler rather than running the real one, so pointing it
-at that path would only re-prove the client contract `use-session.test.ts`
+at that path would only re-prove the client contract `use-enquiry.test.ts`
 already holds.
 
 **A composable does not always need a component.** `useSession()` holds no

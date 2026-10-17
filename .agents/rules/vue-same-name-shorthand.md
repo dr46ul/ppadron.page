@@ -17,7 +17,7 @@ the part a rename forgets to update.
 Vue camelises the argument, so a kebab-case prop still reaches its camelCase
 variable: `:meta-commands` binds `metaCommands`. Nothing else changes — a value
 that is not a bare identifier of the same name (`:email="profile.email"`,
-`:state="contactState"`, `:class="entry.animate && 'session-print'"`) stays
+`:state="enquiry.state"`, `:class="entry.animate && 'session-print'"`) stays
 written out.
 
 Enforced by `vue/v-bind-style` with `sameNameShorthand: 'always'` in

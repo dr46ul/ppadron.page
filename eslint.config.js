@@ -14,10 +14,11 @@ export default antfu(
       '.worktrees/**',
 
       // The preset ignores `**/output` by default, next to `**/dist`, which
-      // takes the Command output components with it. The directory keeps its
-      // name: "Output" is the domain's word for what a Command prints
-      // (CONTEXT.md).
+      // takes the Command output components and their tests with it. The
+      // directories keep their name: "Output" is the domain's word for what a
+      // Command prints (CONTEXT.md).
       '!app/components/session/output/**',
+      '!test/nuxt/session/output/**',
     ],
   },
   {
@@ -34,6 +35,17 @@ export default antfu(
       // CONTEXT.md and the Session's own Interface copy, and `2022 — now` is
       // the right typography for a range. Not slop; an editorial choice.
       'slop/no-em-dash': 'off',
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.vue'],
+    // A code block in Markdown is linted as a virtual `<file>.md/<n>.ts`, and
+    // the rule's own document has to be able to show the cast it forbids.
+    ignores: ['**/*.md/**'],
+    rules: {
+      // `as const` is not a cast and stays allowed. See
+      // .agents/rules/no-type-assertions.md.
+      'ts/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
     },
   },
   {

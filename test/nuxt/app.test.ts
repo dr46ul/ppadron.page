@@ -15,11 +15,11 @@ describe('errorPage', () => {
   async function mountNotFound() {
     return mountSuspended(ErrorPage, {
       props: {
-        error: {
+        error: createError({
           status: 404,
           statusText: 'Not Found',
           message: 'Not Found',
-        },
+        }),
       },
     })
   }

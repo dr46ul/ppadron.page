@@ -14,14 +14,14 @@ git worktree add .worktrees/<name> -b <branch>
 One directory means one ignore entry per tool, and every tool that walks the
 repository already has it:
 
-| Tool                       | Where `.worktrees` is ignored                                                                                        |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| git                        | `.gitignore`                                                                                                         |
-| ESLint (`pnpm lint`)       | `ignores` in `eslint.config.js`                                                                                      |
-| Nuxt / Vite dev server     | `ignore` in `nuxt.config.ts`                                                                                         |
-| vue-tsc (`pnpm typecheck`) | Nothing to add: Nuxt's generated tsconfigs only include `app/`, `test/nuxt/` and the root config files, never `**/*` |
-| Vitest (`pnpm test`)       | Nothing to add: every project's `include` is anchored to `test/<project>/`                                           |
-| lint-staged                | Nothing to add: it only sees staged files, and nothing under `.worktrees` is ever staged                             |
+| Tool                       | Where `.worktrees` is ignored                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| git                        | `.gitignore`                                                                                                                             |
+| ESLint (`pnpm lint`)       | `ignores` in `eslint.config.js`                                                                                                          |
+| Nuxt / Vite dev server     | `ignore` in `nuxt.config.ts`                                                                                                             |
+| vue-tsc (`pnpm typecheck`) | Nothing to add: Nuxt's generated tsconfigs, and the test directories `nuxt.config.ts` adds to them, are all anchored paths, never `**/*` |
+| Vitest (`pnpm test`)       | Nothing to add: every project's `include` is anchored to `test/<project>/`                                                               |
+| lint-staged                | Nothing to add: it only sees staged files, and nothing under `.worktrees` is ever staged                                                 |
 
 A worktree anywhere else is a full second copy of the repo that `eslint .`
 would lint on the wrong branch and the Vite watcher would react to. That is

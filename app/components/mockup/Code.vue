@@ -14,7 +14,9 @@ defineProps<{
 <template>
   <div class="mockup-code w-full">
     <slot>
-      <template v-for="line in lines" :key="line">
+      <!-- By position: the lines are printed once and never reordered, and two
+           of them can share their content. -->
+      <template v-for="(line, index) in lines" :key="index">
         <MockupCodeLine :prefix="line.prefix" :class="line.class" :hide-prefix>
           {{ line.content }}
         </MockupCodeLine>

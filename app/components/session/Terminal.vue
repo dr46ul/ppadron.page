@@ -31,9 +31,7 @@ const {
   exec,
   complete,
   recall,
-  contact,
-  contactState,
-  send,
+  enquiry,
 } = useSession()
 
 const inputEl = ref<HTMLInputElement | null>(null)
@@ -72,7 +70,7 @@ const year = computed(() => formatDate(visitedAt.value, 'year', dateContext.valu
  * keyboard over the text just tapped.
  */
 function focusPrompt(event: MouseEvent) {
-  if ((event as PointerEvent).pointerType === 'touch')
+  if (event instanceof PointerEvent && event.pointerType === 'touch')
     return
   if (window.getSelection()!.toString())
     return
@@ -168,15 +166,13 @@ function focusPrompt(event: MouseEvent) {
               v-else-if="entry.output === 'recommendations'"
               :recommendations
             />
-            <!-- The draft is the session's, so the form is handed a copy and
-                 its report is written back here. -->
             <SessionOutputContact
               v-else-if="entry.output === 'contact'"
-              :model-value="contact"
-              :state="contactState"
+              :model-value="enquiry.draft"
+              :state="enquiry.state"
               :email="profile.email"
-              @update:model-value="Object.assign(contact, $event)"
-              @submit="send"
+              @update:model-value="enquiry.edit"
+              @submit="enquiry.submit"
             />
             <SessionOutputColophon
               v-else-if="entry.output === 'colophon'"

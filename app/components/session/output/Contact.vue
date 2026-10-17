@@ -8,31 +8,33 @@
  * Rendered as command output, so it is a mail client's header block rather
  * than a card: labelled fields on one axis, the body beneath them.
  */
-import type { Enquiry, EnquiryState } from '~/composables/useSession'
+import type { EnquiryField, EnquiryRule } from '#shared/enquiry'
+import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
+import { FIELDS, LIMITS, MESSAGE_MIN, parseEnquiry } from '#shared/enquiry'
 
 const props = defineProps<{
-  /** The draft the session owns. Reported back whole, never written through. */
-  modelValue: Enquiry
+  /** The draft `useEnquiry` owns. Reported back whole, never written through. */
+  modelValue: EnquiryDraft
   state: EnquiryState
   /** Pavel's own address, revealed when a send fails. */
   email: string
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [enquiry: Enquiry]
+  'update:modelValue': [draft: EnquiryDraft]
   'submit': []
 }>()
 
 /**
  * A keystroke reports a whole new draft rather than writing into the one it
- * was handed — the session owns that object. Each field is named as the form
+ * was handed — `useEnquiry` owns that object. Each field is named as the form
  * labels it, because `email` on this component is already Pavel's address.
  */
-function field(key: keyof Enquiry) {
+function field(key: EnquiryField) {
   return computed({
     get: () => props.modelValue[key],
     set: (typed: string) => {
-      const draft: Enquiry = { ...props.modelValue }
+      const draft: EnquiryDraft = { ...props.modelValue }
       draft[key] = typed
       emit('update:modelValue', draft)
     },
@@ -40,19 +42,61 @@ function field(key: keyof Enquiry) {
 }
 
 const sending = computed(() => props.state === 'sending')
+const sent = computed(() => props.state === 'sent')
+const locked = computed(() => sending.value || sent.value)
+
+const LABELS: Partial<Record<EnquiryState, string>> = {
+  sending: 'sending…',
+  sent: 'sent',
+}
 
 /**
  * Not `disabled` on the button: disabling the element that holds focus drops
  * it to <body>, so a second press is refused here instead.
  */
 function submit() {
-  if (!sending.value)
+  if (!locked.value)
     emit('submit')
 }
 
 const from = field('name')
 const replyTo = field('email')
 const body = field('message')
+
+/**
+ * Every rule a field can break below its cap comes down to one thing the
+ * Visitor has to fix, so each field has one complaint and the caps share one.
+ */
+function complaint(key: EnquiryField, rule: EnquiryRule) {
+  if (rule === 'too-long')
+    return `Keep it to ${LIMITS[key]} characters; the rest can follow by email.`
+
+  return {
+    name: 'Tell me who you are.',
+    email: 'I need an address I can reply to.',
+    message: `A little more, please — at least ${MESSAGE_MIN} characters.`,
+  }[key]
+}
+
+const controls = {
+  name: useTemplateRef<HTMLInputElement>('name'),
+  email: useTemplateRef<HTMLInputElement>('email'),
+  message: useTemplateRef<HTMLTextAreaElement>('message'),
+} satisfies Record<EnquiryField, unknown>
+
+/**
+ * The browser's own validation speaks, but with the delivery's rules: `a@b` is
+ * no address, and a message padded with spaces up to the floor is still short.
+ */
+watchPostEffect(() => {
+  const parsed = parseEnquiry(props.modelValue)
+  const failures = parsed.success ? {} : parsed.failures
+
+  for (const key of FIELDS) {
+    const rule = failures[key]
+    controls[key].value!.setCustomValidity(rule ? complaint(key, rule) : '')
+  }
+})
 </script>
 
 <template>
@@ -64,7 +108,9 @@ const body = field('message')
 
     <form class="max-w-xl" @submit.prevent="submit" @click.stop>
       <!-- The fields are 16px below `sm`: iOS Safari zooms the page on
-           focusing a smaller input and does not zoom back out. -->
+           focusing a smaller input and does not zoom back out. Once sent they
+           are read-only rather than disabled, so the Visitor can still select
+           and copy what went. -->
       <fieldset class="flex flex-col gap-4">
         <legend class="sr-only">
           Send an enquiry
@@ -73,6 +119,7 @@ const body = field('message')
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">from:</span>
           <input
+            ref="name"
             v-model="from"
             class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
             type="text"
@@ -80,20 +127,29 @@ const body = field('message')
             autocomplete="name"
             required
             :disabled="sending"
+            :readonly="sent"
             placeholder="your name"
           >
         </label>
 
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
+          <!-- Not `type="email"`: its grammar refuses addresses the delivery
+               accepts, such as `josé@…`, in the browser's wording rather than
+               this form's. `inputmode` keeps the address keyboard. -->
           <input
+            ref="email"
             v-model="replyTo"
             class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
-            type="email"
+            type="text"
+            inputmode="email"
+            autocapitalize="off"
+            spellcheck="false"
             name="email"
             autocomplete="email"
             required
             :disabled="sending"
+            :readonly="sent"
             placeholder="you@company.com"
           >
         </label>
@@ -101,12 +157,13 @@ const body = field('message')
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">body:</span>
           <textarea
+            ref="message"
             v-model="body"
             class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
             name="message"
             required
             :disabled="sending"
-            minlength="20"
+            :readonly="sent"
             placeholder="what are you building, and what is in the way?"
           />
         </label>
@@ -114,10 +171,10 @@ const body = field('message')
         <div class="flex flex-wrap items-center gap-4 sm:pl-[6.75rem]">
           <button
             type="submit"
-            :aria-disabled="sending || undefined"
+            :aria-disabled="locked || undefined"
             class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-xs tracking-[0.15em] uppercase"
           >
-            {{ state === 'sending' ? 'sending…' : 'send' }}
+            {{ LABELS[state] ?? 'send' }}
           </button>
           <!-- ADR-0003 makes this line literally true. If persistence is ever
                added, this copy changes in the same commit. -->

@@ -38,20 +38,6 @@ export interface SessionEntry {
   animate: boolean
 }
 
-/**
- * A draft Enquiry, as it stands before it is sent. The session owns the draft;
- * the form is handed it as a prop and reports a whole new one rather than
- * writing into it.
- */
-export interface Enquiry {
-  name: string
-  email: string
-  message: string
-}
-
-/** How far a submitted Enquiry has got. */
-export type EnquiryState = 'idle' | 'sending' | 'sent' | 'failed'
-
 export const commands: SessionCommand[] = [
   { cmd: 'whoami', output: 'whoami', label: 'who I am', think: 260 },
   {
@@ -150,8 +136,7 @@ export function useSession() {
   const history = ref<string[]>([])
   const historyIndex = ref(-1)
 
-  const contact = reactive<Enquiry>({ name: '', email: '', message: '' })
-  const contactState = ref<EnquiryState>('idle')
+  const enquiry = useEnquiry()
 
   function reducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -177,10 +162,7 @@ export function useSession() {
     history.value = []
     historyIndex.value = -1
     input.value = ''
-    contactState.value = 'idle'
-    contact.name = ''
-    contact.email = ''
-    contact.message = ''
+    enquiry.clear()
 
     nextTick(() => window.scrollTo({ top: 0, behavior: 'auto' }))
   }
@@ -225,7 +207,7 @@ export function useSession() {
       entries.value = entries.value.filter(
         existing => existing.output !== 'contact',
       )
-      contactState.value = 'idle'
+      enquiry.open()
     }
 
     // The echo is instant — the visitor typed it, the machine did not produce it.
@@ -291,18 +273,6 @@ export function useSession() {
     input.value = next === -1 ? '' : history.value[next]!
   }
 
-  async function send() {
-    contactState.value = 'sending'
-
-    try {
-      await $fetch('/api/contact', { method: 'POST', body: { ...contact } })
-      contactState.value = 'sent'
-    }
-    catch {
-      contactState.value = 'failed'
-    }
-  }
-
   return {
     entries,
     trimmed,
@@ -312,8 +282,6 @@ export function useSession() {
     exec,
     complete,
     recall,
-    contact,
-    contactState,
-    send,
+    enquiry,
   }
 }

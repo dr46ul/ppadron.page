@@ -11,6 +11,12 @@
 
 export type Srgb = [number, number, number]
 
+/** `Array.map` widens a tuple to `number[]`; this keeps it three channels long. */
+function mapChannels(colour: Srgb, map: (channel: number, index: 0 | 1 | 2) => number): Srgb {
+  const [r, g, b] = colour
+  return [map(r, 0), map(g, 1), map(b, 2)]
+}
+
 export function oklchToSrgb(l: number, c: number, hDeg: number): Srgb {
   const h = (hDeg * Math.PI) / 180
   const a = c * Math.cos(h)
@@ -20,27 +26,26 @@ export function oklchToSrgb(l: number, c: number, hDeg: number): Srgb {
   const mCube = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3
   const sCube = (l - 0.0894841775 * a - 1.291485548 * b) ** 3
 
-  const linear = [
+  const linear: Srgb = [
     4.0767416621 * lCube - 3.3077115913 * mCube + 0.2309699292 * sCube,
     -1.2684380046 * lCube + 2.6097574011 * mCube - 0.3413193965 * sCube,
     -0.0041960863 * lCube - 0.7034186147 * mCube + 1.707614701 * sCube,
   ]
 
-  return linear.map((u) => {
+  return mapChannels(linear, (u) => {
     const encoded = u <= 0.0031308 ? 12.92 * u : 1.055 * u ** (1 / 2.4) - 0.055
     return Math.min(1, Math.max(0, encoded))
-  }) as Srgb
+  })
 }
 
 export function mixInSrgb(fg: Srgb, bg: Srgb, share: number): Srgb {
-  return fg.map((c, i) => c * share + bg[i]! * (1 - share)) as Srgb
+  return mapChannels(fg, (c, i) => c * share + bg[i] * (1 - share))
 }
 
 export function contrast(a: Srgb, b: Srgb): number {
   const luminance = (colour: Srgb) => {
-    const [r, g, bl] = colour.map(c =>
-      c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4,
-    ) as Srgb
+    const [r, g, bl] = mapChannels(colour, c =>
+      c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
     return 0.2126 * r + 0.7152 * g + 0.0722 * bl
   }
 

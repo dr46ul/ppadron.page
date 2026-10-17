@@ -6,5 +6,5 @@ export default {
   ],
 
   // Project-wide, so it is worth running only when code actually changed.
-  '**/*.(ts|tsx|js|mjs|vue)': () => [`npx vue-tsc --noEmit`],
+  '**/*.(ts|tsx|js|mjs|vue)': () => [`pnpm typecheck`],
 }

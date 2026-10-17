@@ -1,16 +1,18 @@
 import * as z from 'zod/mini'
 
-export type EnquiryRule = 'missing' | 'too-short' | 'too-long' | 'not-an-address'
+const RULES = ['missing', 'too-short', 'too-long', 'not-an-address'] as const
+
+export type EnquiryRule = (typeof RULES)[number]
 
 /**
  * Nothing rate-limits the route, and an uncapped field becomes an uncapped
  * email. 320 is the longest address RFC 5321 allows; the other two are simply
  * more than anyone writing to Pavel needs.
  */
-const LIMITS = { name: 200, email: 320, message: 5000 } as const
+export const LIMITS = { name: 200, email: 320, message: 5000 } as const
 
 /** A one-word message is a mistake or a probe, not an Enquiry. */
-const MESSAGE_MIN = 20
+export const MESSAGE_MIN = 20
 
 /**
  * Whether an address is real is not knowable here, and the only test that
@@ -72,7 +74,7 @@ export type Enquiry = z.output<typeof schema>
 
 export type EnquiryField = keyof Enquiry
 
-const FIELDS = Object.keys(schema.shape) as EnquiryField[]
+export const FIELDS = z.keyof(schema).options
 
 /** The first rule each failing field broke. */
 export type EnquiryFailures = Partial<Record<EnquiryField, EnquiryRule>>
@@ -89,13 +91,15 @@ export function parseEnquiry(body: unknown): EnquiryParse {
 
   const failures: EnquiryFailures = {}
 
-  // An issue with no path is the body itself not being an object, which leaves
-  // every field missing.
   for (const issue of result.error.issues) {
-    const fields = issue.path.length ? [issue.path[0] as EnquiryField] : FIELDS
+    const field = FIELDS.find(name => name === issue.path[0])
+    // Every check is built through `fails`, so every message is a rule.
+    const rule = RULES.find(name => name === issue.message)
 
-    for (const failed of fields)
-      failures[failed] ??= issue.message as EnquiryRule
+    // An issue with no path is the body itself not being an object, which
+    // leaves every field missing.
+    for (const failed of field ? [field] : FIELDS)
+      failures[failed] ??= rule
   }
 
   return { success: false, failures }
