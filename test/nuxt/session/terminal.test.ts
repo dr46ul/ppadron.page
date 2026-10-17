@@ -1,7 +1,7 @@
 import type { Role } from '~/data/experience'
 import type { Profile } from '~/data/profile'
 import type { Recommendation } from '~/data/recommendations'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { roleOf, rolesOf } from '../text-role'
@@ -26,6 +26,14 @@ vi.mock('~/data/experience', () => ({ roles: data.roles }))
 vi.mock('~/data/recommendations', () => ({
   recommendations: data.recommendations,
 }))
+
+/**
+ * Unstubbed, a submit fails because the test runtime mounts none of `server/`,
+ * so a failure-path test would pass for that reason alone. Every test that
+ * submits an Enquiry names the outcome it wants.
+ */
+const { post } = vi.hoisted(() => ({ post: vi.fn() }))
+mockNuxtImport('$fetch', () => post)
 
 function profileFixture(): Profile {
   return {
@@ -110,6 +118,21 @@ async function mountTerminal() {
       await vi.runAllTimersAsync()
       await component.vm.$nextTick()
     },
+    /**
+     * A draft the delivery's rules accept, so the outcome under test is the
+     * stubbed post's and not the form refusing it.
+     */
+    async submitEnquiry() {
+      await this.chip('mail pavel').trigger('click')
+      await this.settle()
+      await component.find('[name="name"]').setValue('Dagny Vole')
+      await component.find('[name="email"]').setValue('dagny@example.test')
+      await component
+        .find('[name="message"]')
+        .setValue('The kiln wants rewiring before the winter firing.')
+      await this.enquiryForm().trigger('submit')
+      await this.settle()
+    },
     async run(cmd: string) {
       const prompt = component.find('#prompt')
       await prompt.setValue(cmd)
@@ -129,6 +152,7 @@ describe('terminal', () => {
     // is pinned rather than merely faked.
     vi.useFakeTimers({ now: new Date('2026-03-14T09:05:07Z') })
     visitFrom(['en-GB'], 'Europe/London')
+    post.mockReset()
 
     Object.assign(data.profile, profileFixture())
     data.roles.splice(0, data.roles.length, roleFixture())
@@ -345,15 +369,23 @@ describe('terminal', () => {
       ).toBe('Dagny Vole')
     })
 
-    it('hands the Profile address to the Contact output', async () => {
+    it('confirms a sent Enquiry in the Contact output', async () => {
+      post.mockResolvedValue({ ok: true })
       const session = await mountTerminal()
 
-      await session.chip('mail pavel').trigger('click')
-      await session.settle()
-      // There is no `server/` directory, so the post genuinely fails — which
-      // is the path that reveals the address.
-      await session.enquiryForm().trigger('submit')
-      await session.settle()
+      await session.submitEnquiry()
+
+      const contact = session.output('mail pavel')
+
+      expect(contact.find('[role="status"]').text()).toContain('Sent.')
+      expect(contact.find('[role="alert"]').exists()).toBe(false)
+    })
+
+    it('hands the Profile address to the Contact output', async () => {
+      post.mockRejectedValue(new Error('offline'))
+      const session = await mountTerminal()
+
+      await session.submitEnquiry()
 
       expect(session.component.find('[role="alert"]').text()).toContain(
         'wilhelmina@example.test',
@@ -361,12 +393,10 @@ describe('terminal', () => {
     })
 
     it('announces the Enquiry result from a single live region', async () => {
+      post.mockRejectedValue(new Error('offline'))
       const session = await mountTerminal()
 
-      await session.chip('mail pavel').trigger('click')
-      await session.settle()
-      await session.enquiryForm().trigger('submit')
-      await session.settle()
+      await session.submitEnquiry()
 
       // The result's own role is the announcement; a polite region around the
       // Transcript would read it a second time, or not at all.
