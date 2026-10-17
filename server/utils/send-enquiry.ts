@@ -1,4 +1,4 @@
-import type { Enquiry } from './enquiry'
+import type { Enquiry } from '#shared/enquiry'
 
 export interface EnquiryDelivery {
   apiKey: string

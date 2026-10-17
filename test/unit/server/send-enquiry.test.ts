@@ -1,4 +1,4 @@
-import type { Enquiry } from '../../../server/utils/enquiry'
+import type { Enquiry } from '../../../shared/enquiry'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sendEnquiry } from '../../../server/utils/send-enquiry'
 
