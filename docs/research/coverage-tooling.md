@@ -1,5 +1,19 @@
 # Coverage tooling for the multi-project Vitest suite
 
+> **A snapshot, not the current setup.** This answered issue #10 and stays on
+> its own branch as the record the issue links to. What landed on `main`
+> differs from the recommendations below:
+>
+> - **Branches are gated as a count, `branches: -4`, not at 100%.** Vue's
+>   compiled `_cache[n]` guards leave four unreachable branches in
+>   `Terminal.vue` (issue #19).
+> - **The allowlist grew** to `app/utils/**` and `server/utils/**`, with
+>   `shared/**` decided on issue #88. `server/api/**` stays out on purpose.
+> - **The `skipFull` workaround in 1(b) was wrong** and is corrected there.
+>
+> `docs/agents/testing.md` on `main` is the living version of both traps and of
+> the gate.
+
 Research for issue #10 (part of map #9). Question: how is coverage collected
 and gated at 100% in this repo's shape — Vitest 4 with three `projects`
 (`unit`, `e2e`, `nuxt`), the `nuxt` one built with `defineVitestProject` from
@@ -124,9 +138,11 @@ add `text-summary` reporter when `text` reporter is used on agents"). Running
 under Claude Code, 8 of the 14 files vanished from the table while the totals
 still counted them. This is cosmetic — the JSON/HTML/lcov output and the
 thresholds are unaffected, and CI (`isAgent` false) prints the full table —
-but it will confuse an agent reading the terminal. Pass
-`--coverage.skipFull=false` or read `coverage/coverage-final.json` when in
-doubt.
+but it will confuse an agent reading the terminal. `--coverage.skipFull=false`
+does **not** bring the rows back: Vitest writes `skipFull: true` into the `text`
+reporter's own options, which the top-level flag does not reach. Read the `SF:`
+lines in `coverage/lcov.info` instead — the `lcov` reporter recommended below
+writes one per counted file.
 
 ## 2. Where does `coverage` live with `projects`, and how is `include` written?
 
