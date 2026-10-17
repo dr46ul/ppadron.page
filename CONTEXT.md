@@ -20,6 +20,10 @@ _Avoid_: CTA, lead, conversion
 One submitted contact form: who is writing, how to reach them, and what they want. An Enquiry exists only as the email it is delivered as; nothing is stored.
 _Avoid_: Lead, submission, ticket, message
 
+**Enquiry draft**:
+What the Visitor has typed into the contact form so far. It becomes an Enquiry only once it passes the same rules the delivery applies, and the form refuses to send it until then. Once it has been sent, it is kept on screen as the record of what went, and it cannot be sent a second time.
+_Avoid_: Form data, draft message, unsent Enquiry
+
 ### Interface
 
 **Session**:
