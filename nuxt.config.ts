@@ -60,4 +60,18 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  // Nuxt's generated projects reach `test/nuxt/` and no other test directory,
+  // so without this `nuxt typecheck` never sees the unit or e2e tests. The node
+  // project, because neither may lean on auto-imports (docs/agents/testing.md).
+  // It has no `#shared` alias of its own, and the `server/utils` the unit tests
+  // import reach for one.
+  typescript: {
+    nodeTsConfig: {
+      include: ['../test/unit/**/*', '../test/e2e/**/*'],
+      compilerOptions: {
+        paths: { '#shared': ['../shared'], '#shared/*': ['../shared/*'] },
+      },
+    },
+  },
 })

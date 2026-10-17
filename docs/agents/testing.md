@@ -192,6 +192,13 @@ auto-imports resolve there. Tests elsewhere must import from real paths. If a
 new directory needs the Nuxt context, add it under `typescript.tsConfig.include`
 in `nuxt.config.ts`.
 
+**`test/unit` and `test/e2e` are type-checked in Nuxt's node project.** Nuxt
+generates no project for them, so `nuxt.config.ts` adds both to
+`typescript.nodeTsConfig.include`, along with the `#shared` alias that the
+`server/utils` they import reach for. That project has no auto-imports, which
+is the rule above enforced by the compiler. A new test directory goes in the
+same list, or `pnpm typecheck` never sees it.
+
 **Unit tests must not reach for Nuxt features.** If a test in `test/unit` needs
 an auto-import or a composable, it belongs in `test/nuxt` instead.
 
