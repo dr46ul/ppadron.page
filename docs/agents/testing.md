@@ -15,7 +15,8 @@ and there is nothing else to configure**.
 | `test/e2e`  | `e2e`   | `node` + a real built server | Only what only the server render can prove — see below. |
 
 Run one at a time with `pnpm test:unit`, `pnpm test:nuxt`, `pnpm test:e2e`
-(watch mode), or the whole suite once with `pnpm test`.
+(watch mode), or the whole suite once with `pnpm test` — the only one of the
+four that measures coverage (see "Reading the coverage report" below).
 
 ## Test-first
 
@@ -64,6 +65,33 @@ exercised **and** the edge cases a reviewer would ask about have a test:
 - the failure path.
 
 Full coverage with none of these is a green gate over an untested component.
+
+### Reading the coverage report
+
+**Only a run that includes the `nuxt` project measures coverage.** A file no
+test loaded is parsed for the report through the first project whose Vite
+server can read it, and only `nuxt` has the Vue plugin. A run without it —
+`--project unit`, `--project e2e` — prints
+`Failed to parse …/Terminal.vue. Excluding it from coverage.` for every SFC and
+drops them from the report, and whatever only the missing project's tests load
+reports 0%. A `--project` run with `--coverage` therefore fails the gate over
+files nobody broke. `pnpm test` runs all three projects, which is why it is the
+gate. `pnpm vitest run --project unit --project nuxt --coverage` gives the same
+numbers without the build, because `e2e` contributes nothing (above).
+
+**In an agent shell the table leaves out every file at 100%.** Vitest asks
+`std-env` whether an AI agent is running it (Claude Code is detected by
+`CLAUDECODE`) and, if so, sets `skipFull` on the `text` reporter and appends a
+`text-summary`. The totals and the gate are unaffected, and CI prints the whole
+table, but a file missing from the table may be at 100% or may never have been
+counted. `--coverage.skipFull=false` does not bring the rows back: Vitest sets
+the option on the reporter, where the top-level flag does not reach. The `SF:`
+lines in `coverage/lcov.info`, which `pnpm test` already writes, list every file
+that was counted:
+
+```sh
+grep '^SF:' coverage/lcov.info
+```
 
 ## Where a test goes
 
@@ -165,7 +193,7 @@ an auto-import or a composable, it belongs in `test/nuxt` instead.
 
 **Never sleep on the real clock.** The session prints output behind a
 per-command think delay (`useSession.ts`). Tests fake the clock and run it out
-with `vi.runAllTimersAsync()` — see `test/nuxt/session.test.ts`. A real-time
+with `vi.runAllTimersAsync()` — see `test/nuxt/session/use-session.test.ts`. A real-time
 `setTimeout` wait is slow and fails on a loaded CI runner.
 
 **The `nuxt` environment shares global state between tests in a file.** A Nuxt
