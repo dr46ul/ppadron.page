@@ -307,6 +307,16 @@ describe('contact output', () => {
       expect(complaint(component, name)).toBe('')
     })
 
+    it.each(['josé@example.test', 'a,b@example.test', 'dagny@example.test.'])(
+      'leaves the delivery alone to decide that %s is an address',
+      async (email) => {
+        const component = await mount({ modelValue: enquiry({ email }) })
+        const control = component.find('[name="email"]').element as HTMLInputElement
+
+        expect(control.validity.valid).toBe(true)
+      },
+    )
+
     it('says nothing about one field because of another', async () => {
       const component = await mount({ modelValue: enquiry({ name: '' }) })
 

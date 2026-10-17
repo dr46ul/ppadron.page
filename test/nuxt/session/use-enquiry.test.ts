@@ -1,11 +1,7 @@
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-/**
- * `$fetch` is an auto-import, not a global, so `vi.stubGlobal` cannot reach the
- * binding the composable holds: the real request goes out and a test asserting
- * `failed` passes because it genuinely failed.
- */
+/** Not `vi.stubGlobal`, which cannot reach it: see docs/agents/testing.md. */
 const { post } = vi.hoisted(() => ({ post: vi.fn() }))
 mockNuxtImport('$fetch', () => post)
 

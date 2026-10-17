@@ -1,7 +1,6 @@
 import type { EnquiryField } from '#shared/enquiry'
 import { parseEnquiry } from '#shared/enquiry'
 
-/** What the Visitor has typed so far, before the delivery's rules have seen it. */
 export type EnquiryDraft = Record<EnquiryField, string>
 
 /** How far a submitted Enquiry has got. */
@@ -11,8 +10,12 @@ export type EnquiryState = 'idle' | 'sending' | 'sent' | 'failed'
  * The Enquiry draft, how far it has got, and the one way to send it. Handed
  * out read-only, so nothing but these functions writes to either.
  */
+function blank(): EnquiryDraft {
+  return { name: '', email: '', message: '' }
+}
+
 export function useEnquiry() {
-  const draft = reactive<EnquiryDraft>({ name: '', email: '', message: '' })
+  const draft = reactive(blank())
   const state = ref<EnquiryState>('idle')
 
   /**
@@ -52,7 +55,7 @@ export function useEnquiry() {
 
   function clear() {
     attempt++
-    edit({ name: '', email: '', message: '' })
+    edit(blank())
     state.value = 'idle'
   }
 

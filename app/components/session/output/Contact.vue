@@ -43,7 +43,7 @@ function field(key: EnquiryField) {
 
 const sending = computed(() => props.state === 'sending')
 const sent = computed(() => props.state === 'sent')
-const refused = computed(() => sending.value || sent.value)
+const locked = computed(() => sending.value || sent.value)
 
 const LABELS: Partial<Record<EnquiryState, string>> = {
   sending: 'sending…',
@@ -55,7 +55,7 @@ const LABELS: Partial<Record<EnquiryState, string>> = {
  * it to <body>, so a second press is refused here instead.
  */
 function submit() {
-  if (!refused.value)
+  if (!locked.value)
     emit('submit')
 }
 
@@ -85,9 +85,8 @@ const controls = {
 }
 
 /**
- * The browser's own validation speaks, but with the delivery's rules rather
- * than the ones `required` and `type` imply, which let `a@b` through and count
- * a message padded with spaces.
+ * The browser's own validation speaks, but with the delivery's rules: `a@b` is
+ * no address, and a message padded with spaces up to the floor is still short.
  */
 watchPostEffect(() => {
   const parsed = parseEnquiry(props.modelValue)
@@ -135,11 +134,17 @@ watchPostEffect(() => {
 
         <label class="flex items-baseline gap-3">
           <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
+          <!-- Not `type="email"`: its grammar refuses addresses the delivery
+               accepts, such as `josé@…`, in the browser's wording rather than
+               this form's. `inputmode` keeps the address keyboard. -->
           <input
             ref="email"
             v-model="replyTo"
             class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
-            type="email"
+            type="text"
+            inputmode="email"
+            autocapitalize="off"
+            spellcheck="false"
             name="email"
             autocomplete="email"
             required
@@ -166,7 +171,7 @@ watchPostEffect(() => {
         <div class="flex flex-wrap items-center gap-4 sm:pl-[6.75rem]">
           <button
             type="submit"
-            :aria-disabled="refused || undefined"
+            :aria-disabled="locked || undefined"
             class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-xs tracking-[0.15em] uppercase"
           >
             {{ LABELS[state] ?? 'send' }}
