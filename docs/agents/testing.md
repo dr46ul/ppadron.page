@@ -33,7 +33,7 @@ first commit of a change is the test that describes the new behaviour.
 ## What covered means
 
 `pnpm test` (and CI) enforces 100% lines, functions and statements on
-`app/components/**`, `app/composables/**`, `app/utils/**` and `server/utils/**`, and **at most
+`app/components/**`, `app/composables/**`, `app/utils/**`, `server/utils/**` and `shared/**`, and **at most
 four uncovered branches** in that tree — a count, not a percentage, so the gate cannot drift as
 the tree grows. Exactly four exist today, all unreachable, all in `Terminal.vue`
 (see "A `.vue` file will not reach 100% branches" below); the cap is sized to
@@ -45,8 +45,10 @@ route is written.** A route handler only ever runs inside the built server the
 `e2e` project starts as its own process, so v8 collects no coverage from it and
 an included route file would report 0% and fail the gate. The rule that follows:
 **a route handler holds no logic.** It reads the body, calls into
-`server/utils/`, and maps a refusal to a status code; everything it decides
-lives in a `server/utils/` module a `test/unit` test imports directly.
+`server/utils/` or `shared/`, and maps a refusal to a status code; everything
+it decides lives in a module there that a `test/unit` test imports directly.
+`shared/` holds what the client applies too, such as the Enquiry schema,
+and is imported explicitly as `#shared/<name>` rather than auto-imported.
 `server/api/contact.post.ts` is the worked example.
 
 What the e2e project adds for a route is the one thing only it can prove: that
@@ -106,6 +108,7 @@ One file per subject, mirroring `app/`:
 | `app/composables/useVisitedAt.ts`          | `test/nuxt/use-visited-at.test.ts`        |
 | `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
 | `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
+| `shared/<name>.ts`                         | `test/unit/shared/<name>.test.ts`         |
 
 Output components are pure: they print what they are handed as props and
 report through emits, so their tests mount them with props and never touch the

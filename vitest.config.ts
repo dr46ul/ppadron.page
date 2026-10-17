@@ -17,6 +17,7 @@ export default defineConfig({
         'app/composables/**',
         'app/utils/**',
         'server/utils/**',
+        'shared/**',
       ],
       reporter: ['text', 'html', 'lcov'],
       // The gate. `pnpm test` fails below these, and CI runs `pnpm test`.
