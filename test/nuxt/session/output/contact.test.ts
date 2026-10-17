@@ -25,7 +25,7 @@ function mount(props: {
   return mountSuspended(Contact, {
     props: {
       modelValue: enquiry(),
-      state: 'idle' as EnquiryState,
+      state: 'idle' satisfies EnquiryState,
       email: 'pavel@example.test',
       ...props,
     },
@@ -33,20 +33,12 @@ function mount(props: {
 }
 
 function value(component: Awaited<ReturnType<typeof mount>>, name: string) {
-  return (
-    component.find(`[name="${name}"]`).element as
-      | HTMLInputElement
-      | HTMLTextAreaElement
-  ).value
+  return component.find<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`).element.value
 }
 
 /** What the browser will say when the Visitor tries to send. */
 function complaint(component: Awaited<ReturnType<typeof mount>>, name: string) {
-  return (
-    component.find(`[name="${name}"]`).element as
-      | HTMLInputElement
-      | HTMLTextAreaElement
-  ).validationMessage
+  return component.find<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`).element.validationMessage
 }
 
 const WHO = 'Tell me who you are.'
@@ -311,7 +303,7 @@ describe('contact output', () => {
       'leaves the delivery alone to decide that %s is an address',
       async (email) => {
         const component = await mount({ modelValue: enquiry({ email }) })
-        const control = component.find('[name="email"]').element as HTMLInputElement
+        const control = component.find<HTMLInputElement>('[name="email"]').element
 
         expect(control.validity.valid).toBe(true)
       },

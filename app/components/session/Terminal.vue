@@ -70,7 +70,7 @@ const year = computed(() => formatDate(visitedAt.value, 'year', dateContext.valu
  * keyboard over the text just tapped.
  */
 function focusPrompt(event: MouseEvent) {
-  if ((event as PointerEvent).pointerType === 'touch')
+  if (event instanceof PointerEvent && event.pointerType === 'touch')
     return
   if (window.getSelection()!.toString())
     return

@@ -10,7 +10,7 @@
  */
 import type { EnquiryField, EnquiryRule } from '#shared/enquiry'
 import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
-import { LIMITS, MESSAGE_MIN, parseEnquiry } from '#shared/enquiry'
+import { FIELDS, LIMITS, MESSAGE_MIN, parseEnquiry } from '#shared/enquiry'
 
 const props = defineProps<{
   /** The draft `useEnquiry` owns. Reported back whole, never written through. */
@@ -82,7 +82,7 @@ const controls = {
   name: useTemplateRef<HTMLInputElement>('name'),
   email: useTemplateRef<HTMLInputElement>('email'),
   message: useTemplateRef<HTMLTextAreaElement>('message'),
-}
+} satisfies Record<EnquiryField, unknown>
 
 /**
  * The browser's own validation speaks, but with the delivery's rules: `a@b` is
@@ -92,7 +92,7 @@ watchPostEffect(() => {
   const parsed = parseEnquiry(props.modelValue)
   const failures = parsed.success ? {} : parsed.failures
 
-  for (const key of Object.keys(controls) as EnquiryField[]) {
+  for (const key of FIELDS) {
     const rule = failures[key]
     controls[key].value!.setCustomValidity(rule ? complaint(key, rule) : '')
   }

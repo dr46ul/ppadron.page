@@ -1,3 +1,4 @@
+import type { EnquiryField } from '../../../shared/enquiry'
 import { describe, expect, it } from 'vitest'
 import { parseEnquiry } from '../../../shared/enquiry'
 
@@ -40,9 +41,9 @@ describe('parseEnquiry', () => {
     },
   )
 
-  it.each(['name', 'email', 'message'])('reports a %s that is absent as missing', (field) => {
-    const incomplete = body()
-    delete (incomplete as Record<string, unknown>)[field]
+  it.each(['name', 'email', 'message'] satisfies EnquiryField[])('reports a %s that is absent as missing', (field) => {
+    const incomplete: Partial<ReturnType<typeof body>> = body()
+    delete incomplete[field]
 
     expect(parseEnquiry(incomplete)).toEqual({
       success: false,

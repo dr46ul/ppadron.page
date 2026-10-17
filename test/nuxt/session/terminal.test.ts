@@ -16,9 +16,9 @@ import { visitFrom } from '../visit-from'
  * in. A Terminal that stopped handing an output its prop fails both halves.
  */
 const data = vi.hoisted(() => ({
-  profile: {} as Profile,
-  roles: [] as Role[],
-  recommendations: [] as Recommendation[],
+  profile: profileFixture(),
+  roles: [roleFixture()],
+  recommendations: [recommendationFixture()],
 }))
 
 vi.mock('~/data/profile', () => ({ profile: data.profile }))
@@ -134,7 +134,7 @@ async function mountTerminal() {
       await this.settle()
     },
     async run(cmd: string) {
-      const prompt = component.find('#prompt')
+      const prompt = component.find<HTMLInputElement>('#prompt')
       await prompt.setValue(cmd)
       await component
         .findAll('form')
@@ -364,8 +364,7 @@ describe('terminal', () => {
       await session.settle()
 
       expect(
-        (session.component.find('[name="name"]').element as HTMLInputElement)
-          .value,
+        session.component.find<HTMLInputElement>('[name="name"]').element.value,
       ).toBe('Dagny Vole')
     })
 
@@ -597,12 +596,12 @@ describe('terminal', () => {
 
     it('completes a part-typed command on Tab', async () => {
       const { component } = await mountTerminal()
-      const prompt = component.find('#prompt')
+      const prompt = component.find<HTMLInputElement>('#prompt')
 
       await prompt.setValue('reco')
       await prompt.trigger('keydown', { key: 'Tab' })
 
-      expect((prompt.element as HTMLInputElement).value).toBe(
+      expect(prompt.element.value).toBe(
         'recommendations',
       )
     })
@@ -625,7 +624,7 @@ describe('terminal', () => {
 
       it('takes Tab only when there is a completion to apply', async () => {
         const { component } = await mountTerminal()
-        const prompt = component.find('#prompt')
+        const prompt = component.find<HTMLInputElement>('#prompt')
         await prompt.setValue('reco')
 
         expect((await press(prompt, {})).defaultPrevented).toBe(true)
@@ -637,7 +636,7 @@ describe('terminal', () => {
         ['a prompt already complete', 'whoami'],
       ])('lets Tab move focus on from %s', async (_, typed) => {
         const { component } = await mountTerminal()
-        const prompt = component.find('#prompt')
+        const prompt = component.find<HTMLInputElement>('#prompt')
         await prompt.setValue(typed)
 
         expect((await press(prompt, {})).defaultPrevented).toBe(false)
@@ -647,7 +646,7 @@ describe('terminal', () => {
         'never takes Tab chorded with %s',
         async (modifier) => {
           const { component } = await mountTerminal()
-          const prompt = component.find('#prompt')
+          const prompt = component.find<HTMLInputElement>('#prompt')
           await prompt.setValue('reco')
 
           expect((await press(prompt, { [modifier]: true })).defaultPrevented)
@@ -657,13 +656,13 @@ describe('terminal', () => {
 
       it('never takes Shift+Tab, even over a completable prompt', async () => {
         const { component } = await mountTerminal()
-        const prompt = component.find('#prompt')
+        const prompt = component.find<HTMLInputElement>('#prompt')
         await prompt.setValue('reco')
 
         const event = await press(prompt, { shiftKey: true })
 
         expect(event.defaultPrevented).toBe(false)
-        expect((prompt.element as HTMLInputElement).value).toBe('reco')
+        expect(prompt.element.value).toBe('reco')
       })
     })
 
@@ -672,15 +671,15 @@ describe('terminal', () => {
 
       await session.run('whoami')
 
-      const prompt = session.component.find('#prompt')
+      const prompt = session.component.find<HTMLInputElement>('#prompt')
 
       await prompt.trigger('keydown', { key: 'ArrowUp' })
 
-      expect((prompt.element as HTMLInputElement).value).toBe('whoami')
+      expect(prompt.element.value).toBe('whoami')
 
       await prompt.trigger('keydown', { key: 'ArrowDown' })
 
-      expect((prompt.element as HTMLInputElement).value).toBe('')
+      expect(prompt.element.value).toBe('')
     })
   })
 
@@ -696,7 +695,7 @@ describe('terminal', () => {
     it('goes back to the prompt when the dead space is clicked', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
-        component.find('#prompt').element as HTMLInputElement,
+        component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
 
@@ -708,15 +707,14 @@ describe('terminal', () => {
     it('leaves the Visitor alone when they have selected text in the transcript', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
-        component.find('#prompt').element as HTMLInputElement,
+        component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
-      const selection = vi.spyOn(window, 'getSelection').mockReturnValue({
-        toString: () => 'He rewired the kiln',
-      } as Selection)
+      const selection = window.getSelection()!
+      selection.selectAllChildren(component.find('blockquote').element)
 
       await component.find('[data-entry]').trigger('click')
-      selection.mockRestore()
+      selection.removeAllRanges()
 
       expect(focus).not.toHaveBeenCalled()
     })
@@ -724,7 +722,7 @@ describe('terminal', () => {
     it('does not raise the keyboard when the transcript is tapped on touch', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
-        component.find('#prompt').element as HTMLInputElement,
+        component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
 
@@ -739,7 +737,7 @@ describe('terminal', () => {
     it('still goes back to the prompt on a mouse click', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
-        component.find('#prompt').element as HTMLInputElement,
+        component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
 
@@ -754,7 +752,7 @@ describe('terminal', () => {
     it('stays put when a chip is clicked, so the page does not jump', async () => {
       const { component, promptBar } = await mountTerminal()
       const focus = vi.spyOn(
-        component.find('#prompt').element as HTMLInputElement,
+        component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
 
