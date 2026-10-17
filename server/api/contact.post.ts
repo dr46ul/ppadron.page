@@ -10,8 +10,9 @@ import { parseEnquiry } from '#shared/enquiry'
 export default defineEventHandler(async (event) => {
   const parsed = parseEnquiry(await readBody(event))
 
-  // The client has one `failed` state and no per-field errors, so it reveals
-  // the direct address — the right answer to a rejection it cannot explain.
+  // The form checks the same schema before it posts, so only a client out of
+  // step with it lands here, and its `failed` state reveals the direct address
+  // — the right answer to a rejection it cannot explain.
   if (!parsed.success)
     throw createError({ statusCode: 400, statusMessage: 'Not an Enquiry' })
 

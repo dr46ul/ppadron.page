@@ -15,6 +15,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const { post } = vi.hoisted(() => ({ post: vi.fn() }))
 mockNuxtImport('$fetch', () => post)
 
+/** A draft the delivery's rules accept, so a send gets as far as `sent`. */
+function enquiry(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
+  return {
+    name: 'Dana',
+    email: 'dana@example.test',
+    message: 'Can you help with a checkout that loses carts?',
+    ...overrides,
+  }
+}
+
 describe('useSession', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -275,17 +285,15 @@ describe('useSession', () => {
       expect(session.entries.value.length).toBe(5)
     })
 
-    it('throws away the enquiry draft and its state', async () => {
+    it('throws away the Enquiry draft and its state', async () => {
       const session = useSession()
 
-      session.contact.name = 'Dana'
-      session.contact.email = 'dana@example.com'
-      session.contact.message = 'Can you help?'
-      await session.send()
+      session.enquiry.edit(enquiry())
+      await session.enquiry.submit()
       session.exec('reset')
 
-      expect(session.contact).toEqual({ name: '', email: '', message: '' })
-      expect(session.contactState.value).toBe('idle')
+      expect(session.enquiry.draft).toEqual({ name: '', email: '', message: '' })
+      expect(session.enquiry.state).toBe('idle')
     })
   })
 
@@ -305,26 +313,28 @@ describe('useSession', () => {
       expect(forms.length).toBe(1)
     })
 
-    it('reopens on a clean slate after a sent enquiry', async () => {
+    it('reopens on a clean slate after a sent Enquiry', async () => {
       const session = useSession()
 
-      await session.send()
+      session.enquiry.edit(enquiry())
+      await session.enquiry.submit()
 
-      expect(session.contactState.value).toBe('sent')
+      expect(session.enquiry.state).toBe('sent')
 
       session.exec('mail pavel')
 
-      expect(session.contactState.value).toBe('idle')
+      expect(session.enquiry.draft).toEqual({ name: '', email: '', message: '' })
+      expect(session.enquiry.state).toBe('idle')
     })
 
     it('keeps what the visitor had already typed', async () => {
       const session = useSession()
 
-      session.contact.message = 'half a thought'
+      session.enquiry.edit(enquiry({ message: 'half a thought' }))
       session.exec('mail pavel')
       await vi.runAllTimersAsync()
 
-      expect(session.contact.message).toBe('half a thought')
+      expect(session.enquiry.draft.message).toBe('half a thought')
     })
   })
 
@@ -556,64 +566,6 @@ describe('useSession', () => {
       expect(scrollTo).toHaveBeenCalledWith(
         expect.objectContaining({ behavior: 'smooth' }),
       )
-    })
-  })
-
-  describe('send', () => {
-    it('reports that it is sending before it knows the outcome', async () => {
-      const session = useSession()
-      let deliver: () => void
-      post.mockReturnValue(
-        new Promise<void>((resolve) => {
-          deliver = resolve
-        }),
-      )
-
-      const sending = session.send()
-
-      expect(session.contactState.value).toBe('sending')
-
-      deliver!()
-      await sending
-
-      expect(session.contactState.value).toBe('sent')
-    })
-
-    it('reports a delivery that failed', async () => {
-      const session = useSession()
-      post.mockRejectedValue(new Error('offline'))
-
-      await session.send()
-
-      expect(session.contactState.value).toBe('failed')
-    })
-
-    it('posts the enquiry as it stands', async () => {
-      const session = useSession()
-
-      session.contact.name = 'Dana'
-      session.contact.email = 'dana@example.com'
-      session.contact.message = 'Can you help?'
-      await session.send()
-
-      expect(post).toHaveBeenCalledWith('/api/contact', {
-        method: 'POST',
-        body: {
-          name: 'Dana',
-          email: 'dana@example.com',
-          message: 'Can you help?',
-        },
-      })
-    })
-
-    it('sends a copy, so later typing cannot change what was sent', async () => {
-      const session = useSession()
-
-      session.contact.message = 'as sent'
-      await session.send()
-      session.contact.message = 'typed afterwards'
-
-      expect(post.mock.calls[0]![1].body.message).toBe('as sent')
     })
   })
 

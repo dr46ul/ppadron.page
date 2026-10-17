@@ -7,10 +7,10 @@ export type EnquiryRule = 'missing' | 'too-short' | 'too-long' | 'not-an-address
  * email. 320 is the longest address RFC 5321 allows; the other two are simply
  * more than anyone writing to Pavel needs.
  */
-const LIMITS = { name: 200, email: 320, message: 5000 } as const
+export const LIMITS = { name: 200, email: 320, message: 5000 } as const
 
 /** A one-word message is a mistake or a probe, not an Enquiry. */
-const MESSAGE_MIN = 20
+export const MESSAGE_MIN = 20
 
 /**
  * Whether an address is real is not knowable here, and the only test that

@@ -36,7 +36,9 @@ Roles list, an absent optional field, or a closed availability.
 **An output's interface is its props and emits, and nothing else.** `Contact`
 takes `modelValue`, `state` and `email` and emits `update:modelValue` and
 `submit`; `Unknown` takes `cmd` and emits `help`; the rest take the Content
-they print. Adding a Command means adding an Output with its own props, not
+they print. An Output may import code, such as the shared Enquiry schema
+`Contact` checks its draft against; it still may not import Content or the
+session. Adding a Command means adding an Output with its own props, not
 another consumer of the session.
 
 **Props carry Content only.** Interface copy — "command not found", "sending…",

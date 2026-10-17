@@ -381,6 +381,42 @@ describe('terminal', () => {
       expect(contact.find('[role="alert"]').exists()).toBe(false)
     })
 
+    it('sends what the Contact output reports, as the delivery will read it', async () => {
+      post.mockResolvedValue({ sent: true })
+      const session = await mountTerminal()
+
+      await session.chip('mail pavel').trigger('click')
+      await session.settle()
+      await session.component.find('[name="name"]').setValue('  Dagny   Vole ')
+      await session.component.find('[name="email"]').setValue('dagny@example.test')
+      await session.component
+        .find('[name="message"]')
+        .setValue('The kiln wants rewiring before the winter firing.')
+      await session.enquiryForm().trigger('submit')
+      await session.settle()
+
+      expect(post).toHaveBeenCalledWith('/api/contact', {
+        method: 'POST',
+        body: {
+          name: 'Dagny Vole',
+          email: 'dagny@example.test',
+          message: 'The kiln wants rewiring before the winter firing.',
+        },
+      })
+    })
+
+    it('locks the Contact output once its Enquiry has gone', async () => {
+      post.mockResolvedValue({ sent: true })
+      const session = await mountTerminal()
+
+      await session.submitEnquiry()
+
+      const contact = session.output('mail pavel')
+
+      expect(contact.find('button[type="submit"]').text()).toBe('sent')
+      expect(contact.find('[name="name"]').attributes('readonly')).toBeDefined()
+    })
+
     it('hands the Profile address to the Contact output', async () => {
       post.mockRejectedValue(new Error('offline'))
       const session = await mountTerminal()

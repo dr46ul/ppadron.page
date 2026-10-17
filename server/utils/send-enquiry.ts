@@ -32,7 +32,7 @@ export async function sendEnquiry(
     }),
   })
 
-  // Throwing is the contract the client depends on: `send()` in useSession.ts
+  // Throwing is the contract the client depends on: `submit()` in useEnquiry.ts
   // distinguishes only resolve from reject, and a rejected send is what reveals
   // the direct address (docs/adr/0003-enquiries-are-not-persisted.md).
   if (!response.ok)
