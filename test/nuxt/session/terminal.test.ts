@@ -4,7 +4,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
-import { roleOf, rolesOf } from '../text-role'
+import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
 /**
@@ -238,10 +238,6 @@ describe('terminal', () => {
         expect(shown.classes()).toContain('text-accent')
         expect(shown.classes()).not.toContain('text-subtle')
       }
-
-      expect(
-        availability().at(-1)!.find('span[aria-hidden="true"]').classes(),
-      ).toContain('bg-success')
     })
 
     it('mutes the availability once he is not', async () => {
@@ -253,11 +249,6 @@ describe('terminal', () => {
         expect(shown.classes()).toContain('text-subtle')
         expect(shown.classes()).not.toContain('text-accent')
       }
-
-      const dot = availability().at(-1)!.find('span[aria-hidden="true"]')
-
-      expect(dot.classes()).toContain('bg-base-300')
-      expect(dot.classes()).not.toContain('bg-success')
     })
   })
 
@@ -521,8 +512,8 @@ describe('terminal', () => {
     })
   })
 
-  describe('the prompt bar', () => {
-    it('lists every command as a chip, and every meta command after them', async () => {
+  describe('what it hands the prompt bar', () => {
+    it('hands every command and every meta command to the chips', async () => {
       const { promptBar } = await mountTerminal()
       const chips = promptBar()
         .findAll('button')
@@ -532,49 +523,6 @@ describe('terminal', () => {
         ...commands.map(command => command.cmd),
         ...metaCommands.map(command => command.cmd),
       ])
-    })
-
-    it('wraps the chips onto further rows rather than scrolling them out of sight', async () => {
-      const { promptBar } = await mountTerminal()
-      const row = promptBar().find('div')
-
-      expect(row.classes()).toContain('flex-wrap')
-      expect(row.classes()).not.toContain('overflow-x-auto')
-    })
-
-    it('holds the prompt at 16px on a phone so iOS does not zoom the page', async () => {
-      const { component } = await mountTerminal()
-      const classes = component.find('#prompt').classes()
-
-      expect(classes).toContain('text-base')
-      expect(classes).toContain('sm:text-[0.875rem]')
-    })
-
-    it('titles each chip with what it does', async () => {
-      const { chip } = await mountTerminal()
-
-      for (const command of [...commands, ...metaCommands])
-        expect(chip(command.cmd).attributes('title')).toBe(command.label)
-    })
-
-    it('describes each chip to a keyboard or screen-reader user', async () => {
-      const { chip, component } = await mountTerminal()
-
-      // `title` is a pointer-only tooltip; the description is what reaches
-      // focus and touch.
-      for (const command of [...commands, ...metaCommands]) {
-        const id = chip(command.cmd).attributes('aria-describedby')!
-
-        expect(component.find(`#${id}`).text()).toBe(command.label)
-      }
-    })
-
-    it('invites a pick rather than a click', async () => {
-      const { component } = await mountTerminal()
-
-      expect(component.find('#prompt').attributes('placeholder')).toBe(
-        'type a command, or pick one above',
-      )
     })
 
     it('runs the command a chip names', async () => {
@@ -594,75 +542,33 @@ describe('terminal', () => {
       expect(session.output('help').text()).toContain('this list')
     })
 
-    it('completes a part-typed command on Tab', async () => {
-      const { component } = await mountTerminal()
-      const prompt = component.find<HTMLInputElement>('#prompt')
-
-      await prompt.setValue('reco')
-      await prompt.trigger('keydown', { key: 'Tab' })
-
-      expect(prompt.element.value).toBe(
-        'recommendations',
-      )
-    })
-
-    describe('keeping the keyboard free', () => {
-      async function press(
-        prompt: { element: Element },
-        init: KeyboardEventInit,
-      ) {
+    describe('completing on Tab', () => {
+      function press(prompt: { element: Element }) {
         const event = new KeyboardEvent('keydown', {
           key: 'Tab',
           bubbles: true,
           cancelable: true,
-          ...init,
         })
         prompt.element.dispatchEvent(event)
-        await nextTick()
         return event
       }
 
-      it('takes Tab only when there is a completion to apply', async () => {
+      it('completes a part-typed command', async () => {
         const { component } = await mountTerminal()
         const prompt = component.find<HTMLInputElement>('#prompt')
         await prompt.setValue('reco')
 
-        expect((await press(prompt, {})).defaultPrevented).toBe(true)
+        expect(press(prompt).defaultPrevented).toBe(true)
+        await nextTick()
+        expect(prompt.element.value).toBe('recommendations')
       })
 
-      it.each([
-        ['an empty prompt', ''],
-        ['text that matches nothing', 'zzz'],
-        ['a prompt already complete', 'whoami'],
-      ])('lets Tab move focus on from %s', async (_, typed) => {
+      it('moves focus on from a prompt already complete', async () => {
         const { component } = await mountTerminal()
         const prompt = component.find<HTMLInputElement>('#prompt')
-        await prompt.setValue(typed)
+        await prompt.setValue('whoami')
 
-        expect((await press(prompt, {})).defaultPrevented).toBe(false)
-      })
-
-      it.each(['ctrlKey', 'altKey', 'metaKey'])(
-        'never takes Tab chorded with %s',
-        async (modifier) => {
-          const { component } = await mountTerminal()
-          const prompt = component.find<HTMLInputElement>('#prompt')
-          await prompt.setValue('reco')
-
-          expect((await press(prompt, { [modifier]: true })).defaultPrevented)
-            .toBe(false)
-        },
-      )
-
-      it('never takes Shift+Tab, even over a completable prompt', async () => {
-        const { component } = await mountTerminal()
-        const prompt = component.find<HTMLInputElement>('#prompt')
-        await prompt.setValue('reco')
-
-        const event = await press(prompt, { shiftKey: true })
-
-        expect(event.defaultPrevented).toBe(false)
-        expect(prompt.element.value).toBe('reco')
+        expect(press(prompt).defaultPrevented).toBe(false)
       })
     })
 
@@ -684,14 +590,6 @@ describe('terminal', () => {
   })
 
   describe('the caret', () => {
-    it('marks the prompt caret so its focus state can be styled off the input', async () => {
-      const { component } = await mountTerminal()
-      const caret = component.find('#prompt ~ .caret')
-
-      expect(caret.exists()).toBe(true)
-      expect(caret.classes()).toContain('prompt-caret')
-    })
-
     it('goes back to the prompt when the dead space is clicked', async () => {
       const { component } = await mountTerminal()
       const focus = vi.spyOn(
@@ -782,41 +680,13 @@ describe('terminal', () => {
 
       expect(roleOf(session.component, 'p', 'earlier block dropped')).toBe('text-subtle')
     })
-
-    it('sets every chip as a label and the rail they sit on as chrome', async () => {
-      const { promptBar } = await mountTerminal()
-
-      // The meta chips are control text too, not a footnote, so they read at
-      // the same step as the commands rather than a step below them.
-      expect(rolesOf(promptBar(), 'button')).toEqual(
-        [...commands, ...metaCommands].map(() => 'text-muted'),
-      )
-      expect(roleOf(promptBar(), 'span', 'Run')).toBe('text-subtle')
-    })
   })
 
   describe('edges', () => {
-    it('draws every chip and the prompt bar rule in the control-edge token', async () => {
-      const { promptBar } = await mountTerminal()
-
-      const chips = promptBar().findAll('button').filter(button =>
-        button.classes().includes('border'),
-      )
-
-      expect(chips).toHaveLength(commands.length)
-      for (const chip of chips) {
-        expect(chip.classes()).toContain('border-edge')
-        expect(chip.classes()).not.toContain('border-base-300')
-      }
-      expect(promptBar().classes()).toContain('border-edge')
-      expect(promptBar().classes()).not.toContain('border-base-300')
-    })
-
-    it('keeps the banner rule and the chip-row divider on the divider token', async () => {
-      const { banner, promptBar } = await mountTerminal()
+    it('keeps the banner rule on the divider token', async () => {
+      const { banner } = await mountTerminal()
 
       expect(banner().classes()).toContain('border-base-300')
-      expect(promptBar().find('div').classes()).toContain('border-base-300')
     })
   })
 

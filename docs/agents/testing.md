@@ -330,20 +330,23 @@ from issue #29 — where the code under test was already merged, so reverting wa
 safe there and destructive here.
 
 **A `.vue` file will not reach 100% branches.** The v8 provider counts branches
-in the compiled render function and maps them back through the sourcemap, so
-Vue's own `_cache[n] || (_cache[n] = …)` guards for hoisted static vnodes and
-cached event handlers surface as uncovered `cond-expr` branches — attributed to
-whichever source column is nearest, usually an innocent prop expression.
-`Terminal.vue` carries four of them (there is no conditional at any of the four
-positions, and they survived every test written for it). No test can reach them;
-do not chase them.
+in the compiled render function and maps them back through the sourcemap, so a
+conditional the toolchain writes into that function surfaces as an uncovered
+`cond-expr` branch at a source position that has none. `Terminal.vue` carries
+four of them, one for each time its template names the auto-imported `commands`
+or `metaCommands` — the `:commands` and `:meta-commands` it hands Help and the
+Prompt bar. Nuxt's auto-import rewrites each `_ctx.commands` that
+`@vue/compiler-sfc` emits into a ternary,
+`("commands" in _ctx ? _ctx.commands : _unref(commands))`, and the `_ctx` arm
+never runs. No test can reach them; do not chase them.
 
 This is why the branch gate is a count of four rather than 100% — `branches: -4`
 in `vitest.config.ts`. If the four ever move or multiply (a template edit shifts
 which prop expression the sourcemap lands on), confirm the newly-reported
 positions are artefacts the same way issue #19 did — compile the template with
-`@vue/compiler-sfc` and look for a conditional at that source position — before
-touching the cap. A real uncovered branch gets a test, not a bigger number.
+`@vue/compiler-sfc`, look for a conditional at that source position, and
+remember the auto-import rewrite runs after it — before touching the cap. A
+real uncovered branch gets a test, not a bigger number.
 
 ## Verifying what the browser actually paints
 

@@ -50,6 +50,12 @@ seeded on load with the full tour so the page can be read without typing, and
 capped so it cannot grow without bound.
 _Avoid_: Feed, log, history
 
+**Prompt bar**:
+The working line at the foot of the Session: a chip for every Command, the
+prompt the Visitor types at, and Pavel's availability. It is always there and
+is not part of the Transcript.
+_Avoid_: Footer, command bar, nav
+
 **Content**:
 What the site says about Pavel: the Profile, the Roles, the Recommendations,
 and the list of Commands. It changes when Pavel's life changes and is handed
