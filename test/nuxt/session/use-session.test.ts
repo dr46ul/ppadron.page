@@ -338,107 +338,77 @@ describe('useSession', () => {
     })
   })
 
-  describe('complete', () => {
-    it('has nothing to complete from an empty prompt', () => {
+  describe('completion', () => {
+    it.each([
+      ['an empty prompt', ''],
+      ['whitespace', '  '],
+      ['text that matches nothing', 'zzz'],
+      ['a prompt already complete', 'whoami'],
+    ])('has nothing to offer for %s', (_, typed) => {
       const session = useSession()
+      session.input.value = typed
 
-      session.complete()
-
-      expect(session.input.value).toBe('')
+      expect(session.completion.value).toBeUndefined()
     })
 
-    it('has nothing to complete from whitespace', () => {
-      const session = useSession()
-      session.input.value = '  '
-
-      session.complete()
-
-      expect(session.input.value).toBe('  ')
-    })
-
-    it('leaves a prompt it cannot complete alone', () => {
-      const session = useSession()
-      session.input.value = 'zzz'
-
-      session.complete()
-
-      expect(session.input.value).toBe('zzz')
-    })
-
-    it('fills in an alias', () => {
+    it('offers an alias', () => {
       const session = useSession()
       session.input.value = 'reco'
 
-      session.complete()
-
-      expect(session.input.value).toBe('recommendations')
+      expect(session.completion.value).toBe('recommendations')
     })
 
     it('completes whatever case it was part-typed in', () => {
       const session = useSession()
       session.input.value = 'RECO'
 
-      session.complete()
-
-      expect(session.input.value).toBe('recommendations')
+      expect(session.completion.value).toBe('recommendations')
     })
 
-    it('fills in a canonical spelling, spaces and all', () => {
+    it('offers a case-fix, because it would change the prompt', () => {
+      const session = useSession()
+      session.input.value = 'WHOAMI'
+
+      expect(session.completion.value).toBe('whoami')
+    })
+
+    it('offers a canonical spelling, spaces and all', () => {
       const session = useSession()
       session.input.value = 'cat ~/r'
 
-      session.complete()
-
-      expect(session.input.value).toBe('cat ~/recommendations')
+      expect(session.completion.value).toBe('cat ~/recommendations')
     })
 
-    it('fills in a meta command', () => {
+    it('offers a meta command', () => {
       const session = useSession()
       session.input.value = 'res'
 
-      session.complete()
-
-      expect(session.input.value).toBe('reset')
+      expect(session.completion.value).toBe('reset')
     })
 
     it('prefers a canonical spelling to a meta command or an alias', () => {
       const session = useSession()
       session.input.value = 'c'
 
-      session.complete()
-
       // `clear` and `contact` start with c too, but a completion should teach
       // the real spelling rather than the shortcut.
-      expect(session.input.value).toBe('cat ~/recommendations')
+      expect(session.completion.value).toBe('cat ~/recommendations')
     })
 
-    describe('reporting whether it took the Tab', () => {
-      it.each([
-        ['an empty prompt', ''],
-        ['whitespace', '  '],
-        ['text that matches nothing', 'zzz'],
-        ['a prompt already complete', 'whoami'],
-      ])('reports nothing applied for %s', (_, typed) => {
-        const session = useSession()
-        session.input.value = typed
+    it('follows the prompt as it is typed', () => {
+      const session = useSession()
+      session.input.value = 'reco'
+      session.input.value = 'res'
 
-        expect(session.complete()).toBe(false)
-      })
+      expect(session.completion.value).toBe('reset')
+    })
 
-      it('reports a completion it applied', () => {
-        const session = useSession()
-        session.input.value = 'reco'
+    it('leaves the prompt alone until it is applied', () => {
+      const session = useSession()
+      session.input.value = 'reco'
 
-        expect(session.complete()).toBe(true)
-      })
-
-      it('reports a case-fix as applied, because the prompt did change', () => {
-        const session = useSession()
-        session.input.value = 'WHOAMI'
-
-        expect(session.complete()).toBe(true)
-        expect(session.input.value).toBe('whoami')
-      })
+      expect(session.completion.value).toBe('recommendations')
+      expect(session.input.value).toBe('reco')
     })
   })
 

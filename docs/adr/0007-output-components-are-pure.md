@@ -41,6 +41,13 @@ they print. An Output may import code, such as the shared Enquiry schema
 session. Adding a Command means adding an Output with its own props, not
 another consumer of the session.
 
+**The Prompt bar is held to the same rule**, though no Command prints it: it
+takes the Commands, the availability, the prompt as `v-model` and the
+`completion` Tab would apply, and emits `run` and `recall`. It also exposes
+`focus()`, because `Terminal` puts the caret back when its dead space is
+clicked and no longer owns the input. Focus is the one thing a pure module may
+expose; anything else it needs from the session arrives as a prop.
+
 **Props carry Content only.** Interface copy — "command not found", "sending…",
 the Help hints — stays in the component that speaks it and never arrives as a
 prop, because it does not change when Pavel's life changes.
