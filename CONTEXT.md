@@ -35,7 +35,10 @@ _Avoid_: Page, layout, theme
 **Command**:
 One thing a Visitor can run, canonically spelled (`ls ~/experience`) and
 reachable by alias (`experience`, `work`). Each one prints exactly one kind of
-output. Adding content means adding a Command, not a page section.
+output. Adding content means adding a Command, not a page section. A Command may
+take an argument that selects which Content its Output prints
+(`cat ~/experience/<slug>`); it is still one Command with one kind of Output,
+and gets one mention in Help rather than a chip per argument.
 _Avoid_: Link, route, nav item
 
 **Output**:
@@ -51,9 +54,9 @@ capped so it cannot grow without bound.
 _Avoid_: Feed, log, history
 
 **Prompt bar**:
-The working line at the foot of the Session: a chip for every Command, the
-prompt the Visitor types at, and Pavel's availability. It is always there and
-is not part of the Transcript.
+The working line at the foot of the Session: a chip for every Command that takes
+no argument, the prompt the Visitor types at, and Pavel's availability. It is
+always there and is not part of the Transcript.
 _Avoid_: Footer, command bar, nav
 
 **Content**:
@@ -71,10 +74,17 @@ _Avoid_: Content, labels, strings
 
 **Profile**:
 The facts about Pavel the site presents: name, headline, location, a tagline, an
-introduction, how to reach him, where else to find him, and whether he is open
-for work. There is exactly one Profile, and it is not a Role.
+introduction, how to reach him, where else to find him, whether he is open for
+work, and his Background. There is exactly one Profile, and it is not a Role.
 _Avoid_: User (that word is wrong for the Visitor and would collide), owner,
 account, about, bio
+
+**Background**:
+The longer story of who Pavel is: ordered paragraphs, his current skills and his
+education. It is part of the Profile, and also the Output `cat ~/about` prints.
+The path is the word a Visitor would guess; the name in the code is this one. It
+prints only when run, so it never joins the tour on load.
+_Avoid_: About, bio
 
 ### Proof surfaces
 
@@ -83,8 +93,12 @@ The roles Pavel has held as an employee or contractor, ordered most recent first
 _Avoid_: Work, Portfolio, Projects, Career, Employment history
 
 **Role**:
-One entry in Experience: a company, a title, a date range, a description of the work done, and the technologies used.
+One entry in Experience: a company, a title, a date range, a description of the work done, and the technologies used. Each has a slug, which names it in the path `~/experience/<slug>`.
 _Avoid_: Job, position, gig
+
+**Role detail**:
+The Output `cat ~/experience/<slug>` prints: one Role's full account, with its exact period, any phased tech history and its full tech stack. The Experience list carries the short summary; this carries everything else. It prints only when run, so it never joins the tour on load.
+_Avoid_: Role page, case study, job description
 
 **Recommendation**:
 A verbatim quote from a former colleague or manager, taken from Pavel's LinkedIn profile and attributed by name, title, and company. Recommendations come from people Pavel worked alongside, never from freelance clients, and the site says so plainly rather than letting a visitor infer client references.

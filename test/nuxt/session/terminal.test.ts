@@ -51,23 +51,35 @@ function profileFixture(): Profile {
       repo: 'https://example.test/repo-ashgrove',
     },
     stack: ['duct tape', 'a longer wrench'],
+    background: ['Learned plumbing from a lighthouse keeper.'],
+    skills: ['soldering'],
+    education: {
+      degree: 'Licence in Hydraulics',
+      faculty: 'Faculty of Water',
+      institution: 'University of Reykjavík',
+      year: '1991',
+    },
   }
 }
 
 function roleFixture(): Role {
   return {
+    slug: 'kiln-and-ash',
     company: 'Kiln & Ash',
     title: 'Kiln technician',
     period: '1998 — 2001',
+    exactPeriod: 'Mar 1998 – Jun 2001',
     since: '1998',
     summary: 'Rebuilt the firing schedule so nothing cracked on the way down.',
     tech: ['pyrometry'],
+    account: ['Spent three winters learning what cooling too fast does to glaze.'],
+    stack: ['pyrometry', 'cone packs'],
   }
 }
 
 function recommendationFixture(): Recommendation {
   return {
-    quote: 'He rewired the kiln and never once mentioned it afterwards.',
+    quote: ['He rewired the kiln and never once mentioned it afterwards.'],
     name: 'Ingrid Vole',
     title: 'Kiln foreman',
     company: 'Kiln & Ash',

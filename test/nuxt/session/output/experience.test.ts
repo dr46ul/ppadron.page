@@ -6,12 +6,16 @@ import { roleOf } from '../../text-role'
 
 function role(overrides: Partial<Role> = {}): Role {
   return {
+    slug: 'acme',
     company: 'Acme',
     title: 'Engineer',
     period: '2022 — now',
+    exactPeriod: 'May 2022 – now',
     since: '2022',
     summary: 'Built the thing that made the other thing work.',
     tech: ['TypeScript', 'Vue'],
+    account: ['Built the thing, then the other thing.'],
+    stack: ['TypeScript', 'Vue', 'Vitest'],
     ...overrides,
   }
 }
