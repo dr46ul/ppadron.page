@@ -1,7 +1,14 @@
-minimumReleaseAgeExclude:
-  - vue-router@5.3.0
+minimumReleaseAgeExcludePrune: true
+
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  # Both are the last versions of their major lines and were published without
+  # an npm attestation, which the policy reads as a downgrade. See ADR-0006.
+  - chokidar@4.0.3
+  - semver@6.3.1
 
 shellEmulator: true
+trustPolicyExcludePrune: true
 
 allowBuilds:
   '@parcel/watcher': false

@@ -47,14 +47,17 @@ does not fit the line, shorten it or use a fenced block.
 
 **This makes ESLint the authority on formatting, not on everything.** The same
 config carries a `pnpm/yaml-enforce-settings` rule that writes settings into
-`pnpm-workspace.yaml`, one of which — `trustPolicy: no-downgrade` — rejects this
-lockfile and breaks `pnpm install --frozen-lockfile` outright, locally and in
-CI. The two entries it flags, `chokidar@4.0.3` and `semver@6.3.1`, are the last
-versions of their major lines and carry no npm attestation, which the policy
-reads as a downgrade. The rule has no way to opt out of one setting, so it is
-off. Supply-chain enforcement is worth having; it is a deliberate change with a
-lockfile audit behind it, not a side effect of `eslint --fix`. `shellEmulator`,
-which arrived the same way, was kept on its own merits.
+`pnpm-workspace.yaml`, one of which — `trustPolicy: no-downgrade` — rejected this
+lockfile and broke `pnpm install --frozen-lockfile` outright, locally and in CI,
+when it arrived through `eslint --fix`. The two entries it flagged,
+`chokidar@4.0.3` and `semver@6.3.1`, are the last versions of their major lines
+and carry no npm attestation, which the policy reads as a downgrade. The rule
+has no way to opt out of one setting, so it is off. Supply-chain enforcement is
+worth having; it is a deliberate change with a lockfile audit behind it, not a
+side effect of `eslint --fix`. That audit has since been done: the policy is set
+by hand in `pnpm-workspace.yaml`, with exactly those two versions excluded.
+`shellEmulator`, which arrived the same way as the policy, was kept on its own
+merits.
 
 **A file that still looks Prettier-shaped was probably never linted.** The
 preset ships a default ignore list that includes `**/output`, which matched
