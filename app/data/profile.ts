@@ -40,7 +40,6 @@ export interface Profile {
   }
   /** The tools this site is built with, shown in the Colophon. */
   stack: string[]
-  /** The longer story, in paragraphs. */
   background: string[]
   /** What Pavel is working with now, unlike the site's own `stack`. */
   skills: string[]

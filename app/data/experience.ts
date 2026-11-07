@@ -33,7 +33,6 @@ export interface Role {
   summary: string
   /** A few names for scanning the list. The full list is `stack`. */
   tech: string[]
-  /** The full account, in paragraphs. */
   account: string[]
   history?: RoleProject[]
   stack: string[]
@@ -48,7 +47,7 @@ export const roles: Role[] = [
     exactPeriod: 'Apr 2022 – Jan 2023',
     since: '2022',
     summary:
-      'Built multi-language support and multi-city presence for a startup\'s Vue/Nuxt platform, refactored its Vuex state and dynamic routing, and reworked the homepage, cart and checkout pages.',
+      'Built multi-language support and multi-city presence for a startup\'s Vue/Nuxt platform, refactored its Vuex state, and made UI/UX improvements in a redesign of its cart and checkout.',
     tech: ['Vue', 'Nuxt', 'Vuex', 'TypeScript', 'SCSS'],
     account: [
       'In this position I was responsible for the maintenance and implementation of new features for three applications, including the visual elements that users interact with, layouts, components and the overall UX of the products.',
@@ -70,7 +69,7 @@ export const roles: Role[] = [
     exactPeriod: 'Nov 2014 – Mar 2022',
     since: '2014',
     summary:
-      'Built the interfaces of the Rogue Fitness web store and Rogue Mobile App, carrying them from Magento 1 to Magento 2 and from Cordova and Ionic to React Native as the stack evolved.',
+      'Built the interfaces of the Rogue Fitness e-commerce web store and Rogue Mobile App as their stack evolved, from Magento 1 to Magento 2 and from Cordova and Ionic to React Native.',
     tech: ['Vue', 'Magento', 'Node.js', 'Ionic', 'React Native'],
     account: [
       '[tenure] working in a wonderful team, great projects and lots of challenges that helped me to expand and improve my skills.',
@@ -117,7 +116,7 @@ export const roles: Role[] = [
     exactPeriod: 'Jan 2009 – Dec 2010',
     since: '2009',
     summary:
-      'Built software in ASP.NET, C# and Java with a team of young programmers, and ran a project as Project Manager and Team Leader for a company based in Spain.',
+      'Led a project in a fast-paced environment, on top of senior engineering work in a team of young programmers, as Project Manager and Team Leader for a company based in Spain.',
     tech: ['ASP.NET', 'C#', 'Java', 'J2EE', 'jQuery'],
     account: [
       'Another great opportunity to contribute with my skills and to develop other ones. A great team of young programmers with wonderful ideas and a variety of different backgrounds. People with a lot of expertise in many fields.',

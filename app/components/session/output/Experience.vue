@@ -3,7 +3,6 @@ import type { Role } from '~/data/experience'
 
 defineProps<{ roles: Role[] }>()
 
-/** The session decides what opening a Role means; this only reports which. */
 const emit = defineEmits<{ open: [slug: string] }>()
 
 /**

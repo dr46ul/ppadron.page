@@ -130,7 +130,7 @@ describe('useSession', () => {
       expect(session.entries.value.at(-1)).toMatchObject({
         cmd: 'cat ~/experience/kelp-and-tar',
         output: 'role-detail',
-        slug: 'kelp-and-tar',
+        roleName: 'kelp-and-tar',
       })
     })
 
@@ -143,7 +143,7 @@ describe('useSession', () => {
       expect(session.entries.value.at(-1)).toMatchObject({
         cmd: 'cat ~/experience/kiln-and-ash',
         output: 'role-detail',
-        slug: 'kiln-and-ash',
+        roleName: 'kiln-and-ash',
       })
 
       session.recall(1)
@@ -159,7 +159,7 @@ describe('useSession', () => {
       expect(session.entries.value.at(-1)).toMatchObject({
         cmd: 'CAT ~/Experience/KILN-and-Ash',
         output: 'role-detail',
-        slug: 'kiln-and-ash',
+        roleName: 'kiln-and-ash',
       })
     })
 
@@ -171,7 +171,7 @@ describe('useSession', () => {
 
       expect(session.entries.value.at(-1)).toMatchObject({
         output: 'role-detail',
-        slug: 'Nowhere-Inc',
+        roleName: 'Nowhere-Inc',
       })
     })
 
@@ -183,7 +183,7 @@ describe('useSession', () => {
 
       expect(session.entries.value.at(-1)).toMatchObject({
         output: 'role-detail',
-        slug: '',
+        roleName: '',
       })
     })
 
@@ -193,7 +193,7 @@ describe('useSession', () => {
       session.exec('cat ~/colophon')
       await vi.runAllTimersAsync()
 
-      expect(session.entries.value.at(-1)!.slug).toBeUndefined()
+      expect(session.entries.value.at(-1)!.roleName).toBe('')
     })
 
     it.each([
@@ -234,7 +234,7 @@ describe('useSession', () => {
       expect(session.trimmed.value).toBe(3)
       expect(session.entries.value.at(-1)).toMatchObject({
         output: 'role-detail',
-        slug: 'kiln-and-ash',
+        roleName: 'kiln-and-ash',
       })
     })
 
@@ -246,7 +246,7 @@ describe('useSession', () => {
       session.exec('reset')
 
       expect(session.entries.value.map(entry => entry.output)).not.toContain('role-detail')
-      expect(session.entries.value.every(entry => entry.slug === undefined)).toBe(true)
+      expect(session.entries.value.every(entry => entry.roleName === '')).toBe(true)
     })
   })
 

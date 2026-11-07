@@ -4,8 +4,8 @@ import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
 
 /**
- * The real Content, which every other test mocks and the coverage gate leaves
- * out, so a bad data edit can only fail here.
+ * The real Content. Every other test mocks it or reads a value back from it, and
+ * the coverage gate leaves it out, so a bad data edit can only fail here.
  */
 
 interface Found {

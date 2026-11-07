@@ -39,8 +39,9 @@ export interface SessionEntry {
   /**
    * The Role a `role-detail` entry asked for: its slug, or, where no Role has
    * that slug, the name as typed so Role detail can say what it could not find.
+   * Empty on every other output.
    */
-  slug?: string
+  roleName: string
   /** Run by hand, so it prints a line at a time. Seeded entries do not. */
   animate: boolean
 }
@@ -120,6 +121,10 @@ const ROLE_DETAIL = {
   think: 480,
 } satisfies Pick<SessionCommand, 'output' | 'think'> & { path: string }
 
+function rolePath(slug: string) {
+  return ROLE_DETAIL.path + slug
+}
+
 /** What the transcript holds when the page loads, in order. */
 const TOUR: SessionOutput[] = [
   'whoami',
@@ -146,6 +151,7 @@ export function useSession(roleSlugs: string[]) {
       id: nextId++,
       cmd: commands.find(entry => entry.output === output)!.cmd,
       output,
+      roleName: '',
       animate: false,
     }))
   }
@@ -228,10 +234,10 @@ export function useSession(roleSlugs: string[]) {
       ? ROLE_DETAIL
       : commands.find(entry => entry.cmd === normalised)
     const output: SessionOutput = command?.output ?? 'unknown'
-    const slug = isRolePath
-      ? roleSlugs.find(known => normalised === ROLE_DETAIL.path + known)
+    const roleName = isRolePath
+      ? roleSlugs.find(slug => normalised === rolePath(slug))
       ?? typed.slice(ROLE_DETAIL.path.length)
-      : undefined
+      : ''
 
     // The Enquiry form is a singleton. A second copy would be a second form
     // bound to the same state, so typing into one would fill the other.
@@ -244,7 +250,7 @@ export function useSession(roleSlugs: string[]) {
 
     // The echo is instant — the visitor typed it, the machine did not produce it.
     const id = nextId++
-    entries.value.push({ id, cmd: typed, output: null, slug, animate: true })
+    entries.value.push({ id, cmd: typed, output: null, roleName, animate: true })
 
     const overflow = entries.value.length - SCROLLBACK
     if (overflow > 0) {
@@ -273,7 +279,7 @@ export function useSession(roleSlugs: string[]) {
   }
 
   function openRole(slug: string) {
-    exec(ROLE_DETAIL.path + slug)
+    exec(rolePath(slug))
   }
 
   /**
@@ -288,7 +294,7 @@ export function useSession(roleSlugs: string[]) {
 
     const pool = [
       ...commands.map(entry => entry.cmd),
-      ...roleSlugs.map(slug => ROLE_DETAIL.path + slug),
+      ...roleSlugs.map(rolePath),
       ...metaCommands.map(entry => entry.cmd),
       ...Object.keys(aliases),
     ]

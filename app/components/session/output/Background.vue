@@ -6,8 +6,6 @@ defineProps<{ profile: Profile }>()
 
 <template>
   <div>
-    <!-- The labels below are paragraphs because the Session's outline stops at
-         whoami's title. -->
     <div class="flex max-w-prose flex-col gap-3">
       <p
         v-for="(paragraph, index) in profile.background"
