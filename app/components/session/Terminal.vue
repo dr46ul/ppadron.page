@@ -155,9 +155,9 @@ function focusPrompt(event: MouseEvent) {
               @open="openRole"
             />
             <SessionOutputRoleDetail
-              v-else-if="entry.output === 'role-detail' && entry.slug !== undefined"
-              :slug="entry.slug"
-              :role="roles.find(role => role.slug === entry.slug)"
+              v-else-if="entry.output === 'role-detail'"
+              :role-name="entry.roleName"
+              :role="roles.find(role => role.slug === entry.roleName)"
             />
             <SessionOutputBackground
               v-else-if="entry.output === 'background'"

@@ -2,9 +2,9 @@
 import type { Role } from '~/data/experience'
 
 defineProps<{
-  slug: string
+  roleName: string
   /**
-   * Absent when the slug names no Role. That prints its own line rather than
+   * Absent when the name matches no Role. That prints its own line rather than
    * the generic Unknown output: the Visitor got the Command right and the name
    * wrong, so what helps is the list of names.
    */
@@ -71,7 +71,7 @@ defineProps<{
     v-else
     class="text-error text-xs"
   >
-    cat: ~/experience/{{ slug }}: No such file or directory — try
+    cat: ~/experience/{{ roleName }}: No such file or directory — try
     <span class="text-accent">ls ~/experience</span>
   </p>
 </template>

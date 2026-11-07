@@ -23,7 +23,7 @@ function role(overrides: Partial<Role> = {}): Role {
 
 function mount(overrides: Partial<Role> = {}) {
   return mountSuspended(RoleDetail, {
-    props: { slug: 'kiln-and-ash', role: role(overrides) },
+    props: { roleName: 'kiln-and-ash', role: role(overrides) },
   })
 }
 
@@ -168,8 +168,8 @@ describe('role detail output', () => {
   })
 
   describe('no such file', () => {
-    function mountMissing(slug = 'ghost-corp') {
-      return mountSuspended(RoleDetail, { props: { slug } })
+    function mountMissing(roleName = 'ghost-corp') {
+      return mountSuspended(RoleDetail, { props: { roleName } })
     }
 
     it('names the path the Visitor asked for', async () => {
