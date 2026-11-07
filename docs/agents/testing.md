@@ -110,6 +110,7 @@ One file per subject, mirroring `app/`:
 | `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
 | `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
 | `shared/<name>.ts`                         | `test/unit/shared/<name>.test.ts`         |
+| `app/data/*.ts`, the real Content          | `test/unit/content.test.ts`               |
 
 Output components are pure: they print what they are handed as props and
 report through emits, so their tests mount them with props and never touch the
@@ -131,6 +132,17 @@ identity and each test writes into it (`Object.assign`, `splice`) rather than
 reassigning it. This is also the only way to reach Content the real modules
 cannot express, such as `availability.open` being false.
 
+### What belongs in the Content invariants test
+
+Every other test mocks the data modules or reads a value back from them, so
+`test/unit/content.test.ts` is the only place a bad data edit can fail. It holds
+rules that are true of any Content: no `[bracketed]` placeholder, Roles most
+recent first, no shared `since` or slug, every slug a valid path segment. It
+never asserts wording.
+
+While Pavel still owes Content, the placeholder test is **meant** to be red, and
+its failure message lists the fields left. That is what holds the branch back.
+
 ### What belongs in the SSR test
 
 `test/e2e/ssr.test.ts` asserts **only what only the server render can prove**:
@@ -148,7 +160,7 @@ already owns.** The seams are the login banner plus each of the three data
 modules, asserted in the transcript block that consumes it. Which fields a
 block prints, and how, stays in that component's own test file; re-proving it
 here just buys a slower copy. Prefer a field carrying real copy over a
-`[bracketed]` placeholder, since the placeholders are all replaced at once.
+`[bracketed]` placeholder, which is only there until it is replaced.
 
 Two mechanics this depends on:
 
@@ -259,15 +271,15 @@ test is wired to nothing. It has bitten three times, in two guises:
   block with `mountTerminal()`'s `output(cmd)` helper (issues #15, #16).
 - **In `test/e2e`** the `<head>` carries `profile.name` twice — the document
   title and the description — so a page-wide assertion on it passes against an
-  empty `<body>`. Worse, the placeholder Content is not unique to its module:
-  `'[Company]'`, `'[Name]'` and `'[Title]'` are fields of **both** `roles` and
-  `recommendations`, so Experience could vanish and an assertion on
-  `roles[0].company` would stay green on the Recommendations block. Scope to
-  `[data-banner]` or to the block `entry(cmd)` returns (issue #29).
+  empty `<body>`. Worse, Content is not unique to its module: `'Rogue Fitness'`
+  and `'Playfood'` are companies in **both** `roles` and `recommendations`, so
+  Experience could vanish and an assertion on `roles[0].company` would stay
+  green on the Recommendations block. Scope to `[data-banner]` or to the block
+  `entry(cmd)` returns (issue #29).
 
 Picking a value that happens to be unique today is not a fix: it rests on which
-strings three placeholder files happen not to share, and stops discriminating
-the moment real copy reuses one. Scope the assertion instead.
+strings three data files happen not to share, and stops discriminating the
+moment an edit reuses one. Scope the assertion instead.
 
 ## Adding a helper
 
