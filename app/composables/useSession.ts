@@ -12,6 +12,8 @@ export type SessionOutput
     | 'contact'
     | 'colophon'
     | 'help'
+    | 'background'
+    | 'role-detail'
     | 'unknown'
 
 export interface SessionCommand {
@@ -34,12 +36,23 @@ export interface SessionEntry {
   cmd: string
   /** null while the machine is still thinking. */
   output: SessionOutput | null
+  /**
+   * The Role a `role-detail` entry asked for: its slug, or, where no Role has
+   * that slug, the name as typed so Role detail can say what it could not find.
+   */
+  slug?: string
   /** Run by hand, so it prints a line at a time. Seeded entries do not. */
   animate: boolean
 }
 
 export const commands: SessionCommand[] = [
   { cmd: 'whoami', output: 'whoami', label: 'who I am', think: 260 },
+  {
+    cmd: 'cat ~/about',
+    output: 'background',
+    label: 'the longer story',
+    think: 440,
+  },
   {
     cmd: 'ls ~/experience',
     output: 'experience',
@@ -80,7 +93,7 @@ export const metaCommands: MetaCommand[] = [
 
 /** What a visitor is likely to type instead of the canonical spelling. */
 export const aliases: Record<string, string> = {
-  'about': 'whoami',
+  'about': 'cat ~/about',
   'me': 'whoami',
   'experience': 'ls ~/experience',
   'work': 'ls ~/experience',
@@ -96,6 +109,16 @@ export const aliases: Record<string, string> = {
   'man': 'help',
   'restart': 'reset',
 }
+
+/**
+ * Takes the Role as an argument, so it stays out of `commands`: a chip per Role
+ * would grow the row with Content.
+ */
+const ROLE_DETAIL = {
+  path: 'cat ~/experience/',
+  output: 'role-detail',
+  think: 480,
+} satisfies Pick<SessionCommand, 'output' | 'think'> & { path: string }
 
 /** What the transcript holds when the page loads, in order. */
 const TOUR: SessionOutput[] = [
@@ -115,7 +138,7 @@ const SCROLLBACK = 14
 /** A command that does not exist still has to be looked for. */
 const THINK_UNKNOWN = 300
 
-export function useSession() {
+export function useSession(roleSlugs: string[]) {
   let nextId = 0
 
   function seed(): SessionEntry[] {
@@ -198,8 +221,17 @@ export function useSession() {
       return
     }
 
-    const command = commands.find(entry => entry.cmd === normalised)
-    const output = command?.output ?? 'unknown'
+    // A right Command with a wrong name gets Role detail's answer, not `unknown`:
+    // the Visitor needs a different name, not a different Command.
+    const isRolePath = normalised.startsWith(ROLE_DETAIL.path)
+    const command = isRolePath
+      ? ROLE_DETAIL
+      : commands.find(entry => entry.cmd === normalised)
+    const output: SessionOutput = command?.output ?? 'unknown'
+    const slug = isRolePath
+      ? roleSlugs.find(known => normalised === ROLE_DETAIL.path + known)
+      ?? typed.slice(ROLE_DETAIL.path.length)
+      : undefined
 
     // The Enquiry form is a singleton. A second copy would be a second form
     // bound to the same state, so typing into one would fill the other.
@@ -212,7 +244,7 @@ export function useSession() {
 
     // The echo is instant — the visitor typed it, the machine did not produce it.
     const id = nextId++
-    entries.value.push({ id, cmd: typed, output: null, animate: true })
+    entries.value.push({ id, cmd: typed, output: null, slug, animate: true })
 
     const overflow = entries.value.length - SCROLLBACK
     if (overflow > 0) {
@@ -252,6 +284,7 @@ export function useSession() {
 
     const pool = [
       ...commands.map(entry => entry.cmd),
+      ...roleSlugs.map(slug => ROLE_DETAIL.path + slug),
       ...metaCommands.map(entry => entry.cmd),
       ...Object.keys(aliases),
     ]

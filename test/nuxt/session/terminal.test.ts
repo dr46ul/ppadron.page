@@ -554,6 +554,14 @@ describe('terminal', () => {
       expect(session.output('help').text()).toContain('this list')
     })
 
+    it('offers a chip for the Background, but none per Role', async () => {
+      const session = await mountTerminal()
+      const chips = session.promptBar().findAll('button').map(button => button.text())
+
+      expect(chips).toContain('cat ~/about')
+      expect(chips.filter(chip => chip.includes('kiln-and-ash'))).toEqual([])
+    })
+
     describe('completing on Tab', () => {
       function press(prompt: { element: Element }) {
         const event = new KeyboardEvent('keydown', {
@@ -573,6 +581,17 @@ describe('terminal', () => {
         expect(press(prompt).defaultPrevented).toBe(true)
         await nextTick()
         expect(prompt.element.value).toBe('recommendations')
+      })
+
+      it('completes the path of a Role it read from the Content', async () => {
+        const { component } = await mountTerminal()
+        const prompt = component.find<HTMLInputElement>('#prompt')
+        await prompt.setValue('cat ~/experience/k')
+
+        press(prompt)
+        await nextTick()
+
+        expect(prompt.element.value).toBe('cat ~/experience/kiln-and-ash')
       })
 
       it('moves focus on from a prompt already complete', async () => {
