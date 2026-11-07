@@ -40,4 +40,6 @@ jobs:
 
       # Runs all three projects. The e2e one builds the app, so it is the slow
       # step; it is also the only thing covering the server-rendered HTML.
-      - run: pnpm test
+      # Vitest defaults to one worker fewer than the cores it sees, so the 2-core
+      # runner a private repository gets would run every test file in series.
+      - run: pnpm test --maxWorkers=100%
