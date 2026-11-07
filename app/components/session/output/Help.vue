@@ -27,7 +27,14 @@ defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
       </li>
     </ul>
 
+    <!-- Interface copy, not a prop: the form does not change when Pavel's Roles
+         do, and `commands` is what the chips print, which it must stay out of. -->
     <p class="text-subtle mt-4 text-xs">
+      <code class="text-accent">cat ~/experience/&lt;role&gt;</code>
+      prints one role in full.
+    </p>
+
+    <p class="text-subtle mt-1 text-xs">
       Tab completes · ↑ ↓ walk the history · plain words work too
       (<span class="text-muted">experience</span>,
       <span class="text-muted">contact</span>).
