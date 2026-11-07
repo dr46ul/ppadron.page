@@ -2,6 +2,21 @@
 import type { Role } from '~/data/experience'
 
 defineProps<{ roles: Role[] }>()
+
+/** The session decides what opening a Role means; this only reports which. */
+const emit = defineEmits<{ open: [slug: string] }>()
+
+/**
+ * Selecting the name by dragging across it also ends in a click, which is not a
+ * request to open. A pointer click has already collapsed any older selection,
+ * so one still standing is this gesture's. The keyboard collapses nothing, and
+ * its click (detail 0) has to work with text selected anywhere on the page.
+ */
+function open(event: MouseEvent, slug: string) {
+  if (event.detail > 0 && window.getSelection()!.toString())
+    return
+  emit('open', slug)
+}
 </script>
 
 <template>
@@ -29,12 +44,19 @@ defineProps<{ roles: Role[] }>()
         </time>
 
         <div>
-          <p class="flex flex-wrap items-baseline gap-x-3">
-            <span class="font-semibold">{{ role.company }}</span>
+          <!-- The button stops at the name so the summary below stays plain
+               text to select. `.stop` because the session behind it would put
+               the caret in the prompt and take focus off the list. -->
+          <button
+            type="button"
+            class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
+            @click.stop="open($event, role.slug)"
+          >
+            <span class="decoration-edge group-hover:text-accent font-semibold underline underline-offset-4">{{ role.company }}</span>
             <span class="text-muted text-xs">
               {{ role.title }}
             </span>
-          </p>
+          </button>
           <p class="text-body mt-1 max-w-prose">
             {{ role.summary }}
           </p>

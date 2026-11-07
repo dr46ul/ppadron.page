@@ -29,6 +29,7 @@ const {
   scrollback,
   input,
   exec,
+  openRole,
   completion,
   recall,
   enquiry,
@@ -151,6 +152,16 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
               :roles
+              @open="openRole"
+            />
+            <SessionOutputRoleDetail
+              v-else-if="entry.output === 'role-detail' && entry.slug !== undefined"
+              :slug="entry.slug"
+              :role="roles.find(role => role.slug === entry.slug)"
+            />
+            <SessionOutputBackground
+              v-else-if="entry.output === 'background'"
+              :profile
             />
             <SessionOutputRecommendations
               v-else-if="entry.output === 'recommendations'"

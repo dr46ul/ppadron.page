@@ -134,6 +134,22 @@ describe('useSession', () => {
       })
     })
 
+    it('opens a Role by slug through the Command, so it echoes and can be recalled', async () => {
+      const session = useSession(SLUGS)
+
+      session.openRole('kiln-and-ash')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        cmd: 'cat ~/experience/kiln-and-ash',
+        output: 'role-detail',
+        slug: 'kiln-and-ash',
+      })
+
+      session.recall(1)
+      expect(session.input.value).toBe('cat ~/experience/kiln-and-ash')
+    })
+
     it('finds the Role whatever case it is typed in, and echoes it as typed', async () => {
       const session = useSession(SLUGS)
 
