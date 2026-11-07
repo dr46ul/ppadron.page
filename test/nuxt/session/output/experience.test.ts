@@ -1,6 +1,6 @@
 import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
 import { roleOf } from '../../text-role'
 
@@ -109,6 +109,79 @@ describe('experience output', () => {
       'Freelance client work is under NDA, so there is no projects gallery.',
     )
     expect(component.findAll('li')).toHaveLength(0)
+  })
+
+  describe('opening a role', () => {
+    function button(component: Awaited<ReturnType<typeof mount>>, company: string) {
+      return component.findAll('button').find(found => found.text().includes(company))!
+    }
+
+    it('gives every role a button of its own, reporting its slug', async () => {
+      const component = await mount([
+        role({ slug: 'kiln-and-ash', company: 'Kiln & Ash', since: '2022' }),
+        role({ slug: 'kelp-and-tar', company: 'Kelp & Tar', since: '2019' }),
+      ])
+
+      await button(component, 'Kelp & Tar').trigger('click', { detail: 1 })
+      await button(component, 'Kiln & Ash').trigger('click')
+
+      expect(component.emitted('open')).toEqual([['kelp-and-tar'], ['kiln-and-ash']])
+    })
+
+    it('names the role in the button and leaves the summary outside it', async () => {
+      const component = await mount([
+        role({
+          company: 'Kiln & Ash',
+          title: 'Kiln technician',
+          summary: 'Rebuilt the firing schedule.',
+        }),
+      ])
+
+      const text = component.get('button').text()
+      expect(text).toContain('Kiln & Ash')
+      expect(text).toContain('Kiln technician')
+      expect(text).not.toContain('Rebuilt the firing schedule.')
+    })
+
+    it('has nothing to open when it has no roles', async () => {
+      const component = await mount([])
+
+      expect(component.findAll('button')).toHaveLength(0)
+    })
+
+    it('keeps the click from reaching the session behind it', async () => {
+      const component = await mount([role()])
+      const behind = vi.fn()
+      component.element.parentElement!.addEventListener('click', behind)
+
+      await component.get('button').trigger('click')
+
+      expect(behind).not.toHaveBeenCalled()
+    })
+
+    describe('with text selected', () => {
+      afterEach(() => {
+        window.getSelection()!.removeAllRanges()
+      })
+
+      it('stays shut when a pointer drag across the name ends on the button', async () => {
+        const component = await mount([role()])
+        window.getSelection()!.selectAllChildren(component.get('button').element)
+
+        await component.get('button').trigger('click', { detail: 1 })
+
+        expect(component.emitted('open')).toBeUndefined()
+      })
+
+      it('still opens from the keyboard, whose click has no pointer behind it', async () => {
+        const component = await mount([role({ slug: 'kiln-and-ash' })])
+        window.getSelection()!.selectAllChildren(component.get('p').element)
+
+        await component.get('button').trigger('click', { detail: 0 })
+
+        expect(component.emitted('open')).toEqual([['kiln-and-ash']])
+      })
+    })
   })
 
   it('holds no placeholder markers of its own', async () => {

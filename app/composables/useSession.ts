@@ -272,6 +272,10 @@ export function useSession(roleSlugs: string[]) {
     )
   }
 
+  function openRole(slug: string) {
+    exec(ROLE_DETAIL.path + slug)
+  }
+
   /**
    * What Tab would turn the prompt into, over every spelling a visitor might
    * be part-way through. Undefined when it would change nothing, so Tab can be
@@ -309,6 +313,7 @@ export function useSession(roleSlugs: string[]) {
     scrollback: SCROLLBACK,
     input,
     exec,
+    openRole,
     completion,
     recall,
     enquiry,

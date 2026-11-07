@@ -524,6 +524,100 @@ describe('terminal', () => {
     })
   })
 
+  describe('reading a Role', () => {
+    it('hands the Role the Command names to the Role detail output', async () => {
+      const session = await mountTerminal()
+      data.roles.push({
+        ...roleFixture(),
+        slug: 'kelp-and-tar',
+        since: '1994',
+        account: ['Dried kelp on the roof until the tar ran out.'],
+      })
+
+      await session.run('cat ~/experience/kelp-and-tar')
+
+      const text = session.output('cat ~/experience/kelp-and-tar').text()
+      expect(text).toContain('Dried kelp on the roof until the tar ran out.')
+      expect(text).not.toContain('Spent three winters')
+    })
+
+    it('resolves the Role whatever case it was typed in', async () => {
+      const session = await mountTerminal()
+
+      await session.run('cat ~/experience/KILN-and-ash')
+
+      expect(session.output('cat ~/experience/KILN-and-ash').text())
+        .toContain('Spent three winters learning')
+    })
+
+    it('says there is no such file for a name no Role has', async () => {
+      const session = await mountTerminal()
+
+      await session.run('cat ~/experience/Nowhere-Inc')
+
+      const text = session.output('cat ~/experience/Nowhere-Inc').text()
+      expect(text).toContain('~/experience/Nowhere-Inc: No such file or directory')
+      expect(text).not.toContain('command not found')
+    })
+
+    it('hands the Profile to the Background output', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('cat ~/about').trigger('click')
+      await session.settle()
+
+      const text = session.output('cat ~/about').text()
+      expect(text).toContain('Learned plumbing from a lighthouse keeper.')
+      expect(text).toContain('soldering')
+      expect(text).toContain('University of Reykjavík')
+    })
+
+    describe('from the Experience list', () => {
+      function row(session: Awaited<ReturnType<typeof mountTerminal>>) {
+        return session.output('ls ~/experience').get('button')
+      }
+
+      it('runs the same path as typing it: the Command echoes and prints', async () => {
+        const session = await mountTerminal()
+
+        await row(session).trigger('click')
+        await session.settle()
+
+        expect(session.entries().at(-1)!.find('p').text())
+          .toContain('cat ~/experience/kiln-and-ash')
+        expect(session.entries().at(-1)!.text())
+          .toContain('Spent three winters learning')
+      })
+
+      it('goes into the history like anything typed', async () => {
+        const session = await mountTerminal()
+
+        await row(session).trigger('click')
+        await session.settle()
+
+        const prompt = session.component.find<HTMLInputElement>('#prompt')
+        await prompt.trigger('keydown', { key: 'ArrowUp' })
+
+        expect(prompt.element.value).toBe('cat ~/experience/kiln-and-ash')
+      })
+
+      it('does not raise the on-screen keyboard on a tap', async () => {
+        const session = await mountTerminal()
+        const focus = vi.spyOn(
+          session.component.find<HTMLInputElement>('#prompt').element,
+          'focus',
+        )
+
+        row(session).element.dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'touch' }))
+        await session.settle()
+
+        expect(focus).not.toHaveBeenCalled()
+        expect(session.entries().at(-1)!.find('p').text())
+          .toContain('cat ~/experience/kiln-and-ash')
+      })
+    })
+  })
+
   describe('what it hands the prompt bar', () => {
     it('hands every command and every meta command to the chips', async () => {
       const { promptBar } = await mountTerminal()
