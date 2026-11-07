@@ -24,6 +24,14 @@ function profile(overrides: Partial<Profile> = {}): Profile {
       repo: 'https://example.test/the-repo',
     },
     stack: ['fortran', 'cobol'],
+    background: ['Learned plumbing from a lighthouse keeper.'],
+    skills: ['soldering'],
+    education: {
+      degree: 'Licence in Hydraulics',
+      faculty: 'Faculty of Water',
+      institution: 'University of Reykjavík',
+      year: '1991',
+    },
     ...overrides,
   }
 }
