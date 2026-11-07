@@ -32,7 +32,7 @@ const {
   completion,
   recall,
   enquiry,
-} = useSession()
+} = useSession(roles.map(role => role.slug))
 
 const promptBar = useTemplateRef('promptBar')
 
