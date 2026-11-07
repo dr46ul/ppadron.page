@@ -364,7 +364,7 @@ guards the number and the browser run proves the number reaches the element.
 - **It is CommonJS**, so an ESM script reaches it with `createRequire` and an
   absolute path rather than an `import`.
 - **It ships no browser.** A fresh clone fails with `Executable doesn't exist`;
-  run `npx playwright install chromium-headless-shell` first. Neither install
+  run `pnpm exec playwright-core install chromium-headless-shell` first. Neither install
   nor CI does this, because no committed test needs a browser.
 
 Drive the server built into `.output`, not the dev server, so what is measured
