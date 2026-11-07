@@ -26,9 +26,9 @@ export default antfu(
     // own language; a block without `files` only reaches the source globs.
     files: ['**/*'],
     rules: {
-      // Would write `trustPolicy: no-downgrade` into pnpm-workspace.yaml, which
-      // rejects this lockfile and breaks `pnpm install --frozen-lockfile`. The
-      // rule cannot opt out of one setting, so it is off. See ADR-0006.
+      // `eslint --fix` would write the preset's settings into
+      // pnpm-workspace.yaml, so a preset upgrade could change install policy
+      // unreviewed. The rule cannot opt out of one setting. See ADR-0006.
       'pnpm/yaml-enforce-settings': 'off',
 
       // The em dash is part of this repository's written voice, in the ADRs,
