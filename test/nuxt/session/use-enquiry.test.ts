@@ -2,7 +2,9 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 /** Not `vi.stubGlobal`, which cannot reach it: see docs/agents/testing.md. */
-const { post } = vi.hoisted(() => ({ post: vi.fn() }))
+const { post } = vi.hoisted(() => ({
+  post: vi.fn(),
+}))
 mockNuxtImport('$fetch', () => post)
 
 /** A draft the delivery's rules accept, as a Visitor might type it. */
@@ -159,8 +161,14 @@ describe('useEnquiry', () => {
     })
 
     it.each([
-      ['delivered', () => Promise.resolve({ sent: true })],
-      ['failed', () => Promise.reject(new Error('offline'))],
+      [
+        'delivered',
+        () => Promise.resolve({ sent: true }),
+      ],
+      [
+        'failed',
+        () => Promise.reject(new Error('offline')),
+      ],
     ])(
       'is not undone by a send that was on its way and then %s',
       async (_, outcome) => {

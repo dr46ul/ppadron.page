@@ -45,7 +45,10 @@ export default antfu(
     rules: {
       // `as const` is not a cast and stays allowed. See
       // .agents/rules/no-type-assertions.md.
-      'ts/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
+      'ts/consistent-type-assertions': [
+        'error',
+        { assertionStyle: 'never' },
+      ],
     },
   },
   {
@@ -55,7 +58,11 @@ export default antfu(
       // `:profile` both pass unless it is named. Vue camelises the argument of
       // a same-name shorthand, so `:meta-commands` still binds `metaCommands`.
       // See .agents/rules/vue-same-name-shorthand.md.
-      'vue/v-bind-style': ['error', 'shorthand', { sameNameShorthand: 'always' }],
+      'vue/v-bind-style': [
+        'error',
+        'shorthand',
+        { sameNameShorthand: 'always' },
+      ],
     },
   },
 )

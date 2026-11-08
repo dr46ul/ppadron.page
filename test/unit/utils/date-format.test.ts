@@ -5,11 +5,36 @@ const builtAt = Date.UTC(2026, 2, 14, 9, 5, 7)
 
 describe('formatDate', () => {
   describe.each([
-    ['en', 'UTC', 'Sat, Mar 14, 09:05:07 AM UTC', '2026'],
-    ['en-US', 'America/New_York', 'Sat, Mar 14, 05:05:07 AM EDT', '2026'],
-    ['en-GB', 'Europe/London', 'Sat 14 Mar, 09:05:07 GMT', '2026'],
-    ['de-DE', 'Europe/Berlin', 'Sa., 14. März, 10:05:07 MEZ', '2026'],
-    ['ar-EG', 'Africa/Cairo', 'السبت، ١٤ مارس، ١١:٠٥:٠٧ ص غرينتش+٢', '٢٠٢٦'],
+    [
+      'en',
+      'UTC',
+      'Sat, Mar 14, 09:05:07 AM UTC',
+      '2026',
+    ],
+    [
+      'en-US',
+      'America/New_York',
+      'Sat, Mar 14, 05:05:07 AM EDT',
+      '2026',
+    ],
+    [
+      'en-GB',
+      'Europe/London',
+      'Sat 14 Mar, 09:05:07 GMT',
+      '2026',
+    ],
+    [
+      'de-DE',
+      'Europe/Berlin',
+      'Sa., 14. März, 10:05:07 MEZ',
+      '2026',
+    ],
+    [
+      'ar-EG',
+      'Africa/Cairo',
+      'السبت، ١٤ مارس، ١١:٠٥:٠٧ ص غرينتش+٢',
+      '٢٠٢٦',
+    ],
   ])('for %s in %s', (locale, timeZone, lastLogin, year) => {
     it('prints the last login', () => {
       expect(formatDate(builtAt, 'lastLogin', { locale, timeZone })).toBe(lastLogin)

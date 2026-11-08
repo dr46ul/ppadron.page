@@ -15,7 +15,9 @@ function command(overrides: Partial<SessionCommand> = {}): SessionCommand {
 }
 
 function mount(commands: SessionCommand[], metaCommands: MetaCommand[] = []) {
-  return mountSuspended(Help, { props: { commands, metaCommands } })
+  return mountSuspended(Help, {
+    props: { commands, metaCommands },
+  })
 }
 
 describe('help output', () => {
@@ -47,8 +49,12 @@ describe('help output', () => {
 
   it('lists the meta commands after the commands that print', async () => {
     const component = await mount(
-      [command({ cmd: 'cat ~/vault', label: 'the sealed thing' })],
-      [{ cmd: 'wipe', label: 'start over' }],
+      [
+        command({ cmd: 'cat ~/vault', label: 'the sealed thing' }),
+      ],
+      [
+        { cmd: 'wipe', label: 'start over' },
+      ],
     )
 
     expect(component.findAll('li').map(item => item.text())).toEqual([
@@ -60,8 +66,13 @@ describe('help output', () => {
 
   it('numbers the print cascade across both lists', async () => {
     const component = await mount(
-      [command({ cmd: 'one' }), command({ cmd: 'two' })],
-      [{ cmd: 'wipe', label: 'start over' }],
+      [
+        command({ cmd: 'one' }),
+        command({ cmd: 'two' }),
+      ],
+      [
+        { cmd: 'wipe', label: 'start over' },
+      ],
     )
 
     expect(component.findAll('li').map(item => item.attributes('style')))
@@ -90,8 +101,12 @@ describe('help output', () => {
       // Both lists, because a meta command's label is printed by a second `li`
       // that a commands-only mount never renders.
       const component = await mount(
-        [command({ cmd: 'cat ~/vault', label: 'the sealed thing' })],
-        [{ cmd: 'reset', label: 'start the session over' }],
+        [
+          command({ cmd: 'cat ~/vault', label: 'the sealed thing' }),
+        ],
+        [
+          { cmd: 'reset', label: 'start the session over' },
+        ],
       )
 
       expect(roleOf(component, 'span', 'the sealed thing')).toBe('text-subtle')
@@ -101,7 +116,9 @@ describe('help output', () => {
     })
 
     it('sets the hint as chrome but its examples a step above it', async () => {
-      const component = await mount([command()])
+      const component = await mount([
+        command(),
+      ])
 
       expect(roleOf(component, 'p', 'Tab completes')).toBe('text-subtle')
       // The two plain words are the point of the sentence, so they read above
@@ -111,7 +128,9 @@ describe('help output', () => {
     })
 
     it('accents the Role form like a command, and sets its gloss as chrome', async () => {
-      const component = await mount([command()])
+      const component = await mount([
+        command(),
+      ])
 
       expect(roleOf(component, 'p', 'one role in full')).toBe('text-subtle')
       expect(roleOf(component, 'code', 'cat ~/experience/<role>')).toBeUndefined()

@@ -7,7 +7,9 @@ import Unknown from '~/components/session/output/Unknown.vue'
  * the component's own markup.
  */
 function mount(cmd = 'sudo make me a sandwich') {
-  return mountSuspended(Unknown, { props: { cmd } })
+  return mountSuspended(Unknown, {
+    props: { cmd },
+  })
 }
 
 describe('unknown output', () => {

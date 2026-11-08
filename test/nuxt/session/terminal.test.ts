@@ -17,8 +17,12 @@ import { visitFrom } from '../visit-from'
  */
 const data = vi.hoisted(() => ({
   profile: profileFixture(),
-  roles: [roleFixture()],
-  recommendations: [recommendationFixture()],
+  roles: [
+    roleFixture(),
+  ],
+  recommendations: [
+    recommendationFixture(),
+  ],
 }))
 
 vi.mock('~/data/profile', () => ({ profile: data.profile }))
@@ -32,7 +36,9 @@ vi.mock('~/data/recommendations', () => ({
  * so a failure-path test would pass for that reason alone. Every test that
  * submits an Enquiry names the outcome it wants.
  */
-const { post } = vi.hoisted(() => ({ post: vi.fn() }))
+const { post } = vi.hoisted(() => ({
+  post: vi.fn(),
+}))
 mockNuxtImport('$fetch', () => post)
 
 function profileFixture(): Profile {
@@ -162,7 +168,9 @@ describe('terminal', () => {
   beforeEach(() => {
     // The banner stamps the session with the time it was built, so the clock
     // is pinned rather than merely faked.
-    vi.useFakeTimers({ now: new Date('2026-03-14T09:05:07Z') })
+    vi.useFakeTimers({
+      now: new Date('2026-03-14T09:05:07Z'),
+    })
     visitFrom(['en-GB'], 'Europe/London')
     post.mockReset()
 
@@ -350,7 +358,10 @@ describe('terminal', () => {
       await session.settle()
 
       const help = session.entries().at(-1)!
-      for (const command of [...commands, ...metaCommands])
+      for (const command of [
+        ...commands,
+        ...metaCommands,
+      ])
         expect(help.text()).toContain(command.label)
     })
 

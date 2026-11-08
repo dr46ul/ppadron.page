@@ -90,11 +90,15 @@ const controls = {
  */
 watchPostEffect(() => {
   const parsed = parseEnquiry(props.modelValue)
-  const failures = parsed.success ? {} : parsed.failures
+  const failures = parsed.success
+    ? {}
+    : parsed.failures
 
   for (const key of FIELDS) {
     const rule = failures[key]
-    controls[key].value!.setCustomValidity(rule ? complaint(key, rule) : '')
+    controls[key].value!.setCustomValidity(rule
+      ? complaint(key, rule)
+      : '')
   }
 })
 </script>

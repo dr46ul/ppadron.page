@@ -14,8 +14,11 @@ interface Found {
 }
 
 function stringsIn(value: unknown, path: string): Found[] {
-  if (typeof value === 'string')
-    return [{ path, value }]
+  if (typeof value === 'string') {
+    return [
+      { path, value },
+    ]
+  }
 
   if (typeof value !== 'object' || value === null)
     return []
@@ -48,13 +51,17 @@ describe('content', () => {
     it('do not share a start', () => {
       const starts = roles.map(role => role.since)
 
-      expect(starts).toEqual([...new Set(starts)])
+      expect(starts).toEqual([
+        ...new Set(starts),
+      ])
     })
 
     it('do not share a slug', () => {
       const slugs = roles.map(role => role.slug)
 
-      expect(slugs).toEqual([...new Set(slugs)])
+      expect(slugs).toEqual([
+        ...new Set(slugs),
+      ])
     })
 
     // Lowercase only: a typed path is matched case-insensitively, so a capital

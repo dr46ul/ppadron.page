@@ -36,7 +36,11 @@ function profile(overrides: Partial<Profile> = {}): Profile {
 }
 
 function mount(overrides: Partial<Profile> = {}) {
-  return mountSuspended(Background, { props: { profile: profile(overrides) } })
+  return mountSuspended(Background, {
+    props: {
+      profile: profile(overrides),
+    },
+  })
 }
 
 describe('background output', () => {
@@ -50,7 +54,9 @@ describe('background output', () => {
   })
 
   it('joins the skills with a middle dot', async () => {
-    const component = await mount({ skills: ['soldering', 'patience', 'flux'] })
+    const component = await mount({
+      skills: ['soldering', 'patience', 'flux'],
+    })
 
     expect(component.text()).toContain('soldering · patience · flux')
   })
@@ -102,7 +108,9 @@ describe('background output', () => {
     })
 
     it('labels the skills when there are some, and drops the label with them when there are none', async () => {
-      const withSkills = await mount({ skills: ['soldering'] })
+      const withSkills = await mount({
+        skills: ['soldering'],
+      })
       const without = await mount({ skills: [] })
 
       expect(withSkills.text()).toContain('Skills')

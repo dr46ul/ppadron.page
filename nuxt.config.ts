@@ -16,7 +16,9 @@ export default defineNuxtConfig({
         'data-theme': 'terminal',
       },
       title: 'Pavel Padron — Frontend Engineer',
-      meta: [{ name: 'description', content: 'Pavel Padron\'s portfolio' }],
+      meta: [
+        { name: 'description', content: 'Pavel Padron\'s portfolio' },
+      ],
     },
   },
 
@@ -53,12 +55,18 @@ export default defineNuxtConfig({
   fonts: {
     // The page is a terminal, so one register and one family.
     families: [
-      { name: 'IBM Plex Mono', provider: 'google', weights: [400, 500, 600, 700] },
+      {
+        name: 'IBM Plex Mono',
+        provider: 'google',
+        weights: [400, 500, 600, 700],
+      },
     ],
   },
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+    ],
   },
 
   // Nuxt's generated projects reach `test/nuxt/` and no other test directory,
@@ -70,7 +78,10 @@ export default defineNuxtConfig({
     nodeTsConfig: {
       include: ['../test/unit/**/*', '../test/e2e/**/*'],
       compilerOptions: {
-        paths: { '#shared': ['../shared'], '#shared/*': ['../shared/*'] },
+        paths: {
+          '#shared': ['../shared'],
+          '#shared/*': ['../shared/*'],
+        },
       },
     },
   },

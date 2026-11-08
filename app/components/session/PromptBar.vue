@@ -37,7 +37,9 @@ function onTab(event: KeyboardEvent) {
   typed.value = completion
 }
 
-defineExpose({ focus: () => prompt.value?.focus() })
+defineExpose({
+  focus: () => prompt.value?.focus(),
+})
 </script>
 
 <template>

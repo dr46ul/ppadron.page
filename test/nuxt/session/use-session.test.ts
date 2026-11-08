@@ -12,7 +12,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
  * binding the composable holds: the real request goes out and a test asserting
  * `failed` passes because it genuinely failed.
  */
-const { post } = vi.hoisted(() => ({ post: vi.fn() }))
+const { post } = vi.hoisted(() => ({
+  post: vi.fn(),
+}))
 mockNuxtImport('$fetch', () => post)
 
 /** A draft the delivery's rules accept, so a send gets as far as `sent`. */

@@ -15,7 +15,9 @@ describe('mockupWindow', () => {
 
   it('renders slot content', async () => {
     const component = await mountSuspended(MockupWindow, {
-      slots: { default: () => 'Window content' },
+      slots: {
+        default: () => 'Window content',
+      },
     })
 
     expect(component.text()).toContain('Window content')
@@ -61,7 +63,9 @@ describe('mockupCodeLine', () => {
 
   it('renders slot content', async () => {
     const component = await mountSuspended(MockupCodeLine, {
-      slots: { default: () => 'npm install' },
+      slots: {
+        default: () => 'npm install',
+      },
     })
 
     expect(component.get('code').text()).toBe('npm install')
@@ -80,7 +84,10 @@ describe('mockupCode', () => {
   it('renders a line for each item', async () => {
     const component = await mountSuspended(MockupCode, {
       props: {
-        lines: [{ content: 'git status' }, { content: 'clean working tree' }],
+        lines: [
+          { content: 'git status' },
+          { content: 'clean working tree' },
+        ],
       },
     })
 
@@ -90,7 +97,10 @@ describe('mockupCode', () => {
   it('renders each line content', async () => {
     const component = await mountSuspended(MockupCode, {
       props: {
-        lines: [{ content: 'git status' }, { content: 'clean working tree' }],
+        lines: [
+          { content: 'git status' },
+          { content: 'clean working tree' },
+        ],
       },
     })
 
@@ -103,7 +113,9 @@ describe('mockupCode', () => {
   it('applies a custom prefix to a line', async () => {
     const component = await mountSuspended(MockupCode, {
       props: {
-        lines: [{ content: 'git status', prefix: '$' }],
+        lines: [
+          { content: 'git status', prefix: '$' },
+        ],
       },
     })
 
@@ -120,7 +132,9 @@ describe('mockupPhone', () => {
 
   it('renders slot content', async () => {
     const component = await mountSuspended(MockupPhone, {
-      slots: { default: () => 'Phone screen' },
+      slots: {
+        default: () => 'Phone screen',
+      },
     })
 
     expect(component.text()).toContain('Phone screen')

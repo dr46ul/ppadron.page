@@ -1,6 +1,11 @@
 import * as z from 'zod/mini'
 
-const RULES = ['missing', 'too-short', 'too-long', 'not-an-address'] as const
+const RULES = [
+  'missing',
+  'too-short',
+  'too-long',
+  'not-an-address',
+] as const
 
 export type EnquiryRule = (typeof RULES)[number]
 
@@ -98,7 +103,9 @@ export function parseEnquiry(body: unknown): EnquiryParse {
 
     // An issue with no path is the body itself not being an object, which
     // leaves every field missing.
-    for (const failed of field ? [field] : FIELDS)
+    for (const failed of field
+      ? [field]
+      : FIELDS)
       failures[failed] ??= rule
   }
 

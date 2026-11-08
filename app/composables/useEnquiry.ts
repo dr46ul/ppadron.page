@@ -71,5 +71,12 @@ export function useEnquiry() {
       state.value = 'idle'
   }
 
-  return readonly({ draft, state, edit, submit, clear, open })
+  return readonly({
+    draft,
+    state,
+    edit,
+    submit,
+    clear,
+    open,
+  })
 }

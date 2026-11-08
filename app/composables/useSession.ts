@@ -47,7 +47,12 @@ export interface SessionEntry {
 }
 
 export const commands: SessionCommand[] = [
-  { cmd: 'whoami', output: 'whoami', label: 'who I am', think: 260 },
+  {
+    cmd: 'whoami',
+    output: 'whoami',
+    label: 'who I am',
+    think: 260,
+  },
   {
     cmd: 'cat ~/about',
     output: 'background',
@@ -78,7 +83,12 @@ export const commands: SessionCommand[] = [
     label: 'how this page is built',
     think: 480,
   },
-  { cmd: 'help', output: 'help', label: 'this list', think: 180 },
+  {
+    cmd: 'help',
+    output: 'help',
+    label: 'this list',
+    think: 180,
+  },
 ]
 
 /** Commands that act on the session itself rather than printing anything. */
@@ -179,7 +189,9 @@ export function useSession(roleSlugs: string[]) {
   function scrollToEnd() {
     window.scrollTo({
       top: document.body.scrollHeight,
-      behavior: reducedMotion() ? 'auto' : 'smooth',
+      behavior: reducedMotion()
+        ? 'auto'
+        : 'smooth',
     })
   }
 
@@ -250,7 +262,13 @@ export function useSession(roleSlugs: string[]) {
 
     // The echo is instant — the visitor typed it, the machine did not produce it.
     const id = nextId++
-    entries.value.push({ id, cmd: typed, output: null, roleName, animate: true })
+    entries.value.push({
+      id,
+      cmd: typed,
+      output: null,
+      roleName,
+      animate: true,
+    })
 
     const overflow = entries.value.length - SCROLLBACK
     if (overflow > 0) {
@@ -274,7 +292,9 @@ export function useSession(roleSlugs: string[]) {
         target.output = output
         nextTick(scrollToEnd)
       },
-      reducedMotion() ? 0 : (command?.think ?? THINK_UNKNOWN),
+      reducedMotion()
+        ? 0
+        : (command?.think ?? THINK_UNKNOWN),
     )
   }
 
@@ -300,7 +320,9 @@ export function useSession(roleSlugs: string[]) {
     ]
 
     const hit = pool.find(entry => entry.startsWith(typed))
-    return hit === input.value ? undefined : hit
+    return hit === input.value
+      ? undefined
+      : hit
   })
 
   function recall(offset: number) {
@@ -309,7 +331,9 @@ export function useSession(roleSlugs: string[]) {
       return
 
     historyIndex.value = next
-    input.value = next === -1 ? '' : history.value[next]!
+    input.value = next === -1
+      ? ''
+      : history.value[next]!
   }
 
   return {

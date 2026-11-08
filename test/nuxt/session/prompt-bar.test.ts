@@ -10,8 +10,18 @@ import { roleOf, rolesOf } from '../text-role'
  * can go green off the component's own markup or the real command list.
  */
 const commands: SessionCommand[] = [
-  { cmd: 'cat ~/vault', output: 'whoami', label: 'the sealed thing', think: 0 },
-  { cmd: 'ls ~/kiln', output: 'experience', label: 'what was fired', think: 0 },
+  {
+    cmd: 'cat ~/vault',
+    output: 'whoami',
+    label: 'the sealed thing',
+    think: 0,
+  },
+  {
+    cmd: 'ls ~/kiln',
+    output: 'experience',
+    label: 'what was fired',
+    think: 0,
+  },
 ]
 
 const metaCommands: MetaCommand[] = [
@@ -80,7 +90,10 @@ describe('prompt bar', () => {
     it('titles each chip with what it does', async () => {
       const component = await mount()
 
-      for (const command of [...commands, ...metaCommands])
+      for (const command of [
+        ...commands,
+        ...metaCommands,
+      ])
         expect(chip(component, command.cmd).attributes('title')).toBe(command.label)
     })
 
@@ -89,7 +102,10 @@ describe('prompt bar', () => {
 
       // `title` is a pointer-only tooltip; the description is what reaches
       // focus and touch.
-      for (const command of [...commands, ...metaCommands]) {
+      for (const command of [
+        ...commands,
+        ...metaCommands,
+      ]) {
         const id = chip(component, command.cmd).attributes('aria-describedby')!
 
         expect(component.find(`#${id}`).text()).toBe(command.label)
@@ -102,7 +118,10 @@ describe('prompt bar', () => {
       await chip(component, 'ls ~/kiln').trigger('click')
       await chip(component, 'sweep').trigger('click')
 
-      expect(component.emitted('run')).toEqual([['ls ~/kiln'], ['sweep']])
+      expect(component.emitted('run')).toEqual([
+        ['ls ~/kiln'],
+        ['sweep'],
+      ])
     })
 
     it('keeps a chip click from reaching the session behind it', async () => {
@@ -128,7 +147,9 @@ describe('prompt bar', () => {
 
       await prompt(component).setValue('ls')
 
-      expect(component.emitted('update:modelValue')).toEqual([['ls']])
+      expect(component.emitted('update:modelValue')).toEqual([
+        ['ls'],
+      ])
     })
 
     it('runs what the Visitor typed', async () => {
@@ -136,7 +157,9 @@ describe('prompt bar', () => {
 
       await component.find('form').trigger('submit')
 
-      expect(component.emitted('run')).toEqual([['cat ~/vault']])
+      expect(component.emitted('run')).toEqual([
+        ['cat ~/vault'],
+      ])
     })
 
     it('holds the prompt at 16px on a phone so iOS does not zoom the page', async () => {
@@ -182,7 +205,9 @@ describe('prompt bar', () => {
 
       const event = press(component, { key })
 
-      expect(component.emitted('recall')).toEqual([[offset]])
+      expect(component.emitted('recall')).toEqual([
+        [offset],
+      ])
       expect(event.defaultPrevented).toBe(true)
     })
   })
@@ -194,7 +219,9 @@ describe('prompt bar', () => {
       const event = press(component, { key: 'Tab' })
 
       expect(event.defaultPrevented).toBe(true)
-      expect(component.emitted('update:modelValue')).toEqual([['cat ~/vault']])
+      expect(component.emitted('update:modelValue')).toEqual([
+        ['cat ~/vault'],
+      ])
     })
 
     it('lets Tab move focus on when there is nothing to complete', async () => {
@@ -206,7 +233,12 @@ describe('prompt bar', () => {
       expect(component.emitted('update:modelValue')).toBeUndefined()
     })
 
-    it.each(['shiftKey', 'ctrlKey', 'altKey', 'metaKey'])(
+    it.each([
+      'shiftKey',
+      'ctrlKey',
+      'altKey',
+      'metaKey',
+    ])(
       'never takes Tab chorded with %s, even with a completion to apply',
       async (modifier) => {
         const component = await mount({ modelValue: 'cat ~/v', completion: 'cat ~/vault' })

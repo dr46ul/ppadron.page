@@ -23,7 +23,10 @@ function role(overrides: Partial<Role> = {}): Role {
 
 function mount(overrides: Partial<Role> = {}) {
   return mountSuspended(RoleDetail, {
-    props: { roleName: 'kiln-and-ash', role: role(overrides) },
+    props: {
+      roleName: 'kiln-and-ash',
+      role: role(overrides),
+    },
   })
 }
 
@@ -56,7 +59,9 @@ describe('role detail output', () => {
   })
 
   it('joins the full stack with a middle dot', async () => {
-    const component = await mount({ stack: ['Clay', 'Glaze', 'Cone 10'] })
+    const component = await mount({
+      stack: ['Clay', 'Glaze', 'Cone 10'],
+    })
 
     expect(component.text()).toContain('Clay · Glaze · Cone 10')
   })
@@ -81,13 +86,24 @@ describe('role detail output', () => {
       {
         name: 'North Kiln',
         phases: [
-          { name: 'Wood fired', tech: ['Oak', 'Ash'] },
-          { name: 'Gas fired', tech: ['Propane'] },
+          {
+            name: 'Wood fired',
+            tech: ['Oak', 'Ash'],
+          },
+          {
+            name: 'Gas fired',
+            tech: ['Propane'],
+          },
         ],
       },
       {
         name: 'South Kiln',
-        phases: [{ name: 'Electric', tech: ['Elements', 'Relays'] }],
+        phases: [
+          {
+            name: 'Electric',
+            tech: ['Elements', 'Relays'],
+          },
+        ],
       },
     ]
 
@@ -132,7 +148,9 @@ describe('role detail output', () => {
 
     it('still names a project whose phases are empty', async () => {
       const component = await mount({
-        history: [{ name: 'North Kiln', phases: [] }],
+        history: [
+          { name: 'North Kiln', phases: [] },
+        ],
       })
 
       expect(component.text()).toContain('North Kiln')
@@ -140,7 +158,14 @@ describe('role detail output', () => {
 
     it('still names a phase whose tech is empty', async () => {
       const component = await mount({
-        history: [{ name: 'North Kiln', phases: [{ name: 'Wood fired', tech: [] }] }],
+        history: [
+          {
+            name: 'North Kiln',
+            phases: [
+              { name: 'Wood fired', tech: [] },
+            ],
+          },
+        ],
         stack: [],
       })
 
@@ -158,7 +183,9 @@ describe('role detail output', () => {
     })
 
     it('labels the stack when there is one, and drops the label with it when there is not', async () => {
-      const withStack = await mount({ stack: ['Clay'] })
+      const withStack = await mount({
+        stack: ['Clay'],
+      })
       const without = await mount({ stack: [] })
 
       expect(withStack.text()).toContain('Tech stack')
@@ -169,7 +196,9 @@ describe('role detail output', () => {
 
   describe('no such file', () => {
     function mountMissing(roleName = 'ghost-corp') {
-      return mountSuspended(RoleDetail, { props: { roleName } })
+      return mountSuspended(RoleDetail, {
+        props: { roleName },
+      })
     }
 
     it('names the path the Visitor asked for', async () => {
@@ -205,7 +234,17 @@ describe('role detail output', () => {
   describe('text roles', () => {
     it('sets the account as prose, the title and period as labels, the stack as chrome', async () => {
       const component = await mount({
-        history: [{ name: 'North Kiln', phases: [{ name: 'Wood fired', tech: ['Oak'] }] }],
+        history: [
+          {
+            name: 'North Kiln',
+            phases: [
+              {
+                name: 'Wood fired',
+                tech: ['Oak'],
+              },
+            ],
+          },
+        ],
       })
 
       expect(roleOf(component, 'p', 'Fired the first batch.')).toBe('text-body')

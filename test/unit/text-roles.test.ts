@@ -7,7 +7,9 @@ function vueFiles(dir: string): string[] {
     const path = join(dir, entry)
     if (statSync(path).isDirectory())
       return vueFiles(path)
-    return path.endsWith('.vue') ? [path] : []
+    return path.endsWith('.vue')
+      ? [path]
+      : []
   })
 }
 
@@ -38,7 +40,13 @@ describe('text roles', () => {
    * utility naming one now resolves to nothing at all rather than to a colour.
    */
   it.each(components)('$path colours nothing with an undeclared token', ({ source }) => {
-    for (const gone of ['primary', 'secondary', 'neutral', 'warning', 'info']) {
+    for (const gone of [
+      'primary',
+      'secondary',
+      'neutral',
+      'warning',
+      'info',
+    ]) {
       expect(source).not.toMatch(
         new RegExp(`\\b(text|bg|border|ring|fill|stroke|divide)-${gone}\\b`),
       )

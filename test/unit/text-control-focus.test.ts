@@ -5,7 +5,9 @@ const css = readFileSync('app/assets/css/main.css', 'utf8').replace(/\/\*[\s\S]*
 
 /** The declarations of the first rule whose selector list contains `selector`. */
 function declarations(selector: string): string | undefined {
-  const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(([, selectors]) =>
+  const rule = [
+    ...css.matchAll(/([^{}]+)\{([^{}]*)\}/g),
+  ].find(([, selectors]) =>
     selectors!.split(',').some(s => s.trim() === selector),
   )
   return rule?.[2]

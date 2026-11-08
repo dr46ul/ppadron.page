@@ -21,7 +21,9 @@ function role(overrides: Partial<Role> = {}): Role {
 }
 
 function mount(roles: Role[]) {
-  return mountSuspended(Experience, { props: { roles } })
+  return mountSuspended(Experience, {
+    props: { roles },
+  })
 }
 
 describe('experience output', () => {
@@ -44,14 +46,18 @@ describe('experience output', () => {
 
   it('joins the tech of a role with a middle dot', async () => {
     const component = await mount([
-      role({ tech: ['TypeScript', 'Vue', 'Nuxt'] }),
+      role({
+        tech: ['TypeScript', 'Vue', 'Nuxt'],
+      }),
     ])
 
     expect(component.text()).toContain('TypeScript · Vue · Nuxt')
   })
 
   it('prints a role whose tech list is empty', async () => {
-    const component = await mount([role({ company: 'Acme', tech: [] })])
+    const component = await mount([
+      role({ company: 'Acme', tech: [] }),
+    ])
 
     expect(component.text()).toContain('Acme')
     expect(component.text()).not.toContain('·')
@@ -87,7 +93,9 @@ describe('experience output', () => {
   })
 
   it('gives each role a machine-readable start date', async () => {
-    const component = await mount([role({ since: '2013', period: '2013 — 2016' })])
+    const component = await mount([
+      role({ since: '2013', period: '2013 — 2016' }),
+    ])
 
     expect(component.get('time').attributes('datetime')).toBe('2013')
   })
@@ -119,7 +127,9 @@ describe('experience output', () => {
     })
 
     it('sets the note as chrome', async () => {
-      const component = await mount([role({ before: '2011 – 2014: freelance.' })])
+      const component = await mount([
+        role({ before: '2011 – 2014: freelance.' }),
+      ])
 
       expect(roleOf(component, 'p', '2011 – 2014: freelance.')).toBe('text-subtle')
     })
@@ -158,7 +168,10 @@ describe('experience output', () => {
       await button(component, 'Kelp & Tar').trigger('click', { detail: 1 })
       await button(component, 'Kiln & Ash').trigger('click')
 
-      expect(component.emitted('open')).toEqual([['kelp-and-tar'], ['kiln-and-ash']])
+      expect(component.emitted('open')).toEqual([
+        ['kelp-and-tar'],
+        ['kiln-and-ash'],
+      ])
     })
 
     it('names the role in the button and leaves the summary outside it', async () => {
@@ -183,7 +196,9 @@ describe('experience output', () => {
     })
 
     it('keeps the click from reaching the session behind it', async () => {
-      const component = await mount([role()])
+      const component = await mount([
+        role(),
+      ])
       const behind = vi.fn()
       component.element.parentElement!.addEventListener('click', behind)
 
@@ -198,7 +213,9 @@ describe('experience output', () => {
       })
 
       it('stays shut when a pointer drag across the name ends on the button', async () => {
-        const component = await mount([role()])
+        const component = await mount([
+          role(),
+        ])
         window.getSelection()!.selectAllChildren(component.get('button').element)
 
         await component.get('button').trigger('click', { detail: 1 })
@@ -207,18 +224,24 @@ describe('experience output', () => {
       })
 
       it('still opens from the keyboard, whose click has no pointer behind it', async () => {
-        const component = await mount([role({ slug: 'kiln-and-ash' })])
+        const component = await mount([
+          role({ slug: 'kiln-and-ash' }),
+        ])
         window.getSelection()!.selectAllChildren(component.get('p').element)
 
         await component.get('button').trigger('click', { detail: 0 })
 
-        expect(component.emitted('open')).toEqual([['kiln-and-ash']])
+        expect(component.emitted('open')).toEqual([
+          ['kiln-and-ash'],
+        ])
       })
     })
   })
 
   it('holds no placeholder markers of its own', async () => {
-    const component = await mount([role()])
+    const component = await mount([
+      role(),
+    ])
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
   })
@@ -239,7 +262,9 @@ describe('experience output', () => {
     })
 
     it('sets the NDA note as chrome and leaves the company at full strength', async () => {
-      const component = await mount([role({ company: 'Kiln & Ash' })])
+      const component = await mount([
+        role({ company: 'Kiln & Ash' }),
+      ])
 
       expect(roleOf(component, 'p', 'under NDA')).toBe('text-subtle')
       expect(roleOf(component, 'span', 'Kiln & Ash')).toBeUndefined()
