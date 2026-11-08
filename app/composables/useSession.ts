@@ -39,7 +39,12 @@ export interface SessionEntry {
 }
 
 export const commands: SessionCommand[] = [
-  { cmd: 'whoami', output: 'whoami', label: 'who I am', think: 260 },
+  {
+    cmd: 'whoami',
+    output: 'whoami',
+    label: 'who I am',
+    think: 260,
+  },
   {
     cmd: 'ls ~/experience',
     output: 'experience',
@@ -64,7 +69,12 @@ export const commands: SessionCommand[] = [
     label: 'how this page is built',
     think: 480,
   },
-  { cmd: 'help', output: 'help', label: 'this list', think: 180 },
+  {
+    cmd: 'help',
+    output: 'help',
+    label: 'this list',
+    think: 180,
+  },
 ]
 
 /** Commands that act on the session itself rather than printing anything. */
@@ -150,7 +160,9 @@ export function useSession() {
   function scrollToEnd() {
     window.scrollTo({
       top: document.body.scrollHeight,
-      behavior: reducedMotion() ? 'auto' : 'smooth',
+      behavior: reducedMotion()
+        ? 'auto'
+        : 'smooth',
     })
   }
 
@@ -212,7 +224,12 @@ export function useSession() {
 
     // The echo is instant — the visitor typed it, the machine did not produce it.
     const id = nextId++
-    entries.value.push({ id, cmd: typed, output: null, animate: true })
+    entries.value.push({
+      id,
+      cmd: typed,
+      output: null,
+      animate: true,
+    })
 
     const overflow = entries.value.length - SCROLLBACK
     if (overflow > 0) {
@@ -236,7 +253,9 @@ export function useSession() {
         target.output = output
         nextTick(scrollToEnd)
       },
-      reducedMotion() ? 0 : (command?.think ?? THINK_UNKNOWN),
+      reducedMotion()
+        ? 0
+        : (command?.think ?? THINK_UNKNOWN),
     )
   }
 
@@ -257,7 +276,9 @@ export function useSession() {
     ]
 
     const hit = pool.find(entry => entry.startsWith(typed))
-    return hit === input.value ? undefined : hit
+    return hit === input.value
+      ? undefined
+      : hit
   })
 
   function recall(offset: number) {
@@ -266,7 +287,9 @@ export function useSession() {
       return
 
     historyIndex.value = next
-    input.value = next === -1 ? '' : history.value[next]!
+    input.value = next === -1
+      ? ''
+      : history.value[next]!
   }
 
   return {

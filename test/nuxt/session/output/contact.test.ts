@@ -78,7 +78,9 @@ describe('contact output', () => {
     await component.find('[name="name"]').setValue('Dagny Vole')
 
     expect(component.emitted('update:modelValue')).toEqual([
-      [{ name: 'Dagny Vole', email: '', message: 'already typed' }],
+      [
+        { name: 'Dagny Vole', email: '', message: 'already typed' },
+      ],
     ])
   })
 
@@ -92,7 +94,9 @@ describe('contact output', () => {
   })
 
   it('reports a typed reply-to address', async () => {
-    const component = await mount({ modelValue: enquiry({ email: '' }) })
+    const component = await mount({
+      modelValue: enquiry({ email: '' }),
+    })
 
     await component.find('[name="email"]').setValue('dagny@example.test')
 
@@ -102,13 +106,17 @@ describe('contact output', () => {
   })
 
   it('reports a typed body', async () => {
-    const component = await mount({ modelValue: enquiry({ message: '' }) })
+    const component = await mount({
+      modelValue: enquiry({ message: '' }),
+    })
 
     await component
       .find('[name="message"]')
       .setValue('Our checkout has three states and all of them are wrong.')
 
-    expect(component.emitted('update:modelValue')!.at(-1)).toEqual([enquiry()])
+    expect(component.emitted('update:modelValue')!.at(-1)).toEqual([
+      enquiry(),
+    ])
   })
 
   it('offers to send while the draft is idle', async () => {
@@ -268,33 +276,137 @@ describe('contact output', () => {
     })
 
     it.each([
-      ['name', 'missing', { name: '' }, WHO],
-      ['name', 'only spaces', { name: '    ' }, WHO],
-      ['name', 'one over its cap', { name: 'n'.repeat(201) }, cap(200)],
-      ['name', 'one over its cap once spaces are collapsed', { name: `${'n'.repeat(200)}  n` }, cap(200)],
-      ['email', 'missing', { email: '' }, ADDRESS],
-      ['email', 'only spaces', { email: '   ' }, ADDRESS],
-      ['email', 'a@b, which has no domain to reply to', { email: 'a@b' }, ADDRESS],
-      ['email', 'one over its cap', { email: address(321) }, cap(320)],
-      ['message', 'missing', { message: '' }, MORE],
-      ['message', 'one under the floor', { message: 'm'.repeat(19) }, MORE],
-      ['message', 'padded with spaces up to the floor', { message: `${'m'.repeat(19)}  ` }, MORE],
-      ['message', 'one over its cap', { message: 'm'.repeat(5001) }, cap(5000)],
+      [
+        'name',
+        'missing',
+        { name: '' },
+        WHO,
+      ],
+      [
+        'name',
+        'only spaces',
+        { name: '    ' },
+        WHO,
+      ],
+      [
+        'name',
+        'one over its cap',
+        {
+          name: 'n'.repeat(201),
+        },
+        cap(200),
+      ],
+      [
+        'name',
+        'one over its cap once spaces are collapsed',
+        { name: `${'n'.repeat(200)}  n` },
+        cap(200),
+      ],
+      [
+        'email',
+        'missing',
+        { email: '' },
+        ADDRESS,
+      ],
+      [
+        'email',
+        'only spaces',
+        { email: '   ' },
+        ADDRESS,
+      ],
+      [
+        'email',
+        'a@b, which has no domain to reply to',
+        { email: 'a@b' },
+        ADDRESS,
+      ],
+      [
+        'email',
+        'one over its cap',
+        {
+          email: address(321),
+        },
+        cap(320),
+      ],
+      [
+        'message',
+        'missing',
+        { message: '' },
+        MORE,
+      ],
+      [
+        'message',
+        'one under the floor',
+        {
+          message: 'm'.repeat(19),
+        },
+        MORE,
+      ],
+      [
+        'message',
+        'padded with spaces up to the floor',
+        { message: `${'m'.repeat(19)}  ` },
+        MORE,
+      ],
+      [
+        'message',
+        'one over its cap',
+        {
+          message: 'm'.repeat(5001),
+        },
+        cap(5000),
+      ],
     ] as const)('refuses the %s field when it is %s', async (name, _, overrides, expected) => {
-      const component = await mount({ modelValue: enquiry(overrides) })
+      const component = await mount({
+        modelValue: enquiry(overrides),
+      })
 
       expect(complaint(component, name)).toBe(expected)
     })
 
     it.each([
-      ['name', 'at its cap', { name: 'n'.repeat(200) }],
-      ['name', 'at its cap once trimmed', { name: ` ${'n'.repeat(200)} ` }],
-      ['email', 'at its cap', { email: address(320) }],
-      ['email', 'padded with spaces', { email: ' dagny@example.test ' }],
-      ['message', 'exactly at the floor', { message: 'm'.repeat(20) }],
-      ['message', 'at its cap', { message: 'm'.repeat(5000) }],
+      [
+        'name',
+        'at its cap',
+        {
+          name: 'n'.repeat(200),
+        },
+      ],
+      [
+        'name',
+        'at its cap once trimmed',
+        { name: ` ${'n'.repeat(200)} ` },
+      ],
+      [
+        'email',
+        'at its cap',
+        {
+          email: address(320),
+        },
+      ],
+      [
+        'email',
+        'padded with spaces',
+        { email: ' dagny@example.test ' },
+      ],
+      [
+        'message',
+        'exactly at the floor',
+        {
+          message: 'm'.repeat(20),
+        },
+      ],
+      [
+        'message',
+        'at its cap',
+        {
+          message: 'm'.repeat(5000),
+        },
+      ],
     ] as const)('accepts the %s field when it is %s', async (name, _, overrides) => {
-      const component = await mount({ modelValue: enquiry(overrides) })
+      const component = await mount({
+        modelValue: enquiry(overrides),
+      })
 
       expect(complaint(component, name)).toBe('')
     })
@@ -302,7 +414,9 @@ describe('contact output', () => {
     it.each(['josé@example.test', 'a,b@example.test', 'dagny@example.test.'])(
       'leaves the delivery alone to decide that %s is an address',
       async (email) => {
-        const component = await mount({ modelValue: enquiry({ email }) })
+        const component = await mount({
+          modelValue: enquiry({ email }),
+        })
         const control = component.find<HTMLInputElement>('[name="email"]').element
 
         expect(control.validity.valid).toBe(true)
@@ -310,7 +424,9 @@ describe('contact output', () => {
     )
 
     it('says nothing about one field because of another', async () => {
-      const component = await mount({ modelValue: enquiry({ name: '' }) })
+      const component = await mount({
+        modelValue: enquiry({ name: '' }),
+      })
 
       expect(complaint(component, 'name')).toBe(WHO)
       expect(complaint(component, 'email')).toBe('')
@@ -318,13 +434,19 @@ describe('contact output', () => {
     })
 
     it('changes its mind as the draft it is handed changes', async () => {
-      const component = await mount({ modelValue: enquiry({ name: '' }) })
+      const component = await mount({
+        modelValue: enquiry({ name: '' }),
+      })
 
-      await component.setProps({ modelValue: enquiry() })
+      await component.setProps({
+        modelValue: enquiry(),
+      })
 
       expect(complaint(component, 'name')).toBe('')
 
-      await component.setProps({ modelValue: enquiry({ email: 'a@b' }) })
+      await component.setProps({
+        modelValue: enquiry({ email: 'a@b' }),
+      })
 
       expect(complaint(component, 'email')).toBe(ADDRESS)
     })

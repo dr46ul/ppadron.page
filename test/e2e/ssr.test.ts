@@ -70,7 +70,9 @@ describe('home page', () => {
    * test/nuxt/session/terminal.test.ts.
    */
   function entry(cmd: string) {
-    return [...page.querySelectorAll('[data-entry]')].find(block =>
+    return [
+      ...page.querySelectorAll('[data-entry]'),
+    ].find(block =>
       block.querySelector('p')?.textContent?.endsWith(cmd),
     )
   }
@@ -164,7 +166,12 @@ describe('home page', () => {
       const unwrap = (value: unknown) => value
       const payload = parsePayload(
         page.querySelector('#__NUXT_DATA__')!.textContent!,
-        { Reactive: unwrap, ShallowReactive: unwrap, Ref: unwrap, ShallowRef: unwrap },
+        {
+          Reactive: unwrap,
+          ShallowReactive: unwrap,
+          Ref: unwrap,
+          ShallowRef: unwrap,
+        },
       )
       builtAt = payload.state['$sbuilt-at']
     })

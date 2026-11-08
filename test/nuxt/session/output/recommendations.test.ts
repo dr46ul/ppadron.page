@@ -17,7 +17,9 @@ function recommendation(
 }
 
 function mount(recommendations: Recommendation[]) {
-  return mountSuspended(Recommendations, { props: { recommendations } })
+  return mountSuspended(Recommendations, {
+    props: { recommendations },
+  })
 }
 
 describe('recommendations output', () => {
@@ -62,7 +64,10 @@ describe('recommendations output', () => {
   })
 
   it('numbers the recommendations for the print cascade', async () => {
-    const component = await mount([recommendation(), recommendation()])
+    const component = await mount([
+      recommendation(),
+      recommendation(),
+    ])
 
     expect(component.findAll('li').map(item => item.attributes('style')))
       .toEqual(['--i: 0;', '--i: 1;'])
@@ -78,7 +83,9 @@ describe('recommendations output', () => {
   })
 
   it('holds no placeholder markers of its own', async () => {
-    const component = await mount([recommendation()])
+    const component = await mount([
+      recommendation(),
+    ])
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
   })
@@ -102,7 +109,9 @@ describe('recommendations output', () => {
     })
 
     it('sets the provenance note as chrome', async () => {
-      const component = await mount([recommendation()])
+      const component = await mount([
+        recommendation(),
+      ])
 
       expect(roleOf(component, 'p', 'Verbatim from LinkedIn')).toBe('text-subtle')
     })

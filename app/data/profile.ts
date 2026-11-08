@@ -53,5 +53,13 @@ export const profile: Profile = {
     linkedin: '[LinkedIn]',
     repo: 'https://github.com/dr46ul/ppadron.page',
   },
-  stack: ['vue', 'nuxt', 'typescript', 'tailwind', 'daisyui', 'vitest', 'vercel'],
+  stack: [
+    'vue',
+    'nuxt',
+    'typescript',
+    'tailwind',
+    'daisyui',
+    'vitest',
+    'vercel',
+  ],
 }

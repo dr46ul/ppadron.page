@@ -46,7 +46,13 @@ export const roles: Role[] = [
     since: '2016',
     summary:
       '[What was built here, in two or three lines. Lead with the work and the outcome, not the job title — around 180 characters, which is about this long, ending on something concrete.]',
-    tech: ['[tech]', '[tech]', '[tech]', '[tech]', '[tech]'],
+    tech: [
+      '[tech]',
+      '[tech]',
+      '[tech]',
+      '[tech]',
+      '[tech]',
+    ],
   },
   {
     company: '[Company]',

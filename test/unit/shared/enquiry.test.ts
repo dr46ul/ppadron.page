@@ -51,7 +51,13 @@ describe('parseEnquiry', () => {
     })
   })
 
-  it.each([undefined, null, 42, {}, ['a']])(
+  it.each([
+    undefined,
+    null,
+    42,
+    {},
+    ['a'],
+  ])(
     'reports a field that is not a string as missing: %o',
     (notAString) => {
       expect(parseEnquiry(body({ name: notAString, email: notAString, message: notAString }))).toEqual({
@@ -88,7 +94,9 @@ describe('parseEnquiry', () => {
   })
 
   it('reports a message one character under the form\'s own minimum as too short', () => {
-    expect(parseEnquiry(body({ message: 'x'.repeat(19) }))).toEqual({
+    expect(parseEnquiry(body({
+      message: 'x'.repeat(19),
+    }))).toEqual({
       success: false,
       failures: { message: 'too-short' },
     })
@@ -102,7 +110,9 @@ describe('parseEnquiry', () => {
   })
 
   it('accepts a message exactly at that minimum', () => {
-    expect(parseEnquiry(body({ message: 'x'.repeat(20) })).success).toBe(true)
+    expect(parseEnquiry(body({
+      message: 'x'.repeat(20),
+    })).success).toBe(true)
   })
 
   /** An address of an exact length that is still a plausible one. */
@@ -113,17 +123,35 @@ describe('parseEnquiry', () => {
   }
 
   it.each([
-    ['name', 'x'.repeat(200)],
-    ['email', address(320)],
-    ['message', 'x'.repeat(5000)],
+    [
+      'name',
+      'x'.repeat(200),
+    ],
+    [
+      'email',
+      address(320),
+    ],
+    [
+      'message',
+      'x'.repeat(5000),
+    ],
   ])('accepts a %s exactly at its cap', (field, value) => {
     expect(parseEnquiry(body({ [field]: value })).success).toBe(true)
   })
 
   it.each([
-    ['name', 'x'.repeat(201)],
-    ['email', address(321)],
-    ['message', 'x'.repeat(5001)],
+    [
+      'name',
+      'x'.repeat(201),
+    ],
+    [
+      'email',
+      address(321),
+    ],
+    [
+      'message',
+      'x'.repeat(5001),
+    ],
   ])('reports a %s one character over its cap as too long', (field, value) => {
     expect(parseEnquiry(body({ [field]: value }))).toEqual({
       success: false,
@@ -159,7 +187,11 @@ describe('parseEnquiry', () => {
 
   it('reports every field that fails, not just the first', () => {
     expect(
-      parseEnquiry({ name: 'x'.repeat(201), email: 'dana', message: 'too short' }),
+      parseEnquiry({
+        name: 'x'.repeat(201),
+        email: 'dana',
+        message: 'too short',
+      }),
     ).toEqual({
       success: false,
       failures: { name: 'too-long', email: 'not-an-address', message: 'too-short' },

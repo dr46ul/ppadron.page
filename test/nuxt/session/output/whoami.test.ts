@@ -29,7 +29,11 @@ function profile(overrides: Partial<Profile> = {}): Profile {
 }
 
 function mount(overrides: Partial<Profile> = {}) {
-  return mountSuspended(Whoami, { props: { profile: profile(overrides) } })
+  return mountSuspended(Whoami, {
+    props: {
+      profile: profile(overrides),
+    },
+  })
 }
 
 describe('whoami output', () => {

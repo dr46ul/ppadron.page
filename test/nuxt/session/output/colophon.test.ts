@@ -30,7 +30,10 @@ function profile(overrides: Partial<Profile> = {}): Profile {
 
 function mount(overrides: Partial<Profile> = {}, year = '2031') {
   return mountSuspended(Colophon, {
-    props: { profile: profile(overrides), year },
+    props: {
+      profile: profile(overrides),
+      year,
+    },
   })
 }
 
@@ -74,13 +77,17 @@ describe('colophon output', () => {
   })
 
   it('joins the stack it is handed with a middle dot', async () => {
-    const component = await mount({ stack: ['fortran', 'cobol', 'apl'] })
+    const component = await mount({
+      stack: ['fortran', 'cobol', 'apl'],
+    })
 
     expect(component.text()).toContain('fortran · cobol · apl')
   })
 
   it('leaves the stack line out when the Profile lists nothing', async () => {
-    const listed = await mount({ stack: ['fortran'] })
+    const listed = await mount({
+      stack: ['fortran'],
+    })
     const empty = await mount({ stack: [] })
 
     expect(listed.findAll('p')).toHaveLength(4)

@@ -17,7 +17,9 @@ function role(overrides: Partial<Role> = {}): Role {
 }
 
 function mount(roles: Role[]) {
-  return mountSuspended(Experience, { props: { roles } })
+  return mountSuspended(Experience, {
+    props: { roles },
+  })
 }
 
 describe('experience output', () => {
@@ -40,14 +42,18 @@ describe('experience output', () => {
 
   it('joins the tech of a role with a middle dot', async () => {
     const component = await mount([
-      role({ tech: ['TypeScript', 'Vue', 'Nuxt'] }),
+      role({
+        tech: ['TypeScript', 'Vue', 'Nuxt'],
+      }),
     ])
 
     expect(component.text()).toContain('TypeScript · Vue · Nuxt')
   })
 
   it('prints a role whose tech list is empty', async () => {
-    const component = await mount([role({ company: 'Acme', tech: [] })])
+    const component = await mount([
+      role({ company: 'Acme', tech: [] }),
+    ])
 
     expect(component.text()).toContain('Acme')
     expect(component.text()).not.toContain('·')
@@ -83,7 +89,9 @@ describe('experience output', () => {
   })
 
   it('gives each role a machine-readable start date', async () => {
-    const component = await mount([role({ since: '2013', period: '2013 — 2016' })])
+    const component = await mount([
+      role({ since: '2013', period: '2013 — 2016' }),
+    ])
 
     expect(component.get('time').attributes('datetime')).toBe('2013')
   })
@@ -108,7 +116,9 @@ describe('experience output', () => {
   })
 
   it('holds no placeholder markers of its own', async () => {
-    const component = await mount([role()])
+    const component = await mount([
+      role(),
+    ])
 
     expect(component.findAll('[data-placeholder]')).toHaveLength(0)
   })
@@ -129,7 +139,9 @@ describe('experience output', () => {
     })
 
     it('sets the NDA note as chrome and leaves the company at full strength', async () => {
-      const component = await mount([role({ company: 'Kiln & Ash' })])
+      const component = await mount([
+        role({ company: 'Kiln & Ash' }),
+      ])
 
       expect(roleOf(component, 'p', 'under NDA')).toBe('text-subtle')
       expect(roleOf(component, 'span', 'Kiln & Ash')).toBeUndefined()

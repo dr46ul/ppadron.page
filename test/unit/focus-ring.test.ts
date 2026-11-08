@@ -7,7 +7,9 @@ function vueFiles(dir: string): string[] {
     const path = join(dir, entry)
     if (statSync(path).isDirectory())
       return vueFiles(path)
-    return path.endsWith('.vue') ? [path] : []
+    return path.endsWith('.vue')
+      ? [path]
+      : []
   })
 }
 
