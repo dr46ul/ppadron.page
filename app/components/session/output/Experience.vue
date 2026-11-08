@@ -28,42 +28,53 @@ function open(event: MouseEvent, slug: string) {
     </p>
 
     <ul class="mt-5 flex flex-col gap-6">
-      <li
+      <template
         v-for="(role, index) in roles"
         :key="role.since"
-        :style="{ '--i': index }"
-        class="grid gap-x-6 gap-y-1 sm:grid-cols-[8.5rem_1fr]"
       >
-        <time
-          :datetime="role.since"
-          class="text-xs tabular-nums"
-          :class="index === 0 ? 'text-accent' : 'text-muted'"
+        <li
+          :style="{ '--i': index }"
+          class="grid gap-x-6 gap-y-1 sm:grid-cols-[8.5rem_1fr]"
         >
-          {{ role.period }}
-        </time>
-
-        <div>
-          <!-- The button stops at the name so the summary below stays plain
-               text to select. `.stop` because the session behind it would put
-               the caret in the prompt and take focus off the list. -->
-          <button
-            type="button"
-            class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
-            @click.stop="open($event, role.slug)"
+          <time
+            :datetime="role.since"
+            class="text-xs tabular-nums"
+            :class="index === 0 ? 'text-accent' : 'text-muted'"
           >
-            <span class="decoration-edge group-hover:text-accent font-semibold underline underline-offset-4">{{ role.company }}</span>
-            <span class="text-muted text-xs">
-              {{ role.title }}
-            </span>
-          </button>
-          <p class="text-body mt-1 max-w-prose">
-            {{ role.summary }}
+            {{ role.period }}
+          </time>
+
+          <div>
+            <!-- The button stops at the name so the summary below stays plain
+                 text to select. `.stop` because the session behind it would put
+                 the caret in the prompt and take focus off the list. -->
+            <button
+              type="button"
+              class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
+              @click.stop="open($event, role.slug)"
+            >
+              <span class="decoration-edge group-hover:text-accent font-semibold underline underline-offset-4">{{ role.company }}</span>
+              <span class="text-muted text-xs">
+                {{ role.title }}
+              </span>
+            </button>
+            <p class="text-body mt-1 max-w-prose">
+              {{ role.summary }}
+            </p>
+            <p class="text-subtle mt-1 text-xs">
+              {{ role.tech.join(' · ') }}
+            </p>
+          </div>
+        </li>
+        <li
+          v-if="role.before"
+          class="grid gap-x-6 sm:grid-cols-[8.5rem_1fr]"
+        >
+          <p class="text-subtle text-xs sm:col-start-2">
+            {{ role.before }}
           </p>
-          <p class="text-subtle mt-1 text-xs">
-            {{ role.tech.join(' · ') }}
-          </p>
-        </div>
-      </li>
+        </li>
+      </template>
     </ul>
   </div>
 </template>

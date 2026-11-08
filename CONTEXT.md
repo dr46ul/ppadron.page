@@ -89,7 +89,7 @@ _Avoid_: About, bio
 ### Proof surfaces
 
 **Experience**:
-The roles Pavel has held as an employee or contractor, ordered most recent first, each described by what he built rather than by what he was employed as. This is the site's primary proof surface and the only place professional work is described.
+The roles Pavel has held as an employee or contractor, ordered most recent first, each described by what he built rather than by what he was employed as. This is the site's primary proof surface and the only place professional work is described. The list may also carry a one-line note for time that was not a Role, such as freelancing; a note has no slug and cannot be opened.
 _Avoid_: Work, Portfolio, Projects, Career, Employment history
 
 **Role**:

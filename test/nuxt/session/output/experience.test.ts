@@ -102,6 +102,39 @@ describe('experience output', () => {
       .toEqual(['--i: 0;', '--i: 1;'])
   })
 
+  describe('a note before a role', () => {
+    it('prints the line between that role and the next, as a note and not a role', async () => {
+      const component = await mount([
+        role({ company: 'Newest', since: '2022', before: '2011 – 2014: freelance, mostly kilns.' }),
+        role({ company: 'Oldest', since: '2009' }),
+      ])
+
+      expect(component.findAll('li').map(item => item.text())).toEqual([
+        expect.stringContaining('Newest'),
+        '2011 – 2014: freelance, mostly kilns.',
+        expect.stringContaining('Oldest'),
+      ])
+      expect(component.findAll('button')).toHaveLength(2)
+      expect(component.findAll('time')).toHaveLength(2)
+    })
+
+    it('sets the note as chrome', async () => {
+      const component = await mount([role({ before: '2011 – 2014: freelance.' })])
+
+      expect(roleOf(component, 'p', '2011 – 2014: freelance.')).toBe('text-subtle')
+    })
+
+    it('leaves the print cascade numbering to the roles', async () => {
+      const component = await mount([
+        role({ since: '2022', before: 'a note' }),
+        role({ since: '2019' }),
+      ])
+
+      expect(component.findAll('li').map(item => item.attributes('style')))
+        .toEqual(['--i: 0;', undefined, '--i: 1;'])
+    })
+  })
+
   it('still says why there is no projects gallery when it has no roles', async () => {
     const component = await mount([])
 
