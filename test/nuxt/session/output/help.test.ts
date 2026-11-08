@@ -89,6 +89,13 @@ describe('help output', () => {
     )
   })
 
+  it('documents the form that opens one Role, whatever Commands it is handed', async () => {
+    const component = await mount([], [])
+
+    expect(component.findAll('li')).toHaveLength(0)
+    expect(component.text()).toContain('cat ~/experience/<role>')
+  })
+
   describe('text roles', () => {
     it('steps each label back to chrome, leaving the command accented', async () => {
       // Both lists, because a meta command's label is printed by a second `li`
@@ -118,6 +125,15 @@ describe('help output', () => {
       // the sentence carrying them.
       expect(roleOf(component, 'span', 'experience')).toBe('text-muted')
       expect(roleOf(component, 'span', 'contact')).toBe('text-muted')
+    })
+
+    it('accents the Role form like a command, and sets its gloss as chrome', async () => {
+      const component = await mount([
+        command(),
+      ])
+
+      expect(roleOf(component, 'p', 'one role in full')).toBe('text-subtle')
+      expect(roleOf(component, 'code', 'cat ~/experience/<role>')).toBeUndefined()
     })
   })
 })

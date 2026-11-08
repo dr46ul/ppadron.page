@@ -27,6 +27,9 @@ function enquiry(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
   }
 }
 
+/** Slugs the real Content does not have: `useSession` only knows what it is handed. */
+const SLUGS = ['kiln-and-ash', 'kelp-and-tar']
+
 describe('useSession', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -40,7 +43,7 @@ describe('useSession', () => {
 
   describe('exec', () => {
     it('ignores an empty command', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       const before = session.entries.value.length
 
       session.exec('')
@@ -49,7 +52,7 @@ describe('useSession', () => {
     })
 
     it('ignores whitespace on its own', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       const before = session.entries.value.length
 
       session.exec('   \t  ')
@@ -58,7 +61,7 @@ describe('useSession', () => {
     })
 
     it('echoes the command before it has any output', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('help')
 
@@ -70,7 +73,7 @@ describe('useSession', () => {
     })
 
     it('prints what a canonical command asks for', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('cat ~/colophon')
       await vi.runAllTimersAsync()
@@ -79,7 +82,7 @@ describe('useSession', () => {
     })
 
     it('resolves an alias whatever case it is typed in', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('WoRk')
       await vi.runAllTimersAsync()
@@ -88,7 +91,7 @@ describe('useSession', () => {
     })
 
     it('echoes what the visitor typed, not what it resolved to', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('work')
       await vi.runAllTimersAsync()
@@ -97,7 +100,7 @@ describe('useSession', () => {
     })
 
     it('resolves a canonical command typed in the wrong case', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('HELP')
       await vi.runAllTimersAsync()
@@ -106,7 +109,7 @@ describe('useSession', () => {
     })
 
     it('looks for a command it does not have before reporting it', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('sudo rm -rf /')
       await vi.advanceTimersByTimeAsync(299)
@@ -119,9 +122,181 @@ describe('useSession', () => {
     })
   })
 
+  describe('reading one Role', () => {
+    it('prints Role detail and records which Role it printed', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/experience/kelp-and-tar')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        cmd: 'cat ~/experience/kelp-and-tar',
+        output: 'role-detail',
+        roleName: 'kelp-and-tar',
+      })
+    })
+
+    it('opens a Role by slug through the Command, so it echoes and can be recalled', async () => {
+      const session = useSession(SLUGS)
+
+      session.openRole('kiln-and-ash')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        cmd: 'cat ~/experience/kiln-and-ash',
+        output: 'role-detail',
+        roleName: 'kiln-and-ash',
+      })
+
+      session.recall(1)
+      expect(session.input.value).toBe('cat ~/experience/kiln-and-ash')
+    })
+
+    it('finds the Role whatever case it is typed in, and echoes it as typed', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('CAT ~/Experience/KILN-and-Ash')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        cmd: 'CAT ~/Experience/KILN-and-Ash',
+        output: 'role-detail',
+        roleName: 'kiln-and-ash',
+      })
+    })
+
+    it('hands an unknown name on as typed, for Role detail to say it has no such file', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/experience/Nowhere-Inc')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        output: 'role-detail',
+        roleName: 'Nowhere-Inc',
+      })
+    })
+
+    it('treats a missing name as an unknown one, not as an unknown command', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/experience/')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({
+        output: 'role-detail',
+        roleName: '',
+      })
+    })
+
+    it('holds no Role until a path names one', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/colophon')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)!.roleName).toBe('')
+    })
+
+    it.each([
+      ['a directory rather than a file', 'cat ~/experience'],
+      ['a path that only starts the same', 'cat ~/experienced/kiln-and-ash'],
+      ['another program', 'rm ~/experience/kiln-and-ash'],
+    ])('leaves %s to the unknown output', async (_, cmd) => {
+      const session = useSession(SLUGS)
+
+      session.exec(cmd)
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)!.output).toBe('unknown')
+    })
+
+    it('reads a file for as long as the other Commands that read one', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/experience/kiln-and-ash')
+      await vi.advanceTimersByTimeAsync(479)
+
+      expect(session.entries.value.at(-1)!.output).toBeNull()
+
+      await vi.advanceTimersByTimeAsync(1)
+
+      expect(session.entries.value.at(-1)!.output).toBe('role-detail')
+    })
+
+    it('prints a Role again when it is asked for again, up to the cap', async () => {
+      const session = useSession(SLUGS)
+
+      for (let i = 0; i < 12; i++) {
+        session.exec('cat ~/experience/kiln-and-ash')
+        await vi.runAllTimersAsync()
+      }
+
+      expect(session.entries.value.length).toBe(session.scrollback)
+      expect(session.trimmed.value).toBe(3)
+      expect(session.entries.value.at(-1)).toMatchObject({
+        output: 'role-detail',
+        roleName: 'kiln-and-ash',
+      })
+    })
+
+    it('stays out of the tour after a reset', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/experience/kiln-and-ash')
+      await vi.runAllTimersAsync()
+      session.exec('reset')
+
+      expect(session.entries.value.map(entry => entry.output)).not.toContain('role-detail')
+      expect(session.entries.value.every(entry => entry.roleName === '')).toBe(true)
+    })
+  })
+
+  describe('reading the Background', () => {
+    it('prints it', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/about')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)!.output).toBe('background')
+    })
+
+    it('is what `about` means now', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('about')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)!.output).toBe('background')
+    })
+
+    it('leaves `me` on whoami', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('me')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)!.output).toBe('whoami')
+    })
+
+    it('reads a file for as long as the other Commands that read one', async () => {
+      const session = useSession(SLUGS)
+
+      session.exec('cat ~/about')
+      await vi.advanceTimersByTimeAsync(439)
+
+      expect(session.entries.value.at(-1)!.output).toBeNull()
+
+      await vi.advanceTimersByTimeAsync(1)
+
+      expect(session.entries.value.at(-1)!.output).toBe('background')
+    })
+  })
+
   describe('the seeded transcript', () => {
     it('opens with the whole tour already printed', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       expect(session.entries.value.map(entry => entry.output)).toEqual([
         'whoami',
@@ -133,13 +308,13 @@ describe('useSession', () => {
     })
 
     it('does not animate what the visitor did not run', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       expect(session.entries.value.every(entry => !entry.animate)).toBe(true)
     })
 
     it('echoes each seeded command by its canonical spelling', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       expect(session.entries.value.map(entry => entry.cmd)).toEqual([
         'whoami',
@@ -151,7 +326,7 @@ describe('useSession', () => {
     })
 
     it('opens with the banner showing and nothing dropped', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       expect(session.cleared.value).toBe(false)
       expect(session.trimmed.value).toBe(0)
@@ -168,7 +343,7 @@ describe('useSession', () => {
     }
 
     it('grows up to the cap without dropping anything', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       await overflow(session, 9)
 
@@ -177,7 +352,7 @@ describe('useSession', () => {
     })
 
     it('holds at the cap and counts what it dropped', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       await overflow(session, 12)
 
@@ -186,7 +361,7 @@ describe('useSession', () => {
     })
 
     it('drops the oldest block first', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       await overflow(session, 12)
 
@@ -197,7 +372,7 @@ describe('useSession', () => {
 
   describe('clear', () => {
     it('empties the scrollback and takes the banner with it', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('clear')
 
@@ -206,7 +381,7 @@ describe('useSession', () => {
     })
 
     it('forgets how many blocks were dropped', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       for (let i = 0; i < 12; i++) {
         session.exec('help')
@@ -218,7 +393,7 @@ describe('useSession', () => {
     })
 
     it('leaves itself in the history', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('clear')
       session.recall(1)
@@ -229,7 +404,7 @@ describe('useSession', () => {
 
   describe('reset', () => {
     it('puts the transcript back as it loaded', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('help')
       await vi.runAllTimersAsync()
@@ -247,7 +422,7 @@ describe('useSession', () => {
     })
 
     it('forgets how many blocks were dropped', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       for (let i = 0; i < 12; i++) {
         session.exec('help')
@@ -259,7 +434,7 @@ describe('useSession', () => {
     })
 
     it('leaves no trace of itself in the history', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('whoami')
       session.exec('reset')
@@ -269,7 +444,7 @@ describe('useSession', () => {
     })
 
     it('empties a part-typed prompt', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.input.value = 'sudo '
       session.exec('reset')
@@ -278,7 +453,7 @@ describe('useSession', () => {
     })
 
     it('is reachable by alias', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('clear')
       session.exec('restart')
@@ -288,7 +463,7 @@ describe('useSession', () => {
     })
 
     it('throws away the Enquiry draft and its state', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.enquiry.edit(enquiry())
       await session.enquiry.submit()
@@ -301,7 +476,7 @@ describe('useSession', () => {
 
   describe('the enquiry form', () => {
     it('stays a singleton however often it is run', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.exec('mail pavel')
       await vi.runAllTimersAsync()
@@ -316,7 +491,7 @@ describe('useSession', () => {
     })
 
     it('reopens on a clean slate after a sent Enquiry', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.enquiry.edit(enquiry())
       await session.enquiry.submit()
@@ -330,7 +505,7 @@ describe('useSession', () => {
     })
 
     it('keeps what the visitor had already typed', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.enquiry.edit(enquiry({ message: 'half a thought' }))
       session.exec('mail pavel')
@@ -347,58 +522,97 @@ describe('useSession', () => {
       ['text that matches nothing', 'zzz'],
       ['a prompt already complete', 'whoami'],
     ])('has nothing to offer for %s', (_, typed) => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = typed
 
       expect(session.completion.value).toBeUndefined()
     })
 
     it('offers an alias', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'reco'
 
       expect(session.completion.value).toBe('recommendations')
     })
 
     it('completes whatever case it was part-typed in', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'RECO'
 
       expect(session.completion.value).toBe('recommendations')
     })
 
     it('offers a case-fix, because it would change the prompt', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'WHOAMI'
 
       expect(session.completion.value).toBe('whoami')
     })
 
     it('offers a canonical spelling, spaces and all', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'cat ~/r'
 
       expect(session.completion.value).toBe('cat ~/recommendations')
     })
 
     it('offers a meta command', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'res'
 
       expect(session.completion.value).toBe('reset')
     })
 
     it('prefers a canonical spelling to a meta command or an alias', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'c'
 
       // `clear` and `contact` start with c too, but a completion should teach
       // the real spelling rather than the shortcut.
-      expect(session.completion.value).toBe('cat ~/recommendations')
+      expect(session.completion.value).toBe('cat ~/about')
+    })
+
+    it.each([
+      ['cat ~/experience/ki', 'cat ~/experience/kiln-and-ash'],
+      ['cat ~/experience/ke', 'cat ~/experience/kelp-and-tar'],
+      ['CAT ~/EXPERIENCE/KE', 'cat ~/experience/kelp-and-tar'],
+    ])('completes %s to the full path of its Role', (typed, path) => {
+      const session = useSession(SLUGS)
+      session.input.value = typed
+
+      expect(session.completion.value).toBe(path)
+    })
+
+    it('offers the first Role for a bare directory', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'cat ~/experience/'
+
+      expect(session.completion.value).toBe('cat ~/experience/kiln-and-ash')
+    })
+
+    it('has nothing to offer for a Role path already complete', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'cat ~/experience/kiln-and-ash'
+
+      expect(session.completion.value).toBeUndefined()
+    })
+
+    it('has nothing to offer for a Role it was not handed', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'cat ~/experience/z'
+
+      expect(session.completion.value).toBeUndefined()
+    })
+
+    it('still completes the other files once Roles are in the pool', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'cat ~/a'
+
+      expect(session.completion.value).toBe('cat ~/about')
     })
 
     it('follows the prompt as it is typed', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'reco'
       session.input.value = 'res'
 
@@ -406,7 +620,7 @@ describe('useSession', () => {
     })
 
     it('leaves the prompt alone until it is applied', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.input.value = 'reco'
 
       expect(session.completion.value).toBe('recommendations')
@@ -416,7 +630,7 @@ describe('useSession', () => {
 
   describe('recall', () => {
     function withHistory() {
-      const session = useSession()
+      const session = useSession(SLUGS)
       session.exec('whoami')
       session.exec('help')
 
@@ -424,7 +638,7 @@ describe('useSession', () => {
     }
 
     it('has nothing to recall on a fresh session', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       session.recall(1)
 
@@ -493,7 +707,7 @@ describe('useSession', () => {
     }
 
     it('prints without a think delay', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       prefersReducedMotion(true)
 
       // Even `help`, the quickest command, normally takes a beat.
@@ -504,7 +718,7 @@ describe('useSession', () => {
     })
 
     it('asks the visitor, rather than assuming', () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       const matchMedia = prefersReducedMotion(true)
 
       session.exec('help')
@@ -513,7 +727,7 @@ describe('useSession', () => {
     })
 
     it('jumps to the foot of the output instead of gliding', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       prefersReducedMotion(true)
       const scrollTo = vi.fn()
       vi.stubGlobal('scrollTo', scrollTo)
@@ -527,7 +741,7 @@ describe('useSession', () => {
     })
 
     it('glides when the visitor has not asked it not to', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
       prefersReducedMotion(false)
       const scrollTo = vi.fn()
       vi.stubGlobal('scrollTo', scrollTo)
@@ -543,7 +757,7 @@ describe('useSession', () => {
 
   describe('a block dropped while the machine is still thinking', () => {
     it('prints nothing and does not fall over', async () => {
-      const session = useSession()
+      const session = useSession(SLUGS)
 
       // Fifteen: enough overflow to drop the slow command before its timer fires.
       session.exec('cat ~/recommendations')

@@ -29,10 +29,11 @@ const {
   scrollback,
   input,
   exec,
+  openRole,
   completion,
   recall,
   enquiry,
-} = useSession()
+} = useSession(roles.map(role => role.slug))
 
 const promptBar = useTemplateRef('promptBar')
 
@@ -151,6 +152,16 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
               :roles
+              @open="openRole"
+            />
+            <SessionOutputRoleDetail
+              v-else-if="entry.output === 'role-detail'"
+              :role-name="entry.roleName"
+              :role="roles.find(role => role.slug === entry.roleName)"
+            />
+            <SessionOutputBackground
+              v-else-if="entry.output === 'background'"
+              :profile
             />
             <SessionOutputRecommendations
               v-else-if="entry.output === 'recommendations'"

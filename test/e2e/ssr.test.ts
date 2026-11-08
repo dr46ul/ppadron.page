@@ -114,12 +114,12 @@ describe('home page', () => {
   /**
    * One assertion per seam — the banner, then each of the three data modules
    * in the transcript block that consumes it. Every expected value is read
-   * from the module rather than spelled out, so the placeholders can be
-   * replaced without touching this file.
+   * from the module rather than spelled out, so Content can change without
+   * touching this file.
    *
    * Each one is scoped to its region. A whole-page assertion here cannot
    * fail: `profile.name` is in the document title and the description, and
-   * `'[Company]'` is a field of both `roles` and `recommendations`.
+   * `'Rogue Fitness'` is a field of both `roles` and `recommendations`.
    */
   describe('server-rendered Content', () => {
     it('prints the availability from the Profile in the login banner', () => {
@@ -137,14 +137,16 @@ describe('home page', () => {
     })
 
     /**
-     * The quote, because it is what a Recommendation is — and because every
-     * other field this block prints (`name`, `title`, `company`) is a
-     * placeholder shared with `roles`, so there is no real-copy field to
-     * anchor on here.
+     * The quote, because it is what a Recommendation is. The last paragraph of
+     * a long one, because only a quote carried over in full has several, so a
+     * placeholder cannot satisfy this, and a render that dropped all but the
+     * first paragraph fails it.
      */
     it('prints the Recommendations in the recommendations block', () => {
+      const long = recommendations.find(({ quote }) => quote.length > 1)!
+
       expect(entry('cat ~/recommendations')?.textContent).toContain(
-        recommendations[0]!.quote,
+        long.quote.at(-1),
       )
     })
   })

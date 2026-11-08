@@ -1,17 +1,21 @@
 import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
 import { roleOf } from '../../text-role'
 
 function role(overrides: Partial<Role> = {}): Role {
   return {
+    slug: 'acme',
     company: 'Acme',
     title: 'Engineer',
     period: '2022 — now',
+    exactPeriod: 'May 2022 – now',
     since: '2022',
     summary: 'Built the thing that made the other thing work.',
     tech: ['TypeScript', 'Vue'],
+    account: ['Built the thing, then the other thing.'],
+    stack: ['TypeScript', 'Vue', 'Vitest'],
     ...overrides,
   }
 }
@@ -106,6 +110,41 @@ describe('experience output', () => {
       .toEqual(['--i: 0;', '--i: 1;'])
   })
 
+  describe('a note before a role', () => {
+    it('prints the line between that role and the next, as a note and not a role', async () => {
+      const component = await mount([
+        role({ company: 'Newest', since: '2022', before: '2011 – 2014: freelance, mostly kilns.' }),
+        role({ company: 'Oldest', since: '2009' }),
+      ])
+
+      expect(component.findAll('li').map(item => item.text())).toEqual([
+        expect.stringContaining('Newest'),
+        '2011 – 2014: freelance, mostly kilns.',
+        expect.stringContaining('Oldest'),
+      ])
+      expect(component.findAll('button')).toHaveLength(2)
+      expect(component.findAll('time')).toHaveLength(2)
+    })
+
+    it('sets the note as chrome', async () => {
+      const component = await mount([
+        role({ before: '2011 – 2014: freelance.' }),
+      ])
+
+      expect(roleOf(component, 'p', '2011 – 2014: freelance.')).toBe('text-subtle')
+    })
+
+    it('leaves the print cascade numbering to the roles', async () => {
+      const component = await mount([
+        role({ since: '2022', before: 'a note' }),
+        role({ since: '2019' }),
+      ])
+
+      expect(component.findAll('li').map(item => item.attributes('style')))
+        .toEqual(['--i: 0;', undefined, '--i: 1;'])
+    })
+  })
+
   it('still says why there is no projects gallery when it has no roles', async () => {
     const component = await mount([])
 
@@ -113,6 +152,90 @@ describe('experience output', () => {
       'Freelance client work is under NDA, so there is no projects gallery.',
     )
     expect(component.findAll('li')).toHaveLength(0)
+  })
+
+  describe('opening a role', () => {
+    function button(component: Awaited<ReturnType<typeof mount>>, company: string) {
+      return component.findAll('button').find(found => found.text().includes(company))!
+    }
+
+    it('gives every role a button of its own, reporting its slug', async () => {
+      const component = await mount([
+        role({ slug: 'kiln-and-ash', company: 'Kiln & Ash', since: '2022' }),
+        role({ slug: 'kelp-and-tar', company: 'Kelp & Tar', since: '2019' }),
+      ])
+
+      await button(component, 'Kelp & Tar').trigger('click', { detail: 1 })
+      await button(component, 'Kiln & Ash').trigger('click')
+
+      expect(component.emitted('open')).toEqual([
+        ['kelp-and-tar'],
+        ['kiln-and-ash'],
+      ])
+    })
+
+    it('names the role in the button and leaves the summary outside it', async () => {
+      const component = await mount([
+        role({
+          company: 'Kiln & Ash',
+          title: 'Kiln technician',
+          summary: 'Rebuilt the firing schedule.',
+        }),
+      ])
+
+      const text = component.get('button').text()
+      expect(text).toContain('Kiln & Ash')
+      expect(text).toContain('Kiln technician')
+      expect(text).not.toContain('Rebuilt the firing schedule.')
+    })
+
+    it('has nothing to open when it has no roles', async () => {
+      const component = await mount([])
+
+      expect(component.findAll('button')).toHaveLength(0)
+    })
+
+    it('keeps the click from reaching the session behind it', async () => {
+      const component = await mount([
+        role(),
+      ])
+      const behind = vi.fn()
+      component.element.parentElement!.addEventListener('click', behind)
+
+      await component.get('button').trigger('click')
+
+      expect(behind).not.toHaveBeenCalled()
+    })
+
+    describe('with text selected', () => {
+      afterEach(() => {
+        window.getSelection()!.removeAllRanges()
+      })
+
+      it('stays shut when a pointer drag across the name ends on the button', async () => {
+        const component = await mount([
+          role(),
+        ])
+        window.getSelection()!.selectAllChildren(component.get('button').element)
+
+        await component.get('button').trigger('click', { detail: 1 })
+
+        expect(component.emitted('open')).toBeUndefined()
+      })
+
+      it('still opens from the keyboard, whose click has no pointer behind it', async () => {
+        const component = await mount([
+          role({ slug: 'kiln-and-ash' }),
+        ])
+        window.getSelection()!.selectAllChildren(component.get('p').element)
+
+        await component.get('button').trigger('click', { detail: 0 })
+
+        expect(component.emitted('open')).toEqual([
+          ['kiln-and-ash'],
+        ])
+      })
+    })
   })
 
   it('holds no placeholder markers of its own', async () => {
