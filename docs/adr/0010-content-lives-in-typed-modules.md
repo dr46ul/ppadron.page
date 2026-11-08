@@ -5,7 +5,7 @@ The Profile, the Roles and the Recommendations are TypeScript modules in
 like any other change. There is no database, no headless CMS and no Nuxt Content.
 
 The question came up when the previous site's text moved in and Content grew from
-short placeholder fields to about 2,600 words. That is still about eleven small
+short placeholder fields to about 2,600 words. That is still about a dozen small
 records, edited by one author a few times a year.
 
 ADR-0004 and ADR-0007 already put Content in `app/data/` and let only `Terminal`
@@ -19,7 +19,7 @@ read it. This record is why it stays there now that there is more of it.
 - **A headless CMS read at build time.** Rejected: it keeps the page prerendered,
   but adds an external service and a rebuild hook, all so that one author can
   edit without a commit a few times a year.
-- **Nuxt Content.** Rejected: it adds a module and a query layer for about eleven
+- **Nuxt Content.** Rejected: it adds a module and a query layer for about a dozen
   small records, and the Outputs would still take the same props.
 
 ## Consequences
