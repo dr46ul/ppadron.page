@@ -8,7 +8,7 @@ function recommendation(
   overrides: Partial<Recommendation> = {},
 ): Recommendation {
   return {
-    quote: 'Pavel shipped the migration nobody else would touch.',
+    quote: ['Pavel shipped the migration nobody else would touch.'],
     name: 'Alex Rivers',
     title: 'Staff Engineer',
     company: 'Acme',
@@ -24,7 +24,7 @@ describe('recommendations output', () => {
   it('prints the quote and its attribution', async () => {
     const component = await mount([
       recommendation({
-        quote: 'Pavel shipped the migration nobody else would touch.',
+        quote: ['Pavel shipped the migration nobody else would touch.'],
         name: 'Alex Rivers',
         title: 'Staff Engineer',
         company: 'Acme',
@@ -53,12 +53,27 @@ describe('recommendations output', () => {
 
   it('quotes each recommendation as a blockquote', async () => {
     const component = await mount([
-      recommendation({ quote: 'He left the codebase better than he found it.' }),
+      recommendation({ quote: ['He left the codebase better than he found it.'] }),
     ])
 
     expect(component.get('blockquote').text()).toBe(
       'He left the codebase better than he found it.',
     )
+  })
+
+  it('keeps a long quote\'s paragraph breaks inside its one blockquote', async () => {
+    const component = await mount([
+      recommendation({
+        quote: ['He rewrote the build.', 'Then he taught us how it worked.'],
+      }),
+    ])
+
+    const quotes = component.findAll('blockquote')
+    expect(quotes).toHaveLength(1)
+    expect(quotes[0]!.findAll('p').map(paragraph => paragraph.text())).toEqual([
+      'He rewrote the build.',
+      'Then he taught us how it worked.',
+    ])
   })
 
   it('numbers the recommendations for the print cascade', async () => {
@@ -87,7 +102,7 @@ describe('recommendations output', () => {
     it('sets the quote and the name as prose, the rest as chrome', async () => {
       const component = await mount([
         recommendation({
-          quote: 'Pavel shipped the migration nobody else would touch.',
+          quote: ['Pavel shipped the migration nobody else would touch.'],
           name: 'Alex Rivers',
           title: 'Staff Engineer',
           company: 'Acme',

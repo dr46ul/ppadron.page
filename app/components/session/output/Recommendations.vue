@@ -19,8 +19,13 @@ defineProps<{ recommendations: Recommendation[] }>()
         :style="{ '--i': index }"
         class="border-accent/30 max-w-prose border-l pl-4"
       >
-        <blockquote class="text-body">
-          {{ recommendation.quote }}
+        <blockquote class="text-body flex flex-col gap-2">
+          <p
+            v-for="(paragraph, paragraphIndex) in recommendation.quote"
+            :key="paragraphIndex"
+          >
+            {{ paragraph }}
+          </p>
         </blockquote>
         <p class="text-subtle mt-2 text-xs">
           <span class="text-body">
