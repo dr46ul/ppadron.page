@@ -52,13 +52,13 @@ export const roles: Role[] = [
     exactPeriod: 'Jun 2023 – now',
     since: '2023',
     summary:
-      'Migrating Nordhealth\'s Provet from a legacy monolith to a new Nuxt app, now as lead frontend developer, and cut its CI pipelines\' run time by 69% to under 10 minutes.',
+      'Migrating Nordhealth\'s Provet, its most important app, from a legacy monolith to a new Nuxt app, and now leading the frontend work across the company\'s teams.',
     tech: ['Nuxt', 'TypeScript', 'Tailwind', 'TanStack Query', 'JSON:API'],
     account: [
       'I joined Nordhealth as a Senior Frontend Developer in Jun 2023 and have been the Lead since Apr 2025, on a remote contract.',
       'Nordhealth is migrating its most important app, Provet, from an old monolithic architecture to a brand-new app written in Nuxt.',
       'As Lead, I supervise the work of all frontend developers so that they stay in sync across the company\'s different teams, and I am the person to ask about anything related to the NFE project, instead of chasing everyone separately. I also fix the project\'s vulnerabilities, keep dependencies up to date and propose refactors.',
-      'Recently I refactored the CI pipelines, which improved their speed by 69%. They all run in under 10 minutes now, a big gain over the previous numbers.',
+      'Recently I refactored the CI pipelines, which made them considerably faster.',
     ],
     stack: ['Nuxt', 'TypeScript', 'CSS3', 'Tailwind', 'TanStack Query', 'TanStack Table', 'JSON:API'],
   },
