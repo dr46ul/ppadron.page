@@ -8,6 +8,10 @@
 > `server/api/` runs as a function — and is the first record of it that the
 > build actually implements. Kept for the reasoning against SSR, which ADR-0008
 > cites.
+>
+> [ADR-0011](./0011-a-terminal-and-a-teletype.md) brings the inline `<head>`
+> script back for a second theme, keeping the choice in `localStorage` rather
+> than a cookie.
 
 The site offers a light/dark toggle (`corporate` / `dracula`) whose choice must survive a reload without a flash of the wrong theme. The obvious implementation is SSR with a cookie: the server reads the theme per request and emits the right `data-theme`. We chose static prerendering instead, and handle the override with a small inline `<head>` script that reads the cookie and sets `data-theme` before first paint. The contact endpoint still deploys as a serverless function via Nitro's hybrid rendering, so the page is CDN-static while `server/api/contact.post.ts` is dynamic.
 

@@ -53,13 +53,17 @@ Both exist because the page can be driven indefinitely: without the cap the DOM
 grows without bound, and a second copy of the form would be a second form bound
 to the same state.
 
-**There is no light theme.** A terminal is a dark surface in any light, and the
+**There is no light theme.** _Superseded by
+[ADR-0011](./0011-a-terminal-and-a-teletype.md), which adds a light theme, the
+teletype, and brings back the inline `<head>` script._ A terminal is a dark surface in any light, and the
 daylight version of this design read as a document in a monospace font rather
 than as a machine. Removing it also removes the theme cookie, the toggle, and
 the inline `<head>` script that ADR-0002 introduced to resolve it before first
 paint — see that record for what remains of it.
 
-**The palette is declared, not borrowed.** It began as daisyUI's `dracula` and
+**The palette is declared, not borrowed.** _The Dracula-derived palette below
+is superseded by [ADR-0011](./0011-a-terminal-and-a-teletype.md); the themes
+are still declared in `main.css` rather than borrowed._ It began as daisyUI's `dracula` and
 is now written out in full in `app/assets/css/main.css` as a theme named
 `terminal`, with daisyUI's built-in themes switched off entirely. The hues are
 unchanged — no new colour entered the system — but the theme name reaches the
