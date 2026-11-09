@@ -1,59 +1,92 @@
 @import 'tailwindcss';
 
 /* --------------------------------------------------------------------------
-   Terminal Brutalist
-   Are.na's raw grid + Bloomberg Terminal's density.
+   Two themes, one Session: a terminal and a teletype.
 
-   The palette below started as daisyUI's `dracula` and is now declared as the
-   site's own, because the theme name ends up in `<html data-theme>` and that
-   is not a place to advertise a borrowed identity. The hues are unchanged —
-   nothing here is a new colour — but they are written out rather than
-   inherited, so the tokens the components actually depend on are visible in
-   the repository instead of resolved out of node_modules. Only the ones that
-   render are declared: a token no pixel resolves works against that, so the
-   list shrinks rather than grows.
+   `terminal` is the dark screen; `teletype` is the session as the first
+   terminals printed it, in dark ink on paper with a red half to the ribbon.
+   They are palettes and nothing else: the typeface, the sizes and the spacing
+   are declared once, outside them, so switching never reflows the page. A
+   Visitor who never chose follows their system: `teletype` is the default and
+   `terminal` answers `prefers-color-scheme: dark`, so this resolves with no
+   JavaScript. An explicit choice is applied before first paint by the head
+   script in `shared/theme.ts`. See docs/adr/0011-a-terminal-and-a-teletype.md.
 
-   Two families of override sit inside the declaration rather than beside it:
+   Everything a component reads is a role, never a value: four text roles and
+   the control edge, which each theme declares, and five type sizes, which
+   neither does.
 
-   - Radius is 0 and elevation is expressed only as 1px hairlines, so daisyUI's
-     radius and depth tokens are flattened here rather than fought with utility
-     classes on every component.
-   - The three base surfaces are darker than stock. The page is the surface a
-     terminal is printed on, so the banner and the prompt bar read as chrome
-     attached to something, rather than as panels floating on the same value.
-
-   Dark only: a terminal is a dark surface in any light. See docs/adr/0004.
+   Radius is 0 and elevation is 1px hairlines in both, so daisyUI's radius and
+   depth tokens are flattened here rather than fought with utilities.
    -------------------------------------------------------------------------- */
 
-/* No built-in themes: the declaration below is the only one the site has, so
-   daisyUI's stock light and dark would be ~4kB of CSS nothing can select. */
+/* No built-in themes: the two below are the only ones the site has, so
+   daisyUI's stock set would be CSS nothing can select. */
 @plugin "daisyui" {
   themes: false;
 }
 
+/* Cool graphite rather than violet, so the amber accent sits on a neutral
+   instead of its complement, and off-white text below the glare of pure white
+   on black. */
 @plugin "daisyui/theme" {
   name: 'terminal';
-  default: true;
+  prefersdark: true;
   color-scheme: dark;
 
-  /* Surfaces — deeper than stock. */
-  --color-base-100: oklch(16.5% 0.02 277);
-  --color-base-200: oklch(20% 0.02 277);
-  --color-base-300: oklch(30.5% 0.024 277);
-  --color-base-content: oklch(97.747% 0.007 106.545);
+  --color-base-100: oklch(17.5% 0.009 255);
+  --color-base-200: oklch(20.5% 0.01 255);
+  --color-base-300: oklch(28% 0.012 255);
+  --color-base-content: oklch(94% 0.006 255);
+  --color-body: oklch(86% 0.008 255);
+  /* Three steps of text proved enough; `muted` and `subtle` stay two roles
+     because they mark different things, and either may move on its own. */
+  --color-muted: oklch(70% 0.012 255);
+  --color-subtle: oklch(70% 0.012 255);
+  --color-edge: oklch(52% 0.014 255);
 
-  /* Amber is the accent the whole page is built on: the prompt, the caret,
-     the rules, the active row. */
-  --color-accent: oklch(83.392% 0.124 66.558);
-  --color-accent-content: oklch(16.678% 0.024 66.558);
+  --color-accent: oklch(81% 0.12 72);
+  --color-accent-content: oklch(20% 0.03 72);
+  --color-success: oklch(80% 0.11 155);
+  --color-success-content: oklch(20% 0.03 155);
+  --color-error: oklch(71% 0.15 25);
+  --color-error-content: oklch(18% 0.04 25);
 
-  /* Status. `success` is the availability dot; `error` is a failed Enquiry. */
-  --color-success: oklch(87.099% 0.219 148.024);
-  --color-success-content: oklch(17.419% 0.043 148.024);
-  --color-error: oklch(68.22% 0.206 24.43);
-  --color-error-content: oklch(13.644% 0.041 24.43);
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
-  /* Square, flat, hairlines only. */
+/* Ink on printer paper. The paper is a near-neutral off-white and the ink a
+   cool near-black, short of pure black so the page does not buzz. Ribbon red
+   is the only accent, and errors share it the way a ledger printed negatives
+   in red. */
+@plugin "daisyui/theme" {
+  name: 'teletype';
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: oklch(97% 0.004 90);
+  --color-base-200: oklch(94% 0.005 90);
+  --color-base-300: oklch(86% 0.006 90);
+  --color-base-content: oklch(22% 0.012 260);
+  --color-body: oklch(31% 0.01 260);
+  --color-muted: oklch(47% 0.01 260);
+  --color-subtle: oklch(47% 0.01 260);
+  --color-edge: oklch(60% 0.01 260);
+
+  --color-accent: oklch(50% 0.18 27);
+  --color-accent-content: oklch(97% 0.004 90);
+  --color-success: oklch(47% 0.11 150);
+  --color-success-content: oklch(97% 0.004 90);
+  --color-error: oklch(50% 0.18 27);
+  --color-error-content: oklch(97% 0.004 90);
+
   --radius-selector: 0rem;
   --radius-field: 0rem;
   --radius-box: 0rem;
@@ -65,48 +98,56 @@
 }
 
 @theme {
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Registered so Tailwind generates `text-body`, `border-edge` and the rest.
+     Never rendered: every theme declares these in the base layer, which wins
+     over this one on the same element. */
+  --color-body: currentColor;
+  --color-muted: currentColor;
+  --color-subtle: currentColor;
+  --color-edge: currentColor;
 
-  /* The three steps below `base-content` that text is allowed to take, so that
-     stepping back is a named role rather than an opacity a component invents.
-     Everything on this site renders at 10-13px, so WCAG asks 4.5:1 of all of
-     it and no large-text exemption applies anywhere; the ratios are measured
-     over base-100 and the first passing step of the ramp is 50%.
+  /* One typeface in both themes: Courier Prime, which is Courier redrawn for
+     screens and reads as typed output. */
+  --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-     Mixed `in srgb` because that is the space the ratios were measured in —
-     oklab lands on a different colour, and so a different ratio. */
+  /* The size floor is the meta step: nothing a Visitor reads is smaller. Only
+     the uppercase labels on chrome go under it, and they are letter-spaced. */
+  --text-machine: 1.03125rem;
+  --text-machine--line-height: 1.6;
+  --text-prose: 1.03125rem;
+  --text-prose--line-height: 1.65;
+  --text-meta: 0.90625rem;
+  --text-meta--line-height: 1.6;
+  --text-label: 0.75rem;
+  --text-name: 1.75rem;
+  --text-name--line-height: 1.2;
+}
 
-  /* 11.63:1 — prose the Visitor reads through, a notch under the one line a
-     block puts at full strength. */
-  --color-body: color-mix(in srgb, var(--color-base-content) 80%, var(--color-base-100));
+/* The Session's column, centred, with the gutter growing from a phone's 1rem
+   to 2.5rem. The prompt bar spans the screen and uses the same column, so the
+   prompt lines up with the transcript above it. 72rem is the width the chip row
+   needs to stay on one line; prose is held to its own measure
+   inside it by `max-w-prose`. */
+@utility session-gutter {
+  padding-inline: max(1rem, calc((100% - 72rem) / 2));
 
-  /* 6.86:1 — labels and ledes standing beside the thing they support. */
-  --color-muted: color-mix(in srgb, var(--color-base-content) 60%, var(--color-base-100));
-
-  /* 5.07:1 — the quietest tier: session chrome, footnotes, metadata. */
-  --color-subtle: color-mix(in srgb, var(--color-base-content) 50%, var(--color-base-100));
-
-  /* 3.20:1 — the boundary of a control: a chip's border, an Enquiry field's
-     underline, the rule over the prompt bar. WCAG 1.4.11 asks 3:1 of these and
-     `base-300` measures 1.44:1, but it stays the divider, since lightening it
-     would lighten every rule on the page. */
-  --color-edge: oklch(50% 0.03 277);
+  @media (width >= 40rem) {
+    padding-inline: max(2.5rem, calc((100% - 72rem) / 2));
+  }
 }
 
 @layer base {
-  html {
-    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  html,
+  body {
+    font-family: var(--font-mono);
   }
 
   body {
-    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8125rem;
-    line-height: 1.6;
     text-wrap: pretty;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Hard, square, amber. Terminals do not glow softly. */
+  /* Hard, square, accented. Terminals do not glow softly. */
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;

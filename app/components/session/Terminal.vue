@@ -15,6 +15,7 @@
  * lives in the prompt at the foot, which is where a terminal's status line has
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
+import type { SessionOutput } from '~/composables/useSession'
 import { roles } from '~/data/experience'
 import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
@@ -36,6 +37,19 @@ const {
 } = useSession(roles.map(role => role.slug))
 
 const promptBar = useTemplateRef('promptBar')
+
+const theme = useTheme()
+onMounted(theme.resolve)
+
+const scheme = computed({
+  get: () => theme.scheme.value,
+  set: theme.set,
+})
+
+/** What the chip for a block's command says it does, over the block itself. */
+function labelOf(output: SessionOutput | null) {
+  return commands.find(command => command.output === output)?.label
+}
 
 /**
  * The page is prerendered (ADR-0008), so this is when it was built, and the
@@ -71,7 +85,7 @@ function focusPrompt(event: MouseEvent) {
 
 <template>
   <div
-    class="flex min-h-screen flex-col text-[0.875rem] leading-[1.7]"
+    class="text-machine flex min-h-screen flex-col"
     @click="focusPrompt"
   >
     <!-- Skips past the Transcript to the prompt, not past navigation to the
@@ -84,13 +98,13 @@ function focusPrompt(event: MouseEvent) {
       Skip to the prompt
     </a>
 
-    <main class="flex-1 px-4 py-8 sm:px-6">
+    <main class="session-gutter flex-1 py-10">
       <!-- A session opens with a login banner, not a header. `clear` takes it
            with the rest of the scrollback; only `reset` brings it back. -->
       <div
         v-if="!cleared"
         data-banner
-        class="border-base-300 mb-12 border-b pb-6 text-[0.8125rem]"
+        class="border-base-300 mb-[4.5rem] border-b pb-6"
       >
         <p class="text-subtle">
           Last login: {{ lastLogin }} on ttys002
@@ -117,7 +131,7 @@ function focusPrompt(event: MouseEvent) {
         </p>
       </div>
 
-      <p v-if="trimmed > 0" class="text-subtle mb-10 text-xs">
+      <p v-if="trimmed > 0" class="text-subtle text-meta mb-10">
         [ {{ trimmed }} earlier {{ trimmed === 1 ? 'block' : 'blocks' }} dropped
         — scrollback is {{ scrollback }} ]
       </p>
@@ -127,22 +141,32 @@ function focusPrompt(event: MouseEvent) {
           v-for="entry in entries"
           :key="entry.id"
           :data-entry="entry.id"
-          class="mb-10 last:mb-0"
+          class="mb-[4.5rem] last:mb-0"
         >
-          <p class="flex gap-2">
-            <span aria-hidden="true" class="text-accent select-none">$</span>
-            <span class="font-medium">{{ entry.cmd }}</span>
-          </p>
+          <!-- Ruled across like a section header, because on a page read top
+               to bottom that is what each command is. -->
+          <div class="flex items-baseline gap-3">
+            <p class="flex gap-2">
+              <span aria-hidden="true" class="text-accent select-none">$</span>
+              <span class="font-medium">{{ entry.cmd }}</span>
+            </p>
+            <span aria-hidden="true" class="bg-base-300 h-px min-w-6 flex-1 self-center max-sm:hidden" />
+            <span
+              v-if="labelOf(entry.output)"
+              data-entry-label
+              class="text-subtle text-meta whitespace-nowrap max-sm:hidden"
+            >{{ labelOf(entry.output) }}</span>
+          </div>
 
           <!-- The beat between the command and its output. -->
-          <p v-if="entry.output === null" class="mt-3 pl-[1.1rem]">
+          <p v-if="entry.output === null" class="mt-5">
             <span aria-hidden="true" class="caret session-busy" />
             <span class="sr-only" role="status">Working…</span>
           </p>
 
           <div
             v-else
-            class="mt-3 pl-[1.1rem]"
+            class="mt-5"
             :class="entry.animate && 'session-print'"
           >
             <SessionOutputWhoami
@@ -198,6 +222,7 @@ function focusPrompt(event: MouseEvent) {
     <SessionPromptBar
       ref="promptBar"
       v-model="input"
+      v-model:scheme="scheme"
       :commands
       :meta-commands
       :availability="profile.availability"

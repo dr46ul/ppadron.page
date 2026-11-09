@@ -10,31 +10,31 @@ defineProps<{ profile: Profile }>()
       <p
         v-for="(paragraph, index) in profile.background"
         :key="index"
-        class="text-body"
+        class="text-prose text-body"
       >
         {{ paragraph }}
       </p>
     </div>
 
     <template v-if="profile.skills.length > 0">
-      <p class="text-muted mt-5 text-xs">
+      <p class="text-muted mt-5 text-meta">
         Skills
       </p>
-      <p class="text-subtle mt-1 text-xs">
+      <p class="text-subtle mt-1 text-meta">
         {{ profile.skills.join(' · ') }}
       </p>
     </template>
 
-    <p class="text-muted mt-5 text-xs">
+    <p class="text-muted mt-5 text-meta">
       Education
     </p>
     <p class="text-body mt-1">
       {{ profile.education.degree }}
     </p>
-    <p class="text-subtle mt-1 text-xs">
+    <p class="text-subtle mt-1 text-meta">
       {{ profile.education.faculty }}
     </p>
-    <p class="text-subtle text-xs">
+    <p class="text-subtle text-meta">
       {{ profile.education.institution }} · {{ profile.education.year }}
     </p>
   </div>

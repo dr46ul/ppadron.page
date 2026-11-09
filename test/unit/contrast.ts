@@ -73,15 +73,3 @@ export function parseOklchToken(css: string, token: string): Srgb {
     throw new Error(`no oklch declaration for --${token}`)
   return oklchToSrgb(Number(match[1]) / 100, Number(match[2]), Number(match[3]))
 }
-
-/** The share of `--color-base-content` a `color-mix()` role token asks for. */
-export function parseMixShare(css: string, token: string): number {
-  const match = css.match(
-    new RegExp(
-      `--${token}:\\s*color-mix\\(\\s*in srgb,\\s*var\\(--color-base-content\\)\\s+([\\d.]+)%,\\s*var\\(--color-base-100\\)\\s*\\)`,
-    ),
-  )
-  if (!match)
-    throw new Error(`no srgb color-mix declaration for --${token}`)
-  return Number(match[1]) / 100
-}

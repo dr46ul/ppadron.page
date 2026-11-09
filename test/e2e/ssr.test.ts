@@ -8,6 +8,7 @@ import { roles } from '../../app/data/experience'
 import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
 import { formatDate } from '../../app/utils/date-format'
+import { themeScript } from '../../shared/theme'
 
 /**
  * This project asserts only what only the server render can prove: the
@@ -89,8 +90,20 @@ describe('home page', () => {
     expect(page.documentElement.getAttribute('lang')).toBe('en')
   })
 
-  it('sets html data-theme to terminal', () => {
-    expect(page.documentElement.getAttribute('data-theme')).toBe('terminal')
+  /**
+   * No attribute is what lets the stylesheet's `prefers-color-scheme` query
+   * choose, with no JavaScript, for a Visitor who never picked a theme.
+   */
+  it('leaves the theme to the stylesheet rather than naming one', () => {
+    expect(page.documentElement.hasAttribute('data-theme')).toBe(false)
+  })
+
+  it('ships the script that applies a saved theme inline in the head, before first paint', () => {
+    const inline = [
+      ...page.head.querySelectorAll('script:not([src])'),
+    ]
+
+    expect(inline.map(script => script.textContent)).toContain(themeScript)
   })
 
   it('sets the description meta tag', () => {

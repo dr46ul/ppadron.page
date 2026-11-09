@@ -1,3 +1,4 @@
+import type { Scheme } from '#shared/theme'
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
@@ -32,6 +33,7 @@ function mount(props: {
   modelValue?: string
   completion?: string
   availability?: Profile['availability']
+  scheme?: Scheme
 } = {}) {
   return mountSuspended(PromptBar, {
     props: {
@@ -39,6 +41,7 @@ function mount(props: {
       metaCommands,
       modelValue: '',
       availability: { open: true, label: 'Free from the equinox' },
+      scheme: 'dark',
       ...props,
     },
   })
@@ -50,8 +53,20 @@ function prompt(component: Mounted) {
   return component.find<HTMLInputElement>('#prompt')
 }
 
+/** The chip row's buttons, and not the theme switch beside the prompt. */
+const CHIPS = '[data-prompt-bar] > div button'
+
 function chip(component: Mounted, cmd: string) {
-  return component.findAll('button').find(button => button.text().trim() === cmd)!
+  return component.findAll(CHIPS).find(button => button.text().trim() === cmd)!
+}
+
+/** The dark / light switch beside the prompt. */
+function schemeSwitch(component: Mounted) {
+  return component.find('[data-scheme-switch]')
+}
+
+function schemeButton(component: Mounted, scheme: Scheme) {
+  return schemeSwitch(component).findAll('button').find(button => button.text().trim() === scheme)!
 }
 
 /** The availability tag, beside the prompt. */
@@ -75,7 +90,7 @@ describe('prompt bar', () => {
     it('lists every command it is handed as a chip, and every meta command after them', async () => {
       const component = await mount()
 
-      expect(component.findAll('button').map(button => button.text().trim()))
+      expect(component.findAll(CHIPS).map(button => button.text().trim()))
         .toEqual(['cat ~/vault', 'ls ~/kiln', 'sweep'])
     })
 
@@ -162,12 +177,12 @@ describe('prompt bar', () => {
       ])
     })
 
-    it('holds the prompt at 16px on a phone so iOS does not zoom the page', async () => {
+    it('holds the prompt at 16px at every width, so iOS never zooms the page', async () => {
       const component = await mount()
       const classes = prompt(component).classes()
 
       expect(classes).toContain('text-base')
-      expect(classes).toContain('sm:text-[0.875rem]')
+      expect(classes.filter(name => name.startsWith('sm:text-'))).toEqual([])
     })
 
     it('invites a pick rather than a click', async () => {
@@ -282,13 +297,67 @@ describe('prompt bar', () => {
     })
   })
 
+  describe('the theme switch', () => {
+    it('offers dark and light, as one labelled group', async () => {
+      const component = await mount()
+
+      expect(schemeSwitch(component).attributes('role')).toBe('group')
+      expect(schemeSwitch(component).attributes('aria-label')).toBe('Theme')
+      expect(schemeSwitch(component).findAll('button').map(button => button.text().trim()))
+        .toEqual(['dark', 'light'])
+    })
+
+    it.each(['dark', 'light'] as const)('presses %s while it is the theme showing', async (scheme) => {
+      const component = await mount({ scheme })
+      const other = scheme === 'dark'
+        ? 'light'
+        : 'dark'
+
+      expect(schemeButton(component, scheme).attributes('aria-pressed')).toBe('true')
+      expect(schemeButton(component, other).attributes('aria-pressed')).toBe('false')
+    })
+
+    it('accents the theme showing and steps the other back', async () => {
+      const component = await mount({ scheme: 'light' })
+
+      expect(schemeButton(component, 'light').classes()).toContain('text-accent')
+      expect(roleOf(component, '[data-scheme-switch] button', 'dark')).toBe('text-muted')
+    })
+
+    it('reports the theme picked', async () => {
+      const component = await mount({ scheme: 'dark' })
+
+      await schemeButton(component, 'light').trigger('click')
+
+      expect(component.emitted('update:scheme')).toEqual([
+        ['light'],
+      ])
+    })
+
+    it('keeps a pick from reaching the session, which would pull focus to the prompt', async () => {
+      const component = await mount()
+      const behind = vi.fn()
+      component.element.parentElement!.addEventListener('click', behind)
+
+      await schemeButton(component, 'light').trigger('click')
+
+      expect(behind).not.toHaveBeenCalled()
+    })
+
+    it('stays on screen on a phone, where the availability tag is hidden', async () => {
+      const component = await mount()
+
+      expect(schemeSwitch(component).classes()).not.toContain('hidden')
+    })
+  })
+
   describe('text roles', () => {
     it('sets every chip as a label and the rail they sit on as chrome', async () => {
       const component = await mount()
 
       // The meta chips are control text too, not a footnote, so they read at
       // the same step as the commands rather than a step below them.
-      expect(rolesOf(component, 'button')).toEqual(['text-muted', 'text-muted', 'text-muted'])
+      expect(rolesOf(component, CHIPS)).toEqual(['text-muted', 'text-muted', 'text-muted'])
       expect(roleOf(component, 'span', 'Run')).toBe('text-subtle')
     })
   })
@@ -296,7 +365,7 @@ describe('prompt bar', () => {
   describe('edges', () => {
     it('draws every command chip and the bar\'s rule in the control-edge token', async () => {
       const component = await mount()
-      const bordered = component.findAll('button').filter(button =>
+      const bordered = component.findAll(CHIPS).filter(button =>
         button.classes().includes('border'),
       )
 

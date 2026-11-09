@@ -16,7 +16,7 @@ const repoLabel = computed(() =>
 
 <template>
   <div>
-    <p class="text-body max-w-prose">
+    <p class="text-prose text-body max-w-prose">
       No projects gallery, so this page is the work sample: a statically
       prerendered Nuxt site with one serverless function behind the form, and
       the whole of it is readable.
@@ -33,11 +33,11 @@ const repoLabel = computed(() =>
     </p>
     <p
       v-if="profile.stack.length > 0"
-      class="text-subtle mt-4 text-xs"
+      class="text-subtle mt-4 text-meta"
     >
       {{ profile.stack.join(' · ') }}
     </p>
-    <p class="text-subtle mt-6 text-xs">
+    <p class="text-subtle mt-6 text-meta">
       © {{ year }} {{ profile.name }} ·
       <a
         class="hover:text-base-content"

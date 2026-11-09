@@ -6,8 +6,10 @@
  * wraps rather than scrolls for the same reason: on a phone a scrolled-off
  * chip, `mail pavel` among them, is hidden just the same.
  */
+import type { Scheme } from '#shared/theme'
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import type { Profile } from '~/data/profile'
+import { SCHEMES } from '#shared/theme'
 
 const props = defineProps<{
   commands: SessionCommand[]
@@ -23,6 +25,8 @@ const emit = defineEmits<{
 }>()
 
 const typed = defineModel<string>({ required: true })
+
+const scheme = defineModel<Scheme>('scheme', { required: true })
 
 const prompt = useTemplateRef<HTMLInputElement>('prompt')
 
@@ -45,21 +49,21 @@ defineExpose({
 <template>
   <div
     data-prompt-bar
-    class="border-edge bg-base-100/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
+    class="border-edge bg-base-200/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
   >
     <div
-      class="border-base-300 flex flex-wrap items-center gap-2 border-b px-4 py-2 sm:px-6"
+      class="session-gutter border-base-300 flex flex-wrap items-center gap-2 border-b py-2.5"
       @click.stop
     >
       <span
-        class="text-subtle shrink-0 text-[0.625rem] tracking-[0.2em] uppercase"
+        class="text-subtle text-label shrink-0 tracking-[0.2em] uppercase"
       >
         Run
       </span>
       <template v-for="(command, index) in commands" :key="command.cmd">
         <button
           type="button"
-          class="border-edge text-muted hover:border-accent hover:text-accent shrink-0 border px-2 py-0.5 text-[0.6875rem] whitespace-nowrap"
+          class="border-edge text-muted hover:border-accent hover:text-accent text-meta min-h-8 shrink-0 border px-2.5 py-1 whitespace-nowrap"
           :title="command.label"
           :aria-describedby="`chip-hint-${index}`"
           @click="emit('run', command.cmd)"
@@ -74,7 +78,7 @@ defineExpose({
       <template v-for="(command, index) in metaCommands" :key="command.cmd">
         <button
           type="button"
-          class="text-muted hover:text-base-content shrink-0 px-1 py-0.5 text-[0.6875rem] whitespace-nowrap"
+          class="text-muted hover:text-base-content text-meta min-h-8 shrink-0 px-1.5 py-1 whitespace-nowrap"
           :title="command.label"
           :aria-describedby="`meta-hint-${index}`"
           @click="emit('run', command.cmd)"
@@ -86,18 +90,20 @@ defineExpose({
     </div>
 
     <form
-      class="flex items-center gap-2 px-4 py-3 sm:px-6"
+      class="session-gutter flex items-center gap-2 py-3"
       @submit.prevent="emit('run', typed)"
     >
       <label class="sr-only" for="prompt">Run a command</label>
       <span aria-hidden="true" class="text-accent shrink-0 select-none">$</span>
-      <!-- 16px below `sm`: iOS Safari zooms the page on focusing a smaller
-           input and does not zoom back out. -->
+      <!-- 16px at every width: iOS Safari zooms the page on focusing a smaller
+           input and does not zoom back out. On a phone the theme switch leaves
+           too little room for the whole hint, so it trails off rather than
+           cutting a word in half. -->
       <input
         id="prompt"
         ref="prompt"
         v-model="typed"
-        class="w-full bg-transparent text-base sm:text-[0.875rem]"
+        class="w-full bg-transparent text-base text-ellipsis"
         type="text"
         autocomplete="off"
         autocapitalize="off"
@@ -109,9 +115,30 @@ defineExpose({
       >
       <span aria-hidden="true" class="caret prompt-caret shrink-0" />
 
+      <div
+        data-scheme-switch
+        role="group"
+        aria-label="Theme"
+        class="text-meta ml-auto flex shrink-0 items-center gap-0.5 pl-4"
+        @click.stop
+      >
+        <template v-for="(option, index) in SCHEMES" :key="option">
+          <span v-if="index > 0" aria-hidden="true" class="text-subtle">/</span>
+          <button
+            type="button"
+            class="min-h-8 px-1"
+            :class="scheme === option ? 'text-accent' : 'text-muted hover:text-base-content'"
+            :aria-pressed="scheme === option"
+            @click="scheme = option"
+          >
+            {{ option }}
+          </button>
+        </template>
+      </div>
+
       <span
         data-availability
-        class="ml-auto hidden shrink-0 items-center gap-2 pl-4 text-[0.6875rem] tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
+        class="text-label hidden shrink-0 items-center gap-2 pl-4 tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
         :class="availability.open ? 'text-accent' : 'text-subtle'"
       >
         <span

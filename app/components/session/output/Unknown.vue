@@ -6,7 +6,7 @@ const emit = defineEmits<{ help: [] }>()
 </script>
 
 <template>
-  <p class="text-error text-xs">
+  <p class="text-error text-meta">
     {{ cmd }}: command not found — try
     <button
       type="button"

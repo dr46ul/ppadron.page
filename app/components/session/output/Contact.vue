@@ -105,13 +105,13 @@ watchPostEffect(() => {
 
 <template>
   <div>
-    <p class="text-muted mb-5 max-w-prose">
+    <p class="text-prose text-muted mb-5 max-w-prose">
       Tell me what you are building and what is in the way. I answer every
       message myself.
     </p>
 
     <form class="max-w-xl" @submit.prevent="submit" @click.stop>
-      <!-- The fields are 16px below `sm`: iOS Safari zooms the page on
+      <!-- The fields are 16px at every width: iOS Safari zooms the page on
            focusing a smaller input and does not zoom back out. Once sent they
            are read-only rather than disabled, so the Visitor can still select
            and copy what went. -->
@@ -121,11 +121,11 @@ watchPostEffect(() => {
         </legend>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-xs">from:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">from:</span>
           <input
             ref="name"
             v-model="from"
-            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base"
             type="text"
             name="name"
             autocomplete="name"
@@ -137,14 +137,14 @@ watchPostEffect(() => {
         </label>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-xs">reply-to:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">reply-to:</span>
           <!-- Not `type="email"`: its grammar refuses addresses the delivery
                accepts, such as `josé@…`, in the browser's wording rather than
                this form's. `inputmode` keeps the address keyboard. -->
           <input
             ref="email"
             v-model="replyTo"
-            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] w-full border-b bg-transparent pb-1 text-base"
             type="text"
             inputmode="email"
             autocapitalize="off"
@@ -159,11 +159,11 @@ watchPostEffect(() => {
         </label>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-xs">body:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">body:</span>
           <textarea
             ref="message"
             v-model="body"
-            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed sm:text-[0.875rem]"
+            class="border-edge focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)] h-28 w-full resize-none border-b bg-transparent pb-1 text-base leading-relaxed"
             name="message"
             required
             :disabled="sending"
@@ -176,27 +176,27 @@ watchPostEffect(() => {
           <button
             type="submit"
             :aria-disabled="locked || undefined"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-xs tracking-[0.15em] uppercase"
+            class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-meta tracking-[0.15em] uppercase"
           >
             {{ LABELS[state] ?? 'send' }}
           </button>
           <!-- ADR-0003 makes this line literally true. If persistence is ever
                added, this copy changes in the same commit. -->
-          <span class="text-subtle text-xs">stored nowhere else</span>
+          <span class="text-subtle text-meta">stored nowhere else</span>
         </div>
       </fieldset>
 
       <p
         v-if="state === 'sent'"
         role="status"
-        class="text-success text-xs mt-4 sm:pl-[6.75rem]"
+        class="text-success text-meta mt-4 sm:pl-[6.75rem]"
       >
         Sent. It is in my inbox and I will reply to the address you gave.
       </p>
       <p
         v-if="state === 'failed'"
         role="alert"
-        class="text-error text-xs mt-4 sm:pl-[6.75rem]"
+        class="text-error text-meta mt-4 sm:pl-[6.75rem]"
       >
         That did not send, and nothing was saved. Email me at
         <span class="text-accent">{{ email }}</span>

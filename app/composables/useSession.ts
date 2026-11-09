@@ -5,6 +5,8 @@
  *
  * See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
+import type { Scheme } from '#shared/theme'
+
 export type SessionOutput
   = | 'whoami'
     | 'experience'
@@ -100,7 +102,15 @@ export interface MetaCommand {
 export const metaCommands: MetaCommand[] = [
   { cmd: 'reset', label: 'back to how the page loaded' },
   { cmd: 'clear', label: 'empty the scrollback' },
+  { cmd: 'theme', label: 'switch between dark and light' },
 ]
+
+/** `theme` on its own toggles; with a scheme it sets that one. */
+const THEME_COMMANDS: Record<string, Scheme | 'toggle'> = {
+  'theme': 'toggle',
+  'theme dark': 'dark',
+  'theme light': 'light',
+}
 
 /** What a visitor is likely to type instead of the canonical spelling. */
 export const aliases: Record<string, string> = {
@@ -119,6 +129,8 @@ export const aliases: Record<string, string> = {
   '?': 'help',
   'man': 'help',
   'restart': 'reset',
+  'dark': 'theme dark',
+  'light': 'theme light',
 }
 
 /**
@@ -176,6 +188,7 @@ export function useSession(roleSlugs: string[]) {
   const historyIndex = ref(-1)
 
   const enquiry = useEnquiry()
+  const theme = useTheme()
 
   function reducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -236,6 +249,16 @@ export function useSession(roleSlugs: string[]) {
 
     if (normalised === 'clear') {
       clear()
+      return
+    }
+
+    const themeCommand = THEME_COMMANDS[normalised]
+    if (themeCommand === 'toggle') {
+      theme.toggle()
+      return
+    }
+    if (themeCommand) {
+      theme.set(themeCommand)
       return
     }
 
