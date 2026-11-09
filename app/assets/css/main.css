@@ -136,6 +136,13 @@
   }
 }
 
+/* Courier Prime's line box keeps more room below the baseline than above the
+   capitals, so a label centred on its line box reads high. Browsers without
+   `text-box` keep the untrimmed box, a pixel or two high. */
+@utility trim-to-caps {
+  text-box: trim-both cap alphabetic;
+}
+
 @layer base {
   html,
   body {
