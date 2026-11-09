@@ -62,6 +62,10 @@ function beforeCaret(component: Mounted) {
   return component.find('[data-before-caret]').element.textContent
 }
 
+function underCaret(component: Mounted) {
+  return component.find('.prompt-caret').element.textContent
+}
+
 /**
  * Puts the insertion point where an arrow key or a click would. A browser then
  * fires `selectionchange`; happy-dom does not, so it is fired here.
@@ -259,6 +263,20 @@ describe('prompt bar', () => {
       await moveInsertion(component, 3)
 
       expect(beforeCaret(component)).toBe('cat')
+    })
+
+    it('carries the letter it sits on, so the block can draw it inverted', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+
+      await moveInsertion(component, 8)
+
+      expect(underCaret(component)).toBe('u')
+    })
+
+    it('carries nothing after the last character', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+
+      expect(underCaret(component)).toBe('')
     })
 
     it('goes to the end of a command filled in for the Visitor', async () => {

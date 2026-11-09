@@ -65,6 +65,21 @@ describe('the prompt caret\'s place on the line', () => {
   it('centres the block on the prompt\'s line rather than dropping it to a baseline', () => {
     expect(declarations('.prompt-caret')).toMatch(/translate:\s*none/)
   })
+
+  it('draws the letter it sits on in the accent\'s own content colour, as a terminal inverts its cell', () => {
+    expect(declarations('.prompt-caret')).toMatch(/color:\s*var\(--color-accent-content\)/)
+  })
+
+  it('sets the letter on a line as tall as the block', () => {
+    const height = declarations('.caret')?.match(/height:([^;]+)/)?.[1]?.trim()
+    const lineHeight = declarations('.prompt-caret')?.match(/line-height:([^;]+)/)?.[1]?.trim()
+
+    expect(lineHeight).toEqual(expect.stringContaining(height ?? 'no caret height'))
+  })
+
+  it('leaves the letter to the prompt while the block is hollow', () => {
+    expect(declarations('input:not(:focus) ~ .prompt-mirror .prompt-caret')).toMatch(/[^-]color:\s*transparent/)
+  })
 })
 
 describe('the prompt input', () => {

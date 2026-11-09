@@ -37,6 +37,8 @@ const scrolled = ref(0)
 
 const beforeCaret = computed(() => typed.value.slice(0, insertion.value ?? undefined))
 
+const underCaret = computed(() => typed.value.charAt(beforeCaret.value.length))
+
 /**
  * Reads where the block belongs off the input: the end of the selection that
  * moves, which is where a terminal draws it, less however far a command too
@@ -152,7 +154,7 @@ defineExpose({
           :style="{ translate: `${-scrolled}px 0` }"
         >
           <span data-before-caret class="invisible">{{ beforeCaret }}</span>
-          <span class="caret prompt-caret shrink-0" />
+          <span class="caret prompt-caret shrink-0">{{ underCaret }}</span>
         </div>
       </div>
 
