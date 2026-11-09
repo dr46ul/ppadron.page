@@ -64,11 +64,15 @@ describe('contact output', () => {
       }),
     })
 
-    expect(value(component, 'name')).toBe('Dagny Vole')
-    expect(value(component, 'email')).toBe('dagny@example.test')
-    expect(value(component, 'message')).toBe(
-      'Our checkout has three states and all of them are wrong.',
-    )
+    expect({
+      name: value(component, 'name'),
+      email: value(component, 'email'),
+      message: value(component, 'message'),
+    }).toEqual({
+      name: 'Dagny Vole',
+      email: 'dagny@example.test',
+      message: 'Our checkout has three states and all of them are wrong.',
+    })
   })
 
   it('reports the whole draft back when a field is typed into', async () => {
@@ -122,17 +126,23 @@ describe('contact output', () => {
   it('offers to send while the draft is idle', async () => {
     const component = await mount({ state: 'idle' })
 
-    expect(component.find('button[type="submit"]').text()).toBe('send')
-    expect(component.find('[role="status"]').exists()).toBe(false)
-    expect(component.find('[role="alert"]').exists()).toBe(false)
+    expect({
+      button: component.find('button[type="submit"]').text(),
+      status: component.find('[role="status"]').exists(),
+      alert: component.find('[role="alert"]').exists(),
+    }).toEqual({ button: 'send', status: false, alert: false })
   })
 
   it('says so and takes no more typing while it is sending', async () => {
     const component = await mount({ state: 'sending' })
 
-    expect(component.find('button[type="submit"]').text()).toBe('sending…')
-    for (const name of ['name', 'email', 'message'])
-      expect(component.find(`[name="${name}"]`).attributes('disabled')).toBeDefined()
+    expect({
+      button: component.find('button[type="submit"]').text(),
+      disabled: ['name', 'email', 'message'].map(name => component.find(`[name="${name}"]`).attributes('disabled') !== undefined),
+    }).toEqual({
+      button: 'sending…',
+      disabled: [true, true, true],
+    })
   })
 
   it('keeps the send button focusable while it is sending', async () => {
@@ -141,9 +151,11 @@ describe('contact output', () => {
 
     // A disabled element drops focus to <body>, so the Visitor would lose
     // their place while waiting to hear the result.
-    expect(component.find('fieldset').attributes('disabled')).toBeUndefined()
-    expect(button.attributes('disabled')).toBeUndefined()
-    expect(button.attributes('aria-disabled')).toBe('true')
+    expect({
+      fieldsetDisabled: component.find('fieldset').attributes('disabled'),
+      buttonDisabled: button.attributes('disabled'),
+      ariaDisabled: button.attributes('aria-disabled'),
+    }).toEqual({ fieldsetDisabled: undefined, buttonDisabled: undefined, ariaDisabled: 'true' })
   })
 
   it('does not ask the session to send again while it is sending', async () => {
@@ -170,9 +182,11 @@ describe('contact output', () => {
       const component = await mount({ state: 'sent' })
       const button = component.find('button[type="submit"]')
 
-      expect(button.text()).toBe('sent')
-      expect(button.attributes('disabled')).toBeUndefined()
-      expect(button.attributes('aria-disabled')).toBe('true')
+      expect({
+        text: button.text(),
+        disabled: button.attributes('disabled'),
+        ariaDisabled: button.attributes('aria-disabled'),
+      }).toEqual({ text: 'sent', disabled: undefined, ariaDisabled: 'true' })
     })
 
     it('does not ask the session to send it again', async () => {
@@ -186,12 +200,13 @@ describe('contact output', () => {
     it('keeps what was sent selectable, but not editable', async () => {
       const component = await mount({ state: 'sent' })
 
-      for (const name of ['name', 'email', 'message']) {
+      expect(['name', 'email', 'message'].map((name) => {
         const control = component.find(`[name="${name}"]`)
-
-        expect(control.attributes('readonly')).toBeDefined()
-        expect(control.attributes('disabled')).toBeUndefined()
-      }
+        return {
+          readonly: control.attributes('readonly') !== undefined,
+          disabled: control.attributes('disabled') !== undefined,
+        }
+      })).toEqual(Array.from({ length: 3 }, () => ({ readonly: true, disabled: false })))
     })
   })
 
@@ -219,11 +234,15 @@ describe('contact output', () => {
   it('confirms a sent Enquiry to a screen reader', async () => {
     const component = await mount({ state: 'sent' })
 
-    expect(component.find('[role="status"]').text()).toContain(
-      'It is in my inbox',
-    )
-    expect(component.find('fieldset').attributes('disabled')).toBeUndefined()
-    expect(component.find('[role="alert"]').exists()).toBe(false)
+    expect({
+      status: component.find('[role="status"]').text(),
+      fieldsetDisabled: component.find('fieldset').attributes('disabled'),
+      alert: component.find('[role="alert"]').exists(),
+    }).toEqual({
+      status: expect.stringContaining('It is in my inbox'),
+      fieldsetDisabled: undefined,
+      alert: false,
+    })
   })
 
   it('reveals the address it is handed when a send fails', async () => {
@@ -233,10 +252,15 @@ describe('contact output', () => {
     })
     const alert = component.find('[role="alert"]')
 
-    expect(alert.text()).toContain('nothing was saved')
-    expect(alert.text()).toContain('pavel@example.test')
-    expect(component.find('fieldset').attributes('disabled')).toBeUndefined()
-    expect(component.find('[role="status"]').exists()).toBe(false)
+    expect({
+      missingFromAlert: ['nothing was saved', 'pavel@example.test'].filter(line => !alert.text().includes(line)),
+      fieldsetDisabled: component.find('fieldset').attributes('disabled'),
+      status: component.find('[role="status"]').exists(),
+    }).toEqual({
+      missingFromAlert: [],
+      fieldsetDisabled: undefined,
+      status: false,
+    })
   })
 
   it('asks the session to send once, and does not navigate', async () => {
@@ -246,8 +270,13 @@ describe('contact output', () => {
 
     await component.find('form').trigger('submit')
 
-    expect(component.emitted('submit')).toHaveLength(1)
-    expect(bubbled.mock.calls[0]![0].defaultPrevented).toBe(true)
+    expect({
+      submits: component.emitted('submit')?.length,
+      prevented: bubbled.mock.calls.map(([event]) => event.defaultPrevented),
+    }).toEqual({
+      submits: 1,
+      prevented: [true],
+    })
   })
 
   it('keeps a click in the form from reaching the session behind it', async () => {
@@ -263,8 +292,10 @@ describe('contact output', () => {
   it('holds no address and no placeholder of its own', async () => {
     const component = await mount({ state: 'failed', email: 'pavel@example.test' })
 
-    expect(component.findAll('[data-placeholder]')).toHaveLength(0)
-    expect(component.text()).not.toContain('[direct email]')
+    expect({
+      placeholders: component.findAll('[data-placeholder]').length,
+      address: component.text().includes('[direct email]'),
+    }).toEqual({ placeholders: 0, address: false })
   })
 
   describe('what it will not send', () => {
@@ -428,9 +459,11 @@ describe('contact output', () => {
         modelValue: enquiry({ name: '' }),
       })
 
-      expect(complaint(component, 'name')).toBe(WHO)
-      expect(complaint(component, 'email')).toBe('')
-      expect(complaint(component, 'message')).toBe('')
+      expect({
+        name: complaint(component, 'name'),
+        email: complaint(component, 'email'),
+        message: complaint(component, 'message'),
+      }).toEqual({ name: WHO, email: '', message: '' })
     })
 
     it('changes its mind as the draft it is handed changes', async () => {
@@ -442,13 +475,17 @@ describe('contact output', () => {
         modelValue: enquiry(),
       })
 
-      expect(complaint(component, 'name')).toBe('')
+      const nameOnceFixed = complaint(component, 'name')
 
       await component.setProps({
         modelValue: enquiry({ email: 'a@b' }),
       })
 
-      expect(complaint(component, 'email')).toBe(ADDRESS)
+      expect({
+        nameOnceFixed,
+        emailOnceBroken: complaint(component, 'email'),
+      })
+        .toEqual({ nameOnceFixed: '', emailOnceBroken: ADDRESS })
     })
   })
 
@@ -456,8 +493,10 @@ describe('contact output', () => {
     it('sets the lede as a label and the retention note as chrome', async () => {
       const component = await mount()
 
-      expect(roleOf(component, 'p', 'Tell me what you are building')).toBe('text-muted')
-      expect(roleOf(component, 'span', 'stored nowhere else')).toBe('text-subtle')
+      expect({
+        lede: roleOf(component, 'p', 'Tell me what you are building'),
+        retention: roleOf(component, 'span', 'stored nowhere else'),
+      }).toEqual({ lede: 'text-muted', retention: 'text-subtle' })
     })
   })
 
@@ -465,12 +504,13 @@ describe('contact output', () => {
     it('underlines every field with the control-edge token, not the divider', async () => {
       const component = await mount()
 
-      for (const name of ['name', 'email', 'message']) {
-        const classes = component.find(`[name="${name}"]`).classes()
-
-        expect(classes).toContain('border-edge')
-        expect(classes).not.toContain('border-base-300')
-      }
+      expect(['name', 'email', 'message'].map(name =>
+        ['border-edge', 'border-base-300'].filter(edge => component.find(`[name="${name}"]`).classes().includes(edge)),
+      )).toEqual([
+        ['border-edge'],
+        ['border-edge'],
+        ['border-edge'],
+      ])
     })
   })
 
@@ -483,23 +523,22 @@ describe('contact output', () => {
     it('thickens a focused field\'s underline to 2px in the accent', async () => {
       const component = await mount()
 
-      for (const name of ['name', 'email', 'message']) {
-        const classes = component.find(`[name="${name}"]`).classes()
-
-        expect(classes).toContain('focus:border-accent')
-        expect(classes).toContain('focus:shadow-[0_1px_0_var(--color-accent)]')
-      }
+      const focus = ['focus:border-accent', 'focus:shadow-[0_1px_0_var(--color-accent)]']
+      expect(['name', 'email', 'message'].map(name =>
+        focus.filter(style => component.find(`[name="${name}"]`).classes().includes(style)),
+      )).toEqual([focus, focus, focus])
     })
   })
 
   it('holds every field at 16px at every width, so iOS never zooms the page', async () => {
     const component = await mount()
 
-    for (const name of ['name', 'email', 'message']) {
-      const classes = component.find(`[name="${name}"]`).classes()
-
-      expect(classes).toContain('text-base')
-      expect(classes.filter(className => className.startsWith('sm:text-'))).toEqual([])
-    }
+    expect(['name', 'email', 'message'].map(name =>
+      component.find(`[name="${name}"]`).classes().filter(className => className === 'text-base' || className.startsWith('sm:text-')),
+    )).toEqual([
+      ['text-base'],
+      ['text-base'],
+      ['text-base'],
+    ])
   })
 })

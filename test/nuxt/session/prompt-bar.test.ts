@@ -98,8 +98,8 @@ describe('prompt bar', () => {
       const component = await mount()
       const row = component.find('[data-prompt-bar] > div')
 
-      expect(row.classes()).toContain('flex-wrap')
-      expect(row.classes()).not.toContain('overflow-x-auto')
+      expect(['flex-wrap', 'overflow-x-auto'].filter(name => row.classes().includes(name)))
+        .toEqual(['flex-wrap'])
     })
 
     it('titles each chip with what it does', async () => {
@@ -181,8 +181,8 @@ describe('prompt bar', () => {
       const component = await mount()
       const classes = prompt(component).classes()
 
-      expect(classes).toContain('text-base')
-      expect(classes.filter(name => name.startsWith('sm:text-'))).toEqual([])
+      expect(classes.filter(name => name === 'text-base' || name.startsWith('sm:text-')))
+        .toEqual(['text-base'])
     })
 
     it('invites a pick rather than a click', async () => {
@@ -195,10 +195,8 @@ describe('prompt bar', () => {
 
     it('marks the prompt caret so its focus state can be styled off the input', async () => {
       const component = await mount()
-      const caret = component.find('#prompt ~ .caret')
 
-      expect(caret.exists()).toBe(true)
-      expect(caret.classes()).toContain('prompt-caret')
+      expect(component.find('#prompt ~ .caret.prompt-caret').exists()).toBe(true)
     })
 
     it('puts the caret back on the prompt when asked', async () => {
@@ -220,10 +218,16 @@ describe('prompt bar', () => {
 
       const event = press(component, { key })
 
-      expect(component.emitted('recall')).toEqual([
-        [offset],
-      ])
-      expect(event.defaultPrevented).toBe(true)
+      expect({
+        recall: component.emitted('recall'),
+        prevented: event.defaultPrevented,
+      })
+        .toEqual({
+          recall: [
+            [offset],
+          ],
+          prevented: true,
+        })
     })
   })
 
@@ -233,10 +237,16 @@ describe('prompt bar', () => {
 
       const event = press(component, { key: 'Tab' })
 
-      expect(event.defaultPrevented).toBe(true)
-      expect(component.emitted('update:modelValue')).toEqual([
-        ['cat ~/vault'],
-      ])
+      expect({
+        prevented: event.defaultPrevented,
+        updates: component.emitted('update:modelValue'),
+      })
+        .toEqual({
+          prevented: true,
+          updates: [
+            ['cat ~/vault'],
+          ],
+        })
     })
 
     it('lets Tab move focus on when there is nothing to complete', async () => {
@@ -244,8 +254,11 @@ describe('prompt bar', () => {
 
       const event = press(component, { key: 'Tab' })
 
-      expect(event.defaultPrevented).toBe(false)
-      expect(component.emitted('update:modelValue')).toBeUndefined()
+      expect({
+        prevented: event.defaultPrevented,
+        updates: component.emitted('update:modelValue'),
+      })
+        .toEqual({ prevented: false, updates: undefined })
     })
 
     it.each([
@@ -260,8 +273,11 @@ describe('prompt bar', () => {
 
         const event = press(component, { key: 'Tab', [modifier]: true })
 
-        expect(event.defaultPrevented).toBe(false)
-        expect(component.emitted('update:modelValue')).toBeUndefined()
+        expect({
+          prevented: event.defaultPrevented,
+          updates: component.emitted('update:modelValue'),
+        })
+          .toEqual({ prevented: false, updates: undefined })
       },
     )
   })
@@ -270,17 +286,24 @@ describe('prompt bar', () => {
     it('prints the label it is handed rather than a spelling of its own', async () => {
       const component = await mount()
 
-      expect(availability(component).text()).toBe('Free from the equinox')
-      expect(component.text()).not.toContain('Available for freelance')
+      expect({
+        label: availability(component).text(),
+        ownSpelling: component.text().includes('Available for freelance'),
+      }).toEqual({ label: 'Free from the equinox', ownSpelling: false })
     })
 
     it('accents the availability while Pavel is open to work', async () => {
       const component = await mount()
 
-      expect(availability(component).classes()).toContain('text-accent')
-      expect(availability(component).classes()).not.toContain('text-subtle')
-      expect(availability(component).find('span[aria-hidden="true"]').classes())
-        .toContain('bg-success')
+      const dot = availability(component).find('span[aria-hidden="true"]')
+
+      expect({
+        label: ['text-accent', 'text-subtle'].filter(name => availability(component).classes().includes(name)),
+        dot: ['bg-success', 'bg-base-300'].filter(name => dot.classes().includes(name)),
+      }).toEqual({
+        label: ['text-accent'],
+        dot: ['bg-success'],
+      })
     })
 
     it('mutes the availability once he is not', async () => {
@@ -289,11 +312,15 @@ describe('prompt bar', () => {
       })
       const dot = availability(component).find('span[aria-hidden="true"]')
 
-      expect(availability(component).text()).toBe('Booked till spring')
-      expect(availability(component).classes()).toContain('text-subtle')
-      expect(availability(component).classes()).not.toContain('text-accent')
-      expect(dot.classes()).toContain('bg-base-300')
-      expect(dot.classes()).not.toContain('bg-success')
+      expect({
+        text: availability(component).text(),
+        label: ['text-accent', 'text-subtle'].filter(name => availability(component).classes().includes(name)),
+        dot: ['bg-success', 'bg-base-300'].filter(name => dot.classes().includes(name)),
+      }).toEqual({
+        text: 'Booked till spring',
+        label: ['text-subtle'],
+        dot: ['bg-base-300'],
+      })
     })
   })
 
@@ -301,10 +328,15 @@ describe('prompt bar', () => {
     it('offers dark and light, as one labelled group', async () => {
       const component = await mount()
 
-      expect(schemeSwitch(component).attributes('role')).toBe('group')
-      expect(schemeSwitch(component).attributes('aria-label')).toBe('Theme')
-      expect(schemeSwitch(component).findAll('button').map(button => button.text().trim()))
-        .toEqual(['dark', 'light'])
+      expect({
+        role: schemeSwitch(component).attributes('role'),
+        label: schemeSwitch(component).attributes('aria-label'),
+        options: schemeSwitch(component).findAll('button').map(button => button.text().trim()),
+      }).toEqual({
+        role: 'group',
+        label: 'Theme',
+        options: ['dark', 'light'],
+      })
     })
 
     it.each(['dark', 'light'] as const)('presses %s while it is the theme showing', async (scheme) => {
@@ -313,15 +345,19 @@ describe('prompt bar', () => {
         ? 'light'
         : 'dark'
 
-      expect(schemeButton(component, scheme).attributes('aria-pressed')).toBe('true')
-      expect(schemeButton(component, other).attributes('aria-pressed')).toBe('false')
+      expect({
+        showing: schemeButton(component, scheme).attributes('aria-pressed'),
+        other: schemeButton(component, other).attributes('aria-pressed'),
+      }).toEqual({ showing: 'true', other: 'false' })
     })
 
     it('accents the theme showing and steps the other back', async () => {
       const component = await mount({ scheme: 'light' })
 
-      expect(schemeButton(component, 'light').classes()).toContain('text-accent')
-      expect(roleOf(component, '[data-scheme-switch] button', 'dark')).toBe('text-muted')
+      expect({
+        showing: schemeButton(component, 'light').classes().includes('text-accent'),
+        other: roleOf(component, '[data-scheme-switch] button', 'dark'),
+      }).toEqual({ showing: true, other: 'text-muted' })
     })
 
     it('reports the theme picked', async () => {
@@ -357,8 +393,14 @@ describe('prompt bar', () => {
 
       // The meta chips are control text too, not a footnote, so they read at
       // the same step as the commands rather than a step below them.
-      expect(rolesOf(component, CHIPS)).toEqual(['text-muted', 'text-muted', 'text-muted'])
-      expect(roleOf(component, 'span', 'Run')).toBe('text-subtle')
+      expect({
+        chips: rolesOf(component, CHIPS),
+        rail: roleOf(component, 'span', 'Run'),
+      })
+        .toEqual({
+          chips: ['text-muted', 'text-muted', 'text-muted'],
+          rail: 'text-subtle',
+        })
     })
   })
 
@@ -369,13 +411,16 @@ describe('prompt bar', () => {
         button.classes().includes('border'),
       )
 
-      expect(bordered).toHaveLength(commands.length)
-      for (const button of bordered) {
-        expect(button.classes()).toContain('border-edge')
-        expect(button.classes()).not.toContain('border-base-300')
-      }
-      expect(component.classes()).toContain('border-edge')
-      expect(component.classes()).not.toContain('border-base-300')
+      const edges = (classes: string[]) =>
+        ['border-edge', 'border-base-300'].filter(name => classes.includes(name))
+
+      expect({
+        chips: bordered.map(button => edges(button.classes())),
+        rule: edges(component.classes()),
+      }).toEqual({
+        chips: commands.map(() => ['border-edge']),
+        rule: ['border-edge'],
+      })
     })
 
     it('keeps the chip-row divider on the divider token', async () => {

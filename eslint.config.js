@@ -52,6 +52,16 @@ export default antfu(
     },
   },
   {
+    files: ['test/**/*.ts'],
+    // See .agents/rules/one-expect-per-test.md.
+    rules: {
+      'test/max-expects': [
+        'error',
+        { max: 1 },
+      ],
+    },
+  },
+  {
     files: ['**/*.vue'],
     rules: {
       // `sameNameShorthand` defaults to `ignore`, so `:profile="profile"` and

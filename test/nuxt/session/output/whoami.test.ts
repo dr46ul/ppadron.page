@@ -49,10 +49,13 @@ describe('whoami output', () => {
     const component = await mount({ name: 'Wilhelmina Ashgrove' })
     const title = component.find('h1')
 
-    expect(title.text()).toBe('Wilhelmina Ashgrove')
-    expect(title.classes()).toEqual(
-      expect.arrayContaining(['text-name', 'font-semibold']),
-    )
+    expect({
+      text: title.text(),
+      classes: title.classes(),
+    }).toEqual({
+      text: 'Wilhelmina Ashgrove',
+      classes: expect.arrayContaining(['text-name', 'font-semibold']),
+    })
   })
 
   it('gives the page no other heading, so the outline stops at the title', async () => {
@@ -117,8 +120,13 @@ describe('whoami output', () => {
       aside: 'Keeps bees, badly.',
     })
 
-    expect(component.text()).toContain('Keeps bees, badly.')
-    expect(component.findAll('h1, p')).toHaveLength(5)
+    expect({
+      text: component.text(),
+      lines: component.findAll('h1, p').length,
+    }).toEqual({
+      text: expect.stringContaining('Keeps bees, badly.'),
+      lines: 5,
+    })
   })
 
   it('leaves no empty line behind when the Profile has no aside', async () => {
@@ -136,8 +144,8 @@ describe('whoami output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).not.toContain('Pavel Padron')
-    expect(text).not.toContain('Frontend engineer')
+    expect(['Pavel Padron', 'Frontend engineer'].filter(fact => text.includes(fact)))
+      .toEqual([])
   })
 
   it('holds no placeholder markers of its own', async () => {
@@ -150,9 +158,11 @@ describe('whoami output', () => {
     it('steps the byline and the aside back to chrome, and the intro to prose', async () => {
       const component = await mount({ aside: 'Keeps bees, badly.' })
 
-      expect(roleOf(component, 'p', 'Systems plumber · Reykjavík')).toBe('text-subtle')
-      expect(roleOf(component, 'p', 'Keeps bees, badly.')).toBe('text-subtle')
-      expect(roleOf(component, 'p', 'Works with teams whose build')).toBe('text-body')
+      expect({
+        byline: roleOf(component, 'p', 'Systems plumber · Reykjavík'),
+        aside: roleOf(component, 'p', 'Keeps bees, badly.'),
+        intro: roleOf(component, 'p', 'Works with teams whose build'),
+      }).toEqual({ byline: 'text-subtle', aside: 'text-subtle', intro: 'text-body' })
     })
 
     it('leaves the tagline and the name at full strength', async () => {
@@ -160,8 +170,10 @@ describe('whoami output', () => {
 
       // Full strength is the absence of a step, which is the emphasis device
       // the tagline depends on: it carries more weight than the intro below it.
-      expect(roleOf(component, 'p', 'Unblocks the pipes')).toBeUndefined()
-      expect(roleOf(component, 'h1', 'Wilhelmina Ashgrove')).toBeUndefined()
+      expect({
+        tagline: roleOf(component, 'p', 'Unblocks the pipes'),
+        name: roleOf(component, 'h1', 'Wilhelmina Ashgrove'),
+      }).toEqual({ tagline: undefined, name: undefined })
     })
   })
 })

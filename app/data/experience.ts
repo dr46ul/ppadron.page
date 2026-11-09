@@ -16,6 +16,18 @@ export interface RoleProject {
   phases: RolePhase[]
 }
 
+export interface RoleNote {
+  /** Years only, the way a Role's `period` is, since the two share a column. */
+  period: string
+  /** Machine-readable start, for <time datetime>. */
+  since: string
+  /** Stands where a Role has its company, for time with no single employer. */
+  name: string
+  title: string
+  summary: string
+  tech: string[]
+}
+
 export interface Role {
   /** The name in the Role's path, `~/experience/<slug>`. Stable once published. */
   slug: string
@@ -35,22 +47,77 @@ export interface Role {
   tech: string[]
   account: string[]
   /**
-   * A line the Experience list prints under this Role, for time before it that
-   * was not a Role. It is not openable and has no slug.
+   * An entry the Experience list prints under this Role, for time before it
+   * that was not a Role. It is not openable and has no slug.
    */
-  before?: string
+  before?: RoleNote
   history?: RoleProject[]
   stack: string[]
 }
 
-export const roles: Role[] = [
+type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+/**
+ * Spelled out digit by digit: `${number}` would let a dropped or doubled
+ * digit through ('201', '20144').
+ */
+export type Year = `${'19' | '20'}${Digit}${Digit}`
+
+export type Month
+  = | 'Jan' | 'Feb' | 'Mar' | 'Apr' | 'May' | 'Jun'
+    | 'Jul' | 'Aug' | 'Sep' | 'Oct' | 'Nov' | 'Dec'
+
+export type MonthYear = `${Month} ${Year}`
+
+/** A note as it is written: its dates, with every printed form left to `defineRole`. */
+export interface RoleNoteEntry extends Omit<RoleNote, 'period' | 'since'> {
+  from: Year
+  to: Year
+}
+
+/** A Role as it is written: its dates, with every printed form left to `defineRole`. */
+export interface RoleEntry extends Omit<Role, 'period' | 'exactPeriod' | 'since' | 'before'> {
+  from: MonthYear
+  /** `now` while Pavel still holds the Role. */
+  to: MonthYear | 'now'
+  before?: RoleNoteEntry
+}
+
+function yearOf(date: MonthYear) {
+  return date.slice(-4)
+}
+
+function defineNote({ from, to, ...note }: RoleNoteEntry): RoleNote {
+  return { ...note, period: `${from} — ${to}`, since: from }
+}
+
+/**
+ * Every printed form of a Role's dates is built here from `from` and `to`, so
+ * none is typed by hand to disagree with another. The year ranges take an em
+ * dash and the month ranges an en dash on purpose: the Experience column and
+ * Role detail have always been set that way.
+ */
+export function defineRole({ from, to, before, ...role }: RoleEntry): Role {
+  return {
+    ...role,
+    period: `${yearOf(from)} — ${to === 'now'
+      ? 'now'
+      : yearOf(to)}`,
+    exactPeriod: `${from} – ${to}`,
+    since: yearOf(from),
+    ...(before && {
+      before: defineNote(before),
+    }),
+  }
+}
+
+const entries: RoleEntry[] = [
   {
     slug: 'nordhealth',
     company: 'Nordhealth',
     title: 'Lead Frontend Developer',
-    period: '2023 — now',
-    exactPeriod: 'Jun 2023 – now',
-    since: '2023',
+    from: 'Jun 2023',
+    to: 'now',
     summary:
       'Migrating Nordhealth\'s Provet, its most important app, from a legacy monolith to a new Nuxt app, and now leading the frontend work across the company\'s teams.',
     tech: [
@@ -80,9 +147,8 @@ export const roles: Role[] = [
     slug: 'playfood',
     company: 'Playfood',
     title: 'Senior Frontend Web Developer',
-    period: '2022 — 2023',
-    exactPeriod: 'Apr 2022 – Jan 2023',
-    since: '2022',
+    from: 'Apr 2022',
+    to: 'Jan 2023',
     summary:
       'Built multi-language support and multi-city presence for a startup\'s Vue/Nuxt platform, refactored its Vuex state, and made UI/UX improvements in a redesign of its cart and checkout.',
     tech: [
@@ -133,10 +199,24 @@ export const roles: Role[] = [
     slug: 'rogue-fitness',
     company: 'Rogue Fitness',
     title: 'Middle/Senior Frontend Developer',
-    period: '2014 — 2022',
-    exactPeriod: 'Nov 2014 – Mar 2022',
-    since: '2014',
-    before: '2011 – 2014: freelance, mostly Magento e-commerce stores.',
+    from: 'Nov 2014',
+    to: 'Mar 2022',
+    before: {
+      from: '2011',
+      to: '2014',
+      name: 'Freelance',
+      title: 'Middle Frontend Developer',
+      summary:
+        'Built custom Magento themes for several e-commerce stores, turning each shop\'s design into a working storefront, from the catalogue and product pages through to cart and checkout.',
+      tech: [
+        'HTML5',
+        'CSS3',
+        'JavaScript',
+        'jQuery',
+        'Magento',
+        'PHP',
+      ],
+    },
     summary:
       'Built the interfaces of the Rogue Fitness e-commerce web store and Rogue Mobile App as their stack evolved, from Magento 1 to Magento 2 and from Cordova and Ionic to React Native.',
     tech: [
@@ -280,9 +360,8 @@ export const roles: Role[] = [
     slug: 'procyon-soluciones',
     company: 'Procyon Soluciones',
     title: 'Senior Software Engineer / Team Manager',
-    period: '2009 — 2010',
-    exactPeriod: 'Jan 2009 – Dec 2010',
-    since: '2009',
+    from: 'Jan 2009',
+    to: 'Dec 2010',
     summary:
       'Led a project in a fast-paced environment, on top of senior engineering work in a team of young programmers, as Project Manager and Team Leader for a company based in Spain.',
     tech: [
@@ -320,9 +399,8 @@ export const roles: Role[] = [
     slug: 'havasoft',
     company: 'Havasoft',
     title: 'Software Engineer',
-    period: '2007 — 2008',
-    exactPeriod: 'Apr 2007 – Dec 2008',
-    since: '2007',
+    from: 'Apr 2007',
+    to: 'Dec 2008',
     summary:
       'Built software for a client\'s daily tasks in C# and .NET, as team leader and main developer on the project. The client said the end result exceeded their expectations.',
     tech: ['C#', '.NET Framework', 'MSSQL'],
@@ -347,9 +425,8 @@ export const roles: Role[] = [
     slug: 'gea-villa-clara',
     company: 'GEA Villa Clara',
     title: 'Network Administrator',
-    period: '2005 — 2007',
-    exactPeriod: 'Sep 2005 – Mar 2007',
-    since: '2005',
+    from: 'Sep 2005',
+    to: 'Mar 2007',
     summary:
       'Designed the company\'s first intranet and, with the TeicoSoft team, rolled it out across five floors in over six months: new servers, an ADSL line and more than 50 offices equipped.',
     tech: [
@@ -388,3 +465,5 @@ export const roles: Role[] = [
     ],
   },
 ]
+
+export const roles: Role[] = entries.map(entry => defineRole(entry))

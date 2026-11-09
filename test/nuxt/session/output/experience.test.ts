@@ -1,4 +1,4 @@
-import type { Role } from '~/data/experience'
+import type { Role, RoleNote } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
@@ -38,10 +38,12 @@ describe('experience output', () => {
     ])
 
     const text = component.text()
-    expect(text).toContain('Acme')
-    expect(text).toContain('Engineer')
-    expect(text).toContain('2022 — now')
-    expect(text).toContain('Built the thing that made the other thing work.')
+    expect([
+      'Acme',
+      'Engineer',
+      '2022 — now',
+      'Built the thing that made the other thing work.',
+    ].filter(field => !text.includes(field))).toEqual([])
   })
 
   it('joins the tech of a role with a middle dot', async () => {
@@ -59,8 +61,12 @@ describe('experience output', () => {
       role({ company: 'Acme', tech: [] }),
     ])
 
-    expect(component.text()).toContain('Acme')
-    expect(component.text()).not.toContain('·')
+    const text = component.text()
+    expect({
+      company: text.includes('Acme'),
+      techSeparator: text.includes('·'),
+    })
+      .toEqual({ company: true, techSeparator: false })
   })
 
   it('keeps the order it was handed', async () => {
@@ -84,12 +90,13 @@ describe('experience output', () => {
       role({ since: '2016' }),
     ])
 
-    const [first, ...rest] = component.findAll('time')
-    expect(first!.classes()).toContain('text-accent')
-    for (const other of rest) {
-      expect(other!.classes()).not.toContain('text-accent')
-      expect(other!.classes()).toContain('text-muted')
-    }
+    expect(component.findAll('time').map(time =>
+      ['text-accent', 'text-muted'].filter(colour => time.classes().includes(colour)),
+    )).toEqual([
+      ['text-accent'],
+      ['text-muted'],
+      ['text-muted'],
+    ])
   })
 
   it('gives each role a machine-readable start date', async () => {
@@ -111,32 +118,110 @@ describe('experience output', () => {
   })
 
   describe('a note before a role', () => {
-    it('prints the line between that role and the next, as a note and not a role', async () => {
+    function note(overrides: Partial<RoleNote> = {}): RoleNote {
+      return {
+        period: '2011 — 2014',
+        since: '2011',
+        name: 'Freelance',
+        title: 'Potter',
+        summary: 'Threw bowls for several kilns.',
+        tech: ['Clay', 'Glaze'],
+        ...overrides,
+      }
+    }
+
+    it('prints the entry between that role and the next', async () => {
       const component = await mount([
-        role({ company: 'Newest', since: '2022', before: '2011 – 2014: freelance, mostly kilns.' }),
+        role({
+          company: 'Newest',
+          since: '2022',
+          before: note({ name: 'Freelance' }),
+        }),
         role({ company: 'Oldest', since: '2009' }),
       ])
 
       expect(component.findAll('li').map(item => item.text())).toEqual([
         expect.stringContaining('Newest'),
-        '2011 – 2014: freelance, mostly kilns.',
+        expect.stringContaining('Freelance'),
         expect.stringContaining('Oldest'),
       ])
-      expect(component.findAll('button')).toHaveLength(2)
-      expect(component.findAll('time')).toHaveLength(2)
     })
 
-    it('sets the note as chrome', async () => {
+    it('cannot be opened, as a role can', async () => {
       const component = await mount([
-        role({ before: '2011 – 2014: freelance.' }),
+        role({
+          before: note(),
+        }),
       ])
 
-      expect(roleOf(component, 'p', '2011 – 2014: freelance.')).toBe('text-subtle')
+      expect(component.findAll('li')[1]!.findAll('button, a')).toHaveLength(0)
+    })
+
+    it('prints every field of the note', async () => {
+      const component = await mount([
+        role({
+          before: note(),
+        }),
+      ])
+
+      const entry = component.findAll('li')[1]!
+      expect({
+        period: entry.get('time').text(),
+        datetime: entry.get('time').attributes('datetime'),
+        lines: [
+          ...entry.findAll('span'),
+          ...entry.findAll('p').slice(1),
+        ].map(line => line.text()),
+      }).toEqual({
+        period: '2011 — 2014',
+        datetime: '2011',
+        lines: [
+          'Freelance',
+          'Potter',
+          'Threw bowls for several kilns.',
+          'Clay · Glaze',
+        ],
+      })
+    })
+
+    it('sets the name in bold, as a role sets its company, but not underlined as a link', async () => {
+      const component = await mount([
+        role({
+          before: note({ name: 'Freelance' }),
+        }),
+      ])
+
+      const name = component.findAll('li')[1]!.findAll('span').find(span => span.text() === 'Freelance')!
+      expect(['font-semibold', 'underline'].filter(style => name.classes().includes(style)))
+        .toEqual(['font-semibold'])
+    })
+
+    it('sets each line of the note as an earlier role sets its own', async () => {
+      const component = await mount([
+        role({
+          before: note(),
+        }),
+      ])
+
+      expect({
+        period: roleOf(component, 'time', '2011 — 2014'),
+        title: roleOf(component, 'span', 'Potter'),
+        summary: roleOf(component, 'p', 'Threw bowls for several kilns.'),
+        tech: roleOf(component, 'p', 'Clay · Glaze'),
+      }).toEqual({
+        period: 'text-muted',
+        title: 'text-muted',
+        summary: 'text-body',
+        tech: 'text-subtle',
+      })
     })
 
     it('leaves the print cascade numbering to the roles', async () => {
       const component = await mount([
-        role({ since: '2022', before: 'a note' }),
+        role({
+          since: '2022',
+          before: note(),
+        }),
         role({ since: '2019' }),
       ])
 
@@ -148,10 +233,15 @@ describe('experience output', () => {
   it('still says why there is no projects gallery when it has no roles', async () => {
     const component = await mount([])
 
-    expect(component.text()).toContain(
-      'Freelance client work is under NDA, so there is no projects gallery.',
-    )
-    expect(component.findAll('li')).toHaveLength(0)
+    expect({
+      text: component.text(),
+      items: component.findAll('li').length,
+    }).toEqual({
+      text: expect.stringContaining(
+        'Freelance client work is under NDA, so there is no projects gallery.',
+      ),
+      items: 0,
+    })
   })
 
   describe('opening a role', () => {
@@ -184,9 +274,11 @@ describe('experience output', () => {
       ])
 
       const text = component.get('button').text()
-      expect(text).toContain('Kiln & Ash')
-      expect(text).toContain('Kiln technician')
-      expect(text).not.toContain('Rebuilt the firing schedule.')
+      expect({
+        company: text.includes('Kiln & Ash'),
+        title: text.includes('Kiln technician'),
+        summary: text.includes('Rebuilt the firing schedule.'),
+      }).toEqual({ company: true, title: true, summary: false })
     })
 
     it('has nothing to open when it has no roles', async () => {
@@ -256,9 +348,11 @@ describe('experience output', () => {
         }),
       ])
 
-      expect(roleOf(component, 'p', 'Built the thing that made')).toBe('text-body')
-      expect(roleOf(component, 'span', 'Kiln technician')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'TypeScript · Vue')).toBe('text-subtle')
+      expect({
+        summary: roleOf(component, 'p', 'Built the thing that made'),
+        title: roleOf(component, 'span', 'Kiln technician'),
+        tech: roleOf(component, 'p', 'TypeScript · Vue'),
+      }).toEqual({ summary: 'text-body', title: 'text-muted', tech: 'text-subtle' })
     })
 
     it('sets the NDA note as chrome and leaves the company at full strength', async () => {
@@ -266,8 +360,10 @@ describe('experience output', () => {
         role({ company: 'Kiln & Ash' }),
       ])
 
-      expect(roleOf(component, 'p', 'under NDA')).toBe('text-subtle')
-      expect(roleOf(component, 'span', 'Kiln & Ash')).toBeUndefined()
+      expect({
+        note: roleOf(component, 'p', 'under NDA'),
+        company: roleOf(component, 'span', 'Kiln & Ash'),
+      }).toEqual({ note: 'text-subtle', company: undefined })
     })
   })
 })

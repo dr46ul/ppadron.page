@@ -40,7 +40,9 @@ describe('unknown output', () => {
   it('prints no command of its own', async () => {
     const component = await mount()
 
-    expect(component.text()).not.toContain('whoami')
-    expect(component.findAll('[data-placeholder]')).toHaveLength(0)
+    expect({
+      namesACommand: component.text().includes('whoami'),
+      placeholders: component.findAll('[data-placeholder]').length,
+    }).toEqual({ namesACommand: false, placeholders: 0 })
   })
 })

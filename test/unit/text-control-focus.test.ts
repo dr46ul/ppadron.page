@@ -41,8 +41,10 @@ describe('the prompt caret', () => {
    * only the unfocused state needs a rule.
    */
   it('is hollow when the prompt is not focused', () => {
-    expect(unfocused).toMatch(/background:\s*transparent/)
-    expect(unfocused).toMatch(/box-shadow:\s*inset 0 0 0 1px var\(--color-accent\)/)
+    expect({ background: unfocused, outline: unfocused }).toEqual({
+      background: expect.stringMatching(/background:\s*transparent/),
+      outline: expect.stringMatching(/box-shadow:\s*inset 0 0 0 1px var\(--color-accent\)/),
+    })
   })
 
   it('stops blinking when the prompt is not focused', () => {
@@ -52,7 +54,9 @@ describe('the prompt caret', () => {
   it('stays solid and blinking when the prompt is focused', () => {
     const solid = declarations('.caret')
 
-    expect(solid).toMatch(/background:\s*var\(--color-accent\)/)
-    expect(solid).toMatch(/animation:\s*caret-blink/)
+    expect({ background: solid, animation: solid }).toEqual({
+      background: expect.stringMatching(/background:\s*var\(--color-accent\)/),
+      animation: expect.stringMatching(/animation:\s*caret-blink/),
+    })
   })
 })

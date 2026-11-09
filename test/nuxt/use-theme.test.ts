@@ -110,8 +110,8 @@ describe('useTheme', () => {
 
       theme.toggle()
 
-      expect(theme.scheme.value).toBe('light')
-      expect(html.dataset.theme).toBe('teletype')
+      expect({ scheme: theme.scheme.value, theme: html.dataset.theme })
+        .toEqual({ scheme: 'light', theme: 'teletype' })
     })
 
     it('toggles from light to dark', () => {
@@ -120,8 +120,8 @@ describe('useTheme', () => {
 
       theme.toggle()
 
-      expect(theme.scheme.value).toBe('dark')
-      expect(html.dataset.theme).toBe('terminal')
+      expect({ scheme: theme.scheme.value, theme: html.dataset.theme })
+        .toEqual({ scheme: 'dark', theme: 'terminal' })
     })
   })
 })

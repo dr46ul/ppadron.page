@@ -27,10 +27,12 @@ describe('help output', () => {
     ])
 
     const text = component.text()
-    expect(text).toContain('cat ~/vault')
-    expect(text).toContain('the sealed thing')
-    // Nothing it was not handed: the real command list must not leak in.
-    expect(text).not.toContain('ls ~/experience')
+    expect({
+      command: text.includes('cat ~/vault'),
+      label: text.includes('the sealed thing'),
+      // Nothing it was not handed: the real command list must not leak in.
+      realCommand: text.includes('ls ~/experience'),
+    }).toEqual({ command: true, label: true, realCommand: false })
   })
 
   it('keeps the order it was handed', async () => {
@@ -59,9 +61,8 @@ describe('help output', () => {
 
     expect(component.findAll('li').map(item => item.text())).toEqual([
       expect.stringContaining('cat ~/vault'),
-      expect.stringContaining('wipe'),
+      expect.stringMatching(/wipe[\s\S]*start over/),
     ])
-    expect(component.text()).toContain('start over')
   })
 
   it('numbers the print cascade across both lists', async () => {
@@ -82,18 +83,28 @@ describe('help output', () => {
   it('still prints the hint when it is handed nothing at all', async () => {
     const component = await mount([], [])
 
-    expect(component.findAll('li')).toHaveLength(0)
-    expect(component.text().replace(/\s+/g, ' ')).toContain(
-      'Tab completes · ↑ ↓ walk the history · plain words work too '
-      + '(experience, contact).',
-    )
+    expect({
+      items: component.findAll('li').length,
+      text: component.text().replace(/\s+/g, ' '),
+    }).toEqual({
+      items: 0,
+      text: expect.stringContaining(
+        'Tab completes · ↑ ↓ walk the history · plain words work too '
+        + '(experience, contact).',
+      ),
+    })
   })
 
   it('documents the form that opens one Role, whatever Commands it is handed', async () => {
     const component = await mount([], [])
 
-    expect(component.findAll('li')).toHaveLength(0)
-    expect(component.text()).toContain('cat ~/experience/<role>')
+    expect({
+      items: component.findAll('li').length,
+      text: component.text(),
+    }).toEqual({
+      items: 0,
+      text: expect.stringContaining('cat ~/experience/<role>'),
+    })
   })
 
   describe('text roles', () => {
@@ -109,10 +120,17 @@ describe('help output', () => {
         ],
       )
 
-      expect(roleOf(component, 'span', 'the sealed thing')).toBe('text-subtle')
-      expect(roleOf(component, 'span', 'start the session over')).toBe('text-subtle')
-      expect(roleOf(component, 'span', 'cat ~/vault')).toBeUndefined()
-      expect(roleOf(component, 'span', 'reset')).toBeUndefined()
+      expect({
+        label: roleOf(component, 'span', 'the sealed thing'),
+        metaLabel: roleOf(component, 'span', 'start the session over'),
+        command: roleOf(component, 'span', 'cat ~/vault'),
+        metaCommand: roleOf(component, 'span', 'reset'),
+      }).toEqual({
+        label: 'text-subtle',
+        metaLabel: 'text-subtle',
+        command: undefined,
+        metaCommand: undefined,
+      })
     })
 
     it('sets the hint as chrome but its examples a step above it', async () => {
@@ -120,11 +138,13 @@ describe('help output', () => {
         command(),
       ])
 
-      expect(roleOf(component, 'p', 'Tab completes')).toBe('text-subtle')
-      // The two plain words are the point of the sentence, so they read above
-      // the sentence carrying them.
-      expect(roleOf(component, 'span', 'experience')).toBe('text-muted')
-      expect(roleOf(component, 'span', 'contact')).toBe('text-muted')
+      expect({
+        hint: roleOf(component, 'p', 'Tab completes'),
+        // The two plain words are the point of the sentence, so they read above
+        // the sentence carrying them.
+        experience: roleOf(component, 'span', 'experience'),
+        contact: roleOf(component, 'span', 'contact'),
+      }).toEqual({ hint: 'text-subtle', experience: 'text-muted', contact: 'text-muted' })
     })
 
     it('accents the Role form like a command, and sets its gloss as chrome', async () => {
@@ -132,8 +152,10 @@ describe('help output', () => {
         command(),
       ])
 
-      expect(roleOf(component, 'p', 'one role in full')).toBe('text-subtle')
-      expect(roleOf(component, 'code', 'cat ~/experience/<role>')).toBeUndefined()
+      expect({
+        gloss: roleOf(component, 'p', 'one role in full'),
+        form: roleOf(component, 'code', 'cat ~/experience/<role>'),
+      }).toEqual({ gloss: 'text-subtle', form: undefined })
     })
   })
 })

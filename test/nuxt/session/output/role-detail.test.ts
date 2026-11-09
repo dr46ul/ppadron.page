@@ -35,9 +35,8 @@ describe('role detail output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).toContain('Kiln & Ash')
-    expect(text).toContain('Kiln technician')
-    expect(text).toContain('Feb 2011 – Sep 2013')
+    expect(['Kiln & Ash', 'Kiln technician', 'Feb 2011 – Sep 2013'].filter(field => !text.includes(field)))
+      .toEqual([])
   })
 
   it('gives the period a machine-readable start date', async () => {
@@ -52,10 +51,11 @@ describe('role detail output', () => {
     })
 
     const paragraphs = component.findAll('p').map(paragraph => paragraph.text())
-    expect(paragraphs.indexOf('Fired the first batch.')).toBeGreaterThan(-1)
-    expect(paragraphs.indexOf('Rebuilt the flue.')).toBe(
-      paragraphs.indexOf('Fired the first batch.') + 1,
-    )
+    const first = paragraphs.indexOf('Fired the first batch.')
+    expect(paragraphs.slice(first, first + 2)).toEqual([
+      'Fired the first batch.',
+      'Rebuilt the flue.',
+    ])
   })
 
   it('joins the full stack with a middle dot', async () => {
@@ -70,9 +70,8 @@ describe('role detail output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).not.toContain('AtAGlanceOnly')
-    expect(text).not.toContain('The short summary only')
-    expect(text).not.toContain('2011 — 2013')
+    expect(['AtAGlanceOnly', 'The short summary only', '2011 — 2013'].filter(field => text.includes(field)))
+      .toEqual([])
   })
 
   it('holds no placeholder markers of its own', async () => {
@@ -122,8 +121,8 @@ describe('role detail output', () => {
         'Elements · Relays',
       ]
       const positions = printed.map(value => text.indexOf(value))
-      expect(positions).not.toContain(-1)
-      expect(positions).toEqual(positions.toSorted((a, b) => a - b))
+      const found = positions.filter(position => position > -1)
+      expect(positions).toEqual(found.toSorted((a, b) => a - b))
     })
 
     it('sets the history between the account and the stack', async () => {
@@ -134,16 +133,24 @@ describe('role detail output', () => {
       })
 
       const text = component.text()
-      expect(text.indexOf('Rebuilt the flue.')).toBeLessThan(text.indexOf('North Kiln'))
-      expect(text.indexOf('Elements · Relays')).toBeLessThan(text.lastIndexOf('Clay'))
+      expect({
+        afterTheAccount: text.indexOf('Rebuilt the flue.') < text.indexOf('North Kiln'),
+        beforeTheStack: text.indexOf('Elements · Relays') < text.lastIndexOf('Clay'),
+      }).toEqual({ afterTheAccount: true, beforeTheStack: true })
     })
 
     it('leaves nothing behind when the Role has no history', async () => {
       const without = await mount({ history: undefined })
       const empty = await mount({ history: [] })
 
-      expect(without.html()).toBe(empty.html())
-      expect(without.text()).not.toContain('North Kiln')
+      expect({
+        html: without.html(),
+        project: without.text().includes('North Kiln'),
+      })
+        .toEqual({
+          html: empty.html(),
+          project: false,
+        })
     })
 
     it('still names a project whose phases are empty', async () => {
@@ -169,8 +176,12 @@ describe('role detail output', () => {
         stack: [],
       })
 
-      expect(component.text()).toContain('Wood fired')
-      expect(component.text()).not.toContain('·')
+      const text = component.text()
+      expect({
+        phase: text.includes('Wood fired'),
+        techSeparator: text.includes('·'),
+      })
+        .toEqual({ phase: true, techSeparator: false })
     })
   })
 
@@ -178,8 +189,12 @@ describe('role detail output', () => {
     it('prints a Role with no account', async () => {
       const component = await mount({ account: [] })
 
-      expect(component.text()).toContain('Kiln & Ash')
-      expect(component.text()).not.toContain('Fired the first batch.')
+      const text = component.text()
+      expect({
+        company: text.includes('Kiln & Ash'),
+        account: text.includes('Fired the first batch.'),
+      })
+        .toEqual({ company: true, account: false })
     })
 
     it('labels the stack when there is one, and drops the label with it when there is not', async () => {
@@ -188,9 +203,11 @@ describe('role detail output', () => {
       })
       const without = await mount({ stack: [] })
 
-      expect(withStack.text()).toContain('Tech stack')
-      expect(without.text()).toContain('Kiln & Ash')
-      expect(without.text()).not.toContain('Tech stack')
+      expect({
+        labelledWithStack: withStack.text().includes('Tech stack'),
+        companyWithout: without.text().includes('Kiln & Ash'),
+        labelledWithout: without.text().includes('Tech stack'),
+      }).toEqual({ labelledWithStack: true, companyWithout: true, labelledWithout: false })
     })
   })
 
@@ -218,16 +235,18 @@ describe('role detail output', () => {
     it('prints only that line, in the voice of an error', async () => {
       const component = await mountMissing()
 
-      expect(component.classes()).toContain('text-error')
-      expect(component.find('time').exists()).toBe(false)
-      expect(component.text()).not.toContain('Tech stack')
+      expect({
+        error: component.classes().includes('text-error'),
+        period: component.find('time').exists(),
+        stack: component.text().includes('Tech stack'),
+      }).toEqual({ error: true, period: false, stack: false })
     })
 
     it('does not print the form when a Role is handed in', async () => {
       const component = await mount()
 
-      expect(component.text()).not.toContain('No such file')
-      expect(component.text()).not.toContain('ls ~/experience')
+      const text = component.text()
+      expect(['No such file', 'ls ~/experience'].filter(line => text.includes(line))).toEqual([])
     })
   })
 
@@ -247,13 +266,23 @@ describe('role detail output', () => {
         ],
       })
 
-      expect(roleOf(component, 'p', 'Fired the first batch.')).toBe('text-body')
-      expect(roleOf(component, 'span', 'Kiln technician')).toBe('text-muted')
-      expect(roleOf(component, 'time', 'Feb 2011')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'Clay · Glaze')).toBe('text-subtle')
-      expect(roleOf(component, 'p', 'North Kiln')).toBe('text-muted')
-      expect(roleOf(component, 'span', 'Wood fired')).toBe('text-muted')
-      expect(roleOf(component, 'span', 'Oak')).toBe('text-subtle')
+      expect({
+        account: roleOf(component, 'p', 'Fired the first batch.'),
+        title: roleOf(component, 'span', 'Kiln technician'),
+        period: roleOf(component, 'time', 'Feb 2011'),
+        stack: roleOf(component, 'p', 'Clay · Glaze'),
+        project: roleOf(component, 'p', 'North Kiln'),
+        phase: roleOf(component, 'span', 'Wood fired'),
+        phaseTech: roleOf(component, 'span', 'Oak'),
+      }).toEqual({
+        account: 'text-body',
+        title: 'text-muted',
+        period: 'text-muted',
+        stack: 'text-subtle',
+        project: 'text-muted',
+        phase: 'text-muted',
+        phaseTech: 'text-subtle',
+      })
     })
 
     it('leaves the company at full strength', async () => {
