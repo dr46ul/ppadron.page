@@ -3,6 +3,7 @@ import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import PromptBar from '~/components/session/PromptBar.vue'
 import { roleOf, rolesOf } from '../text-role'
 
@@ -51,6 +52,24 @@ type Mounted = Awaited<ReturnType<typeof mount>>
 
 function prompt(component: Mounted) {
   return component.find<HTMLInputElement>('#prompt')
+}
+
+/**
+ * The text the block caret is set after. It is laid out in the prompt's own
+ * font, so its width is how far along the prompt the block is drawn.
+ */
+function beforeCaret(component: Mounted) {
+  return component.find('[data-before-caret]').element.textContent
+}
+
+/**
+ * Puts the insertion point where an arrow key or a click would. A browser then
+ * fires `selectionchange`; happy-dom does not, so it is fired here.
+ */
+async function moveInsertion(component: Mounted, start: number, end = start, direction: 'forward' | 'backward' = 'forward') {
+  prompt(component).element.setSelectionRange(start, end, direction)
+  document.dispatchEvent(new Event('selectionchange'))
+  await nextTick()
 }
 
 /** The chip row's buttons, and not the theme switch beside the prompt. */
@@ -196,7 +215,7 @@ describe('prompt bar', () => {
     it('marks the prompt caret so its focus state can be styled off the input', async () => {
       const component = await mount()
 
-      expect(component.find('#prompt ~ .caret.prompt-caret').exists()).toBe(true)
+      expect(component.find('#prompt ~ .prompt-mirror .caret.prompt-caret').exists()).toBe(true)
     })
 
     it('puts the caret back on the prompt when asked', async () => {
@@ -206,6 +225,94 @@ describe('prompt bar', () => {
       component.vm.focus()
 
       expect(focus).toHaveBeenCalled()
+    })
+  })
+
+  describe('the caret', () => {
+    it('marks the prompt so its own caret can be hidden behind the block', async () => {
+      const component = await mount()
+
+      expect(prompt(component).classes()).toContain('prompt-input')
+    })
+
+    it('sits at the start of an empty prompt', async () => {
+      const component = await mount()
+
+      expect(beforeCaret(component)).toBe('')
+    })
+
+    it('sits after the last character of the prompt it is handed', async () => {
+      const component = await mount({ modelValue: 'cat ~/va' })
+
+      expect(beforeCaret(component)).toBe('cat ~/va')
+    })
+
+    it('moves to the insertion point when the Visitor moves it', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+
+      await moveInsertion(component, 3)
+
+      expect(beforeCaret(component)).toBe('cat')
+    })
+
+    it('goes to the end of a command filled in for the Visitor', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+      await moveInsertion(component, 3)
+
+      await component.setProps({ modelValue: 'ls ~/kiln' })
+
+      expect(beforeCaret(component)).toBe('ls ~/kiln')
+    })
+
+    it('sits on the end of a selection the Visitor is extending leftward', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+
+      await moveInsertion(component, 3, 11, 'backward')
+
+      expect(beforeCaret(component)).toBe('cat')
+    })
+
+    it('sits on the end of a selection the Visitor is extending rightward', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+
+      await moveInsertion(component, 0, 3)
+
+      expect(beforeCaret(component)).toBe('cat')
+    })
+
+    it('scrolls with a command too long for the prompt', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+      prompt(component).element.scrollLeft = 40
+
+      await moveInsertion(component, 11)
+
+      expect(component.find('[data-caret-mirror]').attributes('style')).toContain('translate: -40px 0')
+    })
+
+    it('scrolls with the prompt when the Visitor scrolls it without moving the insertion point', async () => {
+      const component = await mount({ modelValue: 'cat ~/vault' })
+      prompt(component).element.scrollLeft = 40
+
+      await prompt(component).trigger('scroll')
+
+      expect(component.find('[data-caret-mirror]').attributes('style')).toContain('translate: -40px 0')
+    })
+
+    it('stops following the page\'s selection once the prompt bar is gone', async () => {
+      const component = await mount()
+      const errors: unknown[] = []
+      const report = (event: ErrorEvent) => errors.push(event.error)
+      window.addEventListener('error', report)
+
+      try {
+        component.unmount()
+        document.dispatchEvent(new Event('selectionchange'))
+      }
+      finally {
+        window.removeEventListener('error', report)
+      }
+
+      expect(errors).toEqual([])
     })
   })
 

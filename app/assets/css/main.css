@@ -163,6 +163,12 @@
     outline: none;
   }
 
+  /* Shared by the block caret and the indent that keeps it off the prompt's
+     placeholder. In `em`, so it is a cell of whatever font it is used in. */
+  :root {
+    --caret-width: 0.55em;
+  }
+
   ::selection {
     background: var(--color-accent);
     color: var(--color-accent-content);
@@ -172,7 +178,7 @@
 @layer components {
   .caret {
     display: inline-block;
-    width: 0.55em;
+    width: var(--caret-width);
     height: 1.05em;
     translate: 0 0.18em;
     background: var(--color-accent);
@@ -182,10 +188,23 @@
   /* A terminal draws a solid block while it has focus and a hollow one while it
      does not. The blink is dropped with the fill, so a still outline is what
      tells a Visitor the prompt is not listening. */
-  input:not(:focus) ~ .prompt-caret {
+  input:not(:focus) ~ .prompt-mirror .prompt-caret {
     background: transparent;
     box-shadow: inset 0 0 0 1px var(--color-accent);
     animation: none;
+  }
+
+  /* The block is drawn over the prompt in a mirror of the text up to the
+     insertion point (`.prompt-mirror`), so the browser's own caret would be a
+     second one beside it. */
+  .prompt-input {
+    caret-color: transparent;
+  }
+
+  /* An empty prompt has the block at its start, where it would cover the
+     placeholder's first letter. */
+  .prompt-input:placeholder-shown {
+    text-indent: var(--caret-width);
   }
 
   /* The machine thinking, for exactly as long as it takes the first line to

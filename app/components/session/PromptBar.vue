@@ -30,6 +30,34 @@ const scheme = defineModel<Scheme>('scheme', { required: true })
 
 const prompt = useTemplateRef<HTMLInputElement>('prompt')
 
+/** `null` until the input has reported one, which puts the block at the end. */
+const insertion = ref<number | null>(null)
+
+const scrolled = ref(0)
+
+const beforeCaret = computed(() => typed.value.slice(0, insertion.value ?? undefined))
+
+/**
+ * Reads where the block belongs off the input: the end of the selection that
+ * moves, which is where a terminal draws it, less however far a command too
+ * long for the prompt has scrolled.
+ */
+function followCaret() {
+  const input = prompt.value!
+  insertion.value = input.selectionDirection === 'backward'
+    ? input.selectionStart
+    : input.selectionEnd
+  scrolled.value = input.scrollLeft
+}
+
+// Not every browser reports the jump to the end when the value is set from
+// code, as Tab completion and history recall do. Post-flush, because the
+// input's value and selection only move once Vue has patched it.
+watch(typed, followCaret, { flush: 'post' })
+
+onMounted(() => document.addEventListener('selectionchange', followCaret))
+onBeforeUnmount(() => document.removeEventListener('selectionchange', followCaret))
+
 // A page may only take Tab when it has something to do with it; otherwise the
 // prompt is a keyboard trap (WCAG 2.1.2).
 function onTab(event: KeyboardEvent) {
@@ -99,21 +127,34 @@ defineExpose({
            input and does not zoom back out. On a phone the theme switch leaves
            too little room for the whole hint, so it trails off rather than
            cutting a word in half. -->
-      <input
-        id="prompt"
-        ref="prompt"
-        v-model="typed"
-        class="w-full bg-transparent text-base text-ellipsis"
-        type="text"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="type a command, or pick one above"
-        @keydown.tab="onTab"
-        @keydown.up.prevent="emit('recall', 1)"
-        @keydown.down.prevent="emit('recall', -1)"
-      >
-      <span aria-hidden="true" class="caret prompt-caret shrink-0" />
+      <div class="relative w-full min-w-0">
+        <input
+          id="prompt"
+          ref="prompt"
+          v-model="typed"
+          class="prompt-input w-full bg-transparent text-base text-ellipsis"
+          type="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="type a command, or pick one above"
+          @keydown.tab="onTab"
+          @keydown.up.prevent="emit('recall', 1)"
+          @keydown.down.prevent="emit('recall', -1)"
+          @scroll="followCaret"
+        >
+        <!-- Unclipped on purpose: the text in it is invisible, and the block
+             may overhang the prompt's right edge as a terminal's does. -->
+        <div
+          data-caret-mirror
+          aria-hidden="true"
+          class="prompt-mirror pointer-events-none absolute inset-y-0 left-0 flex items-center text-base whitespace-pre"
+          :style="{ translate: `${-scrolled}px 0` }"
+        >
+          <span data-before-caret class="invisible">{{ beforeCaret }}</span>
+          <span class="caret prompt-caret shrink-0" />
+        </div>
+      </div>
 
       <div
         data-scheme-switch
