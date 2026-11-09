@@ -413,6 +413,28 @@ describe('prompt bar', () => {
     )
   })
 
+  describe('one line', () => {
+    it('sets the prompt, the theme switch and the availability on one baseline, though their sizes differ', async () => {
+      const component = await mount()
+      const classes = component.find('form').classes()
+
+      expect(['items-baseline', 'items-center'].filter(name => classes.includes(name)))
+        .toEqual(['items-baseline'])
+    })
+
+    it('takes the availability\'s baseline from its words and centres its dot on them', async () => {
+      const component = await mount()
+
+      expect({
+        tag: ['items-baseline', 'items-center'].filter(name => availability(component).classes().includes(name)),
+        dot: availability(component).find('span').classes().includes('self-center'),
+      }).toEqual({
+        tag: ['items-baseline'],
+        dot: true,
+      })
+    })
+  })
+
   describe('the availability', () => {
     it('prints the label it is handed rather than a spelling of its own', async () => {
       const component = await mount()

@@ -119,8 +119,11 @@ defineExpose({
       </template>
     </div>
 
+    <!-- On one baseline rather than centred: the prompt, the theme switch and
+         the availability are three sizes, and centring their boxes leaves the
+         smaller words riding high of the prompt's. -->
     <form
-      class="session-gutter flex items-center gap-2 py-3"
+      class="session-gutter flex items-baseline gap-2 py-3"
       @submit.prevent="emit('run', typed)"
     >
       <label class="sr-only" for="prompt">Run a command</label>
@@ -181,12 +184,14 @@ defineExpose({
 
       <span
         data-availability
-        class="text-label hidden shrink-0 items-center gap-2 pl-4 tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
+        class="text-label hidden shrink-0 items-baseline gap-2 pl-4 tracking-[0.15em] whitespace-nowrap uppercase sm:flex"
         :class="availability.open ? 'text-accent' : 'text-subtle'"
       >
+        <!-- Centred off the baseline, so the tag's baseline is its words'
+             rather than the bottom of a dot with none. -->
         <span
           aria-hidden="true"
-          class="size-1.5"
+          class="size-1.5 self-center"
           :class="availability.open ? 'bg-success' : 'bg-base-300'"
         />
         {{ availability.label }}
