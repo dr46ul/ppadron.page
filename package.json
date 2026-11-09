@@ -1,11 +1,11 @@
 {
-  "name": "nuxt-app",
+  "name": "ppadron-page",
   "type": "module",
   "private": true,
   "packageManager": "pnpm@12.18.0",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host localhost",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "prepare": "husky",
