@@ -81,10 +81,10 @@ describe('colophon output', () => {
     })
 
     const text = component.text()
-    expect({
-      bare: text.includes('→ example.test/the-repo'),
-      withScheme: text.includes('https://example.test/the-repo'),
-    }).toEqual({ bare: true, withScheme: false })
+    expect({ bare: text, withScheme: text }).toEqual({
+      bare: expect.stringContaining('→ example.test/the-repo'),
+      withScheme: expect.not.stringContaining('https://example.test/the-repo'),
+    })
   })
 
   it('joins the stack it is handed with a middle dot', async () => {
