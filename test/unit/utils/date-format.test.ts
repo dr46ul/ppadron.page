@@ -48,8 +48,10 @@ describe('formatDate', () => {
   it('takes the year from the time zone, not from UTC', () => {
     const newYearsEve = Date.UTC(2026, 11, 31, 23, 30)
 
-    expect(formatDate(newYearsEve, 'year', { locale: 'en', timeZone: 'UTC' })).toBe('2026')
-    expect(formatDate(newYearsEve, 'year', { locale: 'en', timeZone: 'Asia/Tokyo' })).toBe('2027')
+    expect({
+      utc: formatDate(newYearsEve, 'year', { locale: 'en', timeZone: 'UTC' }),
+      tokyo: formatDate(newYearsEve, 'year', { locale: 'en', timeZone: 'Asia/Tokyo' }),
+    }).toEqual({ utc: '2026', tokyo: '2027' })
   })
 })
 
@@ -71,7 +73,10 @@ describe('pickLocale', () => {
   })
 
   it('falls back to English when nothing is usable', () => {
-    expect(pickLocale(['en_US', 'zz'])).toBe('en')
-    expect(pickLocale([])).toBe('en')
+    expect({
+      unusable: pickLocale(['en_US', 'zz']),
+      empty: pickLocale([]),
+    })
+      .toEqual({ unusable: 'en', empty: 'en' })
   })
 })

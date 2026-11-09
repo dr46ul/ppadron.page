@@ -30,18 +30,23 @@ describe('sendEnquiry', () => {
   it('hands the Enquiry to Resend, addressed so a reply reaches the Visitor', async () => {
     await sendEnquiry(enquiry, delivery)
 
-    expect(send).toHaveBeenCalledTimes(1)
-
-    const [url, init] = send.mock.calls[0]!
-    expect(url).toBe('https://api.resend.com/emails')
-    expect(init.method).toBe('POST')
-    expect(init.headers.Authorization).toBe('Bearer re_test_key')
-
-    expect(JSON.parse(init.body)).toMatchObject({
-      from: 'enquiries@ppadron.example',
-      to: 'pavel@ppadron.example',
-      reply_to: 'dana@whitfield.example',
-    })
+    expect(send.mock.calls.map(([url, init]) => ({
+      url,
+      method: init.method,
+      authorization: init.headers.Authorization,
+      body: JSON.parse(init.body),
+    }))).toEqual([
+      {
+        url: 'https://api.resend.com/emails',
+        method: 'POST',
+        authorization: 'Bearer re_test_key',
+        body: expect.objectContaining({
+          from: 'enquiries@ppadron.example',
+          to: 'pavel@ppadron.example',
+          reply_to: 'dana@whitfield.example',
+        }),
+      },
+    ])
   })
 
   it('writes the whole Enquiry into the mail, not just the headers', async () => {
@@ -49,10 +54,17 @@ describe('sendEnquiry', () => {
 
     const { subject, text } = JSON.parse(send.mock.calls[0]![1].body)
 
-    expect(subject).toContain('Dana Whitfield')
-    expect(text).toContain('Dana Whitfield')
-    expect(text).toContain('dana@whitfield.example')
-    expect(text).toContain('I need a frontend engineer for a six week engagement.')
+    expect({
+      subject,
+      missingFromText: [
+        'Dana Whitfield',
+        'dana@whitfield.example',
+        'I need a frontend engineer for a six week engagement.',
+      ].filter(field => !text.includes(field)),
+    }).toEqual({
+      subject: expect.stringContaining('Dana Whitfield'),
+      missingFromText: [],
+    })
   })
 
   it('throws when Resend refuses the send', async () => {
@@ -74,11 +86,13 @@ describe('sendEnquiry', () => {
   it.each(['apiKey', 'to', 'from'])(
     'refuses to send at all with no %s configured',
     async (missing) => {
-      await expect(
-        sendEnquiry(enquiry, { ...delivery, [missing]: '' }),
-      ).rejects.toThrow(/not configured/)
+      const outcome = await sendEnquiry(enquiry, { ...delivery, [missing]: '' })
+        .then(() => 'sent', (error: Error) => error.message)
 
-      expect(send).not.toHaveBeenCalled()
+      expect({ outcome, sends: send.mock.calls.length }).toEqual({
+        outcome: expect.stringMatching(/not configured/),
+        sends: 0,
+      })
     },
   )
 })

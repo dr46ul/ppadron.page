@@ -33,26 +33,33 @@ it('prints every field of the note', async () => {
 })
 ```
 
-A state that changes is still one value: compare `[before, after]`, not the two
-moments one after the other. Asymmetric matchers inside the one `expect`
-(`expect.stringContaining`, `expect.arrayContaining`, `expect.any`) are part of
-the expected value, not extra assertions.
+The shapes that come up again and again:
+
+- **A state that changes** is captured and compared once:
+  `expect([before, after]).toEqual(['sending', 'sent'])`, not two `expect`s
+  either side of the step.
+- **A string that must hold several things** lists what is missing, so the
+  failure names it: `expect(['Acme', '2022 — now'].filter(field =>
+  !text.includes(field))).toEqual([])`. Flip the condition for things it must
+  not hold.
+- **A class that must be there while another must not**: filter to the classes
+  in question, `expect(['border-edge', 'border-base-300'].filter(name =>
+  classes.includes(name))).toEqual(['border-edge'])`.
+- **The same check across a list** maps the list and compares the array, never
+  an `expect` inside a `for`.
+
+Asymmetric matchers inside the one `expect` (`expect.stringContaining`,
+`expect.objectContaining`, `expect.not.stringMatching`) are part of the expected
+value, not extra assertions.
 
 Every test is written with `it`, never `test`, so a file reads as a list of
 things the code does: "it prints every field of the note".
 
-Enforced in `eslint.config.js`:
-
-- `test/max-expects` with `max: 1` covers every test file except the ones listed
-  beside it, which predate this rule. A file migrated to one `expect` per `it`
-  comes off the list in the same change, and nothing is ever added to it.
-- `test/consistent-test-it` comes from `@antfu/eslint-config`, which sets `it`
-  both inside and outside `describe`.
+Enforced in `eslint.config.js` for every file under `test/`:
+`test/max-expects` with `max: 1`, and `test/consistent-test-it`, which
+`@antfu/eslint-config` already sets to `it` inside and outside `describe`.
 
 Severity:
 
-- ❌ HIGH — a second `expect` in a test file not on the list, or a file added to
-  the list. `pnpm lint` fails or the ratchet goes backwards.
-- ❌ HIGH — `test(` in place of `it(`. `pnpm lint` fails.
-- ⚠️ MEDIUM — a new or changed test with more than one `expect` in a file still
-  on the list. Lint can't see it, so review has to.
+- ❌ HIGH — a second `expect` in a test, or `test(` in place of `it(`.
+  `pnpm lint` fails, so the branch does not merge.

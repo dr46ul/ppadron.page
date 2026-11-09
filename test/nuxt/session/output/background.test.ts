@@ -49,8 +49,10 @@ describe('background output', () => {
 
     const paragraphs = component.findAll('p').map(paragraph => paragraph.text())
     const first = paragraphs.indexOf('Learned plumbing from a lighthouse keeper.')
-    expect(first).toBeGreaterThan(-1)
-    expect(paragraphs[first + 1]).toBe('Moved inland when the light went automatic.')
+    expect(paragraphs.slice(first, first + 2)).toEqual([
+      'Learned plumbing from a lighthouse keeper.',
+      'Moved inland when the light went automatic.',
+    ])
   })
 
   it('joins the skills with a middle dot', async () => {
@@ -65,9 +67,11 @@ describe('background output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).toContain('Licence in Hydraulics')
-    expect(text).toContain('Faculty of Water')
-    expect(text).toContain('University of Reykjavík · 1991')
+    expect([
+      'Licence in Hydraulics',
+      'Faculty of Water',
+      'University of Reykjavík · 1991',
+    ].filter(field => !text.includes(field))).toEqual([])
   })
 
   it('reads story, then skills, then education', async () => {
@@ -79,18 +83,20 @@ describe('background output', () => {
       'soldering',
       'Licence in Hydraulics',
     ].map(value => text.indexOf(value))
-    expect(positions).not.toContain(-1)
-    expect(positions).toEqual(positions.toSorted((a, b) => a - b))
+    const printed = positions.filter(position => position > -1)
+    expect(positions).toEqual(printed.toSorted((a, b) => a - b))
   })
 
   it('prints nothing of the Profile that belongs to whoami or the Colophon', async () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).not.toContain('Systems plumber')
-    expect(text).not.toContain('Unblocks the pipes')
-    expect(text).not.toContain('fortran')
-    expect(text).not.toContain('Pavel Padron')
+    expect([
+      'Systems plumber',
+      'Unblocks the pipes',
+      'fortran',
+      'Pavel Padron',
+    ].filter(fact => text.includes(fact))).toEqual([])
   })
 
   it('holds no placeholder markers of its own', async () => {
@@ -103,8 +109,9 @@ describe('background output', () => {
     it('still prints the skills and education when the story is empty', async () => {
       const component = await mount({ background: [] })
 
-      expect(component.text()).toContain('soldering')
-      expect(component.text()).toContain('Licence in Hydraulics')
+      const text = component.text()
+      expect(['soldering', 'Licence in Hydraulics'].filter(field => !text.includes(field)))
+        .toEqual([])
     })
 
     it('labels the skills when there are some, and drops the label with them when there are none', async () => {
@@ -113,9 +120,11 @@ describe('background output', () => {
       })
       const without = await mount({ skills: [] })
 
-      expect(withSkills.text()).toContain('Skills')
-      expect(without.text()).not.toContain('Skills')
-      expect(without.text()).toContain('Licence in Hydraulics')
+      expect({
+        labelledWithSkills: withSkills.text().includes('Skills'),
+        labelledWithout: without.text().includes('Skills'),
+        educationWithout: without.text().includes('Licence in Hydraulics'),
+      }).toEqual({ labelledWithSkills: true, labelledWithout: false, educationWithout: true })
     })
   })
 
@@ -123,13 +132,23 @@ describe('background output', () => {
     it('sets the story and degree as prose, the labels as labels, the rest as chrome', async () => {
       const component = await mount()
 
-      expect(roleOf(component, 'p', 'Learned plumbing')).toBe('text-body')
-      expect(roleOf(component, 'p', 'Licence in Hydraulics')).toBe('text-body')
-      expect(roleOf(component, 'p', 'Skills')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'Education')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'soldering')).toBe('text-subtle')
-      expect(roleOf(component, 'p', 'Faculty of Water')).toBe('text-subtle')
-      expect(roleOf(component, 'p', 'University of Reykjavík')).toBe('text-subtle')
+      expect({
+        story: roleOf(component, 'p', 'Learned plumbing'),
+        degree: roleOf(component, 'p', 'Licence in Hydraulics'),
+        skillsLabel: roleOf(component, 'p', 'Skills'),
+        educationLabel: roleOf(component, 'p', 'Education'),
+        skills: roleOf(component, 'p', 'soldering'),
+        faculty: roleOf(component, 'p', 'Faculty of Water'),
+        university: roleOf(component, 'p', 'University of Reykjavík'),
+      }).toEqual({
+        story: 'text-body',
+        degree: 'text-body',
+        skillsLabel: 'text-muted',
+        educationLabel: 'text-muted',
+        skills: 'text-subtle',
+        faculty: 'text-subtle',
+        university: 'text-subtle',
+      })
     })
   })
 })

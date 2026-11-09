@@ -38,10 +38,12 @@ describe('experience output', () => {
     ])
 
     const text = component.text()
-    expect(text).toContain('Acme')
-    expect(text).toContain('Engineer')
-    expect(text).toContain('2022 — now')
-    expect(text).toContain('Built the thing that made the other thing work.')
+    expect([
+      'Acme',
+      'Engineer',
+      '2022 — now',
+      'Built the thing that made the other thing work.',
+    ].filter(field => !text.includes(field))).toEqual([])
   })
 
   it('joins the tech of a role with a middle dot', async () => {
@@ -59,8 +61,12 @@ describe('experience output', () => {
       role({ company: 'Acme', tech: [] }),
     ])
 
-    expect(component.text()).toContain('Acme')
-    expect(component.text()).not.toContain('·')
+    const text = component.text()
+    expect({
+      company: text.includes('Acme'),
+      techSeparator: text.includes('·'),
+    })
+      .toEqual({ company: true, techSeparator: false })
   })
 
   it('keeps the order it was handed', async () => {
@@ -84,12 +90,13 @@ describe('experience output', () => {
       role({ since: '2016' }),
     ])
 
-    const [first, ...rest] = component.findAll('time')
-    expect(first!.classes()).toContain('text-accent')
-    for (const other of rest) {
-      expect(other!.classes()).not.toContain('text-accent')
-      expect(other!.classes()).toContain('text-muted')
-    }
+    expect(component.findAll('time').map(time =>
+      ['text-accent', 'text-muted'].filter(colour => time.classes().includes(colour)),
+    )).toEqual([
+      ['text-accent'],
+      ['text-muted'],
+      ['text-muted'],
+    ])
   })
 
   it('gives each role a machine-readable start date', async () => {
@@ -226,10 +233,15 @@ describe('experience output', () => {
   it('still says why there is no projects gallery when it has no roles', async () => {
     const component = await mount([])
 
-    expect(component.text()).toContain(
-      'Freelance client work is under NDA, so there is no projects gallery.',
-    )
-    expect(component.findAll('li')).toHaveLength(0)
+    expect({
+      text: component.text(),
+      items: component.findAll('li').length,
+    }).toEqual({
+      text: expect.stringContaining(
+        'Freelance client work is under NDA, so there is no projects gallery.',
+      ),
+      items: 0,
+    })
   })
 
   describe('opening a role', () => {
@@ -262,9 +274,11 @@ describe('experience output', () => {
       ])
 
       const text = component.get('button').text()
-      expect(text).toContain('Kiln & Ash')
-      expect(text).toContain('Kiln technician')
-      expect(text).not.toContain('Rebuilt the firing schedule.')
+      expect({
+        company: text.includes('Kiln & Ash'),
+        title: text.includes('Kiln technician'),
+        summary: text.includes('Rebuilt the firing schedule.'),
+      }).toEqual({ company: true, title: true, summary: false })
     })
 
     it('has nothing to open when it has no roles', async () => {
@@ -334,9 +348,11 @@ describe('experience output', () => {
         }),
       ])
 
-      expect(roleOf(component, 'p', 'Built the thing that made')).toBe('text-body')
-      expect(roleOf(component, 'span', 'Kiln technician')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'TypeScript · Vue')).toBe('text-subtle')
+      expect({
+        summary: roleOf(component, 'p', 'Built the thing that made'),
+        title: roleOf(component, 'span', 'Kiln technician'),
+        tech: roleOf(component, 'p', 'TypeScript · Vue'),
+      }).toEqual({ summary: 'text-body', title: 'text-muted', tech: 'text-subtle' })
     })
 
     it('sets the NDA note as chrome and leaves the company at full strength', async () => {
@@ -344,8 +360,10 @@ describe('experience output', () => {
         role({ company: 'Kiln & Ash' }),
       ])
 
-      expect(roleOf(component, 'p', 'under NDA')).toBe('text-subtle')
-      expect(roleOf(component, 'span', 'Kiln & Ash')).toBeUndefined()
+      expect({
+        note: roleOf(component, 'p', 'under NDA'),
+        company: roleOf(component, 'span', 'Kiln & Ash'),
+      }).toEqual({ note: 'text-subtle', company: undefined })
     })
   })
 })

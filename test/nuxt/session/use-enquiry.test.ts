@@ -26,8 +26,11 @@ describe('useEnquiry', () => {
   it('opens on an empty draft that nobody has sent', () => {
     const enquiry = useEnquiry()
 
-    expect(enquiry.draft).toEqual({ name: '', email: '', message: '' })
-    expect(enquiry.state).toBe('idle')
+    expect({ draft: enquiry.draft, state: enquiry.state })
+      .toEqual({
+        draft: { name: '', email: '', message: '' },
+        state: 'idle',
+      })
   })
 
   describe('submit', () => {
@@ -53,8 +56,8 @@ describe('useEnquiry', () => {
       enquiry.edit(draft({ message: 'hi' }))
       await enquiry.submit()
 
-      expect(post).not.toHaveBeenCalled()
-      expect(enquiry.state).toBe('idle')
+      expect({ sends: post.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 0, state: 'idle' })
     })
 
     it('leaves a failed send failed when the draft is refused', async () => {
@@ -66,8 +69,8 @@ describe('useEnquiry', () => {
       enquiry.edit(draft({ email: 'dana@' }))
       await enquiry.submit()
 
-      expect(post).toHaveBeenCalledTimes(1)
-      expect(enquiry.state).toBe('failed')
+      expect({ sends: post.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 1, state: 'failed' })
     })
 
     it('reports that it is sending before it knows the outcome', async () => {
@@ -82,12 +85,12 @@ describe('useEnquiry', () => {
       enquiry.edit(draft())
       const sending = enquiry.submit()
 
-      expect(enquiry.state).toBe('sending')
+      const states = [enquiry.state]
 
       deliver!()
       await sending
 
-      expect(enquiry.state).toBe('sent')
+      expect([...states, enquiry.state]).toEqual(['sending', 'sent'])
     })
 
     it('reports a delivery that failed', async () => {
@@ -108,8 +111,8 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       await enquiry.submit()
 
-      expect(post).toHaveBeenCalledTimes(2)
-      expect(enquiry.state).toBe('sent')
+      expect({ sends: post.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 2, state: 'sent' })
     })
 
     it('sends a copy, so later typing cannot change what was sent', async () => {
@@ -131,8 +134,8 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       await enquiry.submit()
 
-      expect(post).toHaveBeenCalledTimes(1)
-      expect(enquiry.state).toBe('sent')
+      expect({ sends: post.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 1, state: 'sent' })
     })
 
     it('does not send a second copy while the first is on its way', async () => {
@@ -143,8 +146,8 @@ describe('useEnquiry', () => {
       void enquiry.submit()
       await enquiry.submit()
 
-      expect(post).toHaveBeenCalledTimes(1)
-      expect(enquiry.state).toBe('sending')
+      expect({ sends: post.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 1, state: 'sending' })
     })
   })
 
@@ -156,8 +159,11 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       enquiry.clear()
 
-      expect(enquiry.draft).toEqual({ name: '', email: '', message: '' })
-      expect(enquiry.state).toBe('idle')
+      expect({ draft: enquiry.draft, state: enquiry.state })
+        .toEqual({
+          draft: { name: '', email: '', message: '' },
+          state: 'idle',
+        })
     })
 
     it.each([
@@ -199,8 +205,11 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       enquiry.open()
 
-      expect(enquiry.draft).toEqual({ name: '', email: '', message: '' })
-      expect(enquiry.state).toBe('idle')
+      expect({ draft: enquiry.draft, state: enquiry.state })
+        .toEqual({
+          draft: { name: '', email: '', message: '' },
+          state: 'idle',
+        })
     })
 
     it('keeps a draft that has not been sent', () => {
@@ -209,8 +218,8 @@ describe('useEnquiry', () => {
       enquiry.edit(draft({ message: 'half a thought' }))
       enquiry.open()
 
-      expect(enquiry.draft.message).toBe('half a thought')
-      expect(enquiry.state).toBe('idle')
+      expect({ message: enquiry.draft.message, state: enquiry.state })
+        .toEqual({ message: 'half a thought', state: 'idle' })
     })
 
     it('keeps a draft that failed to send, and offers to send it again', async () => {
@@ -221,8 +230,11 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       enquiry.open()
 
-      expect(enquiry.draft).toEqual(draft())
-      expect(enquiry.state).toBe('idle')
+      expect({ draft: enquiry.draft, state: enquiry.state })
+        .toEqual({
+          draft: draft(),
+          state: 'idle',
+        })
     })
 
     it('leaves a send that is on its way to finish', () => {
@@ -233,8 +245,11 @@ describe('useEnquiry', () => {
       void enquiry.submit()
       enquiry.open()
 
-      expect(enquiry.draft).toEqual(draft())
-      expect(enquiry.state).toBe('sending')
+      expect({ draft: enquiry.draft, state: enquiry.state })
+        .toEqual({
+          draft: draft(),
+          state: 'sending',
+        })
     })
   })
 })

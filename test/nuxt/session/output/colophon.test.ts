@@ -80,8 +80,11 @@ describe('colophon output', () => {
       },
     })
 
-    expect(component.text()).toContain('→ example.test/the-repo')
-    expect(component.text()).not.toContain('https://example.test/the-repo')
+    const text = component.text()
+    expect({
+      bare: text.includes('→ example.test/the-repo'),
+      withScheme: text.includes('https://example.test/the-repo'),
+    }).toEqual({ bare: true, withScheme: false })
   })
 
   it('joins the stack it is handed with a middle dot', async () => {
@@ -98,9 +101,15 @@ describe('colophon output', () => {
     })
     const empty = await mount({ stack: [] })
 
-    expect(listed.findAll('p')).toHaveLength(4)
-    expect(empty.findAll('p')).toHaveLength(3)
-    expect(empty.text()).toContain('this page is the work sample')
+    expect({
+      listed: listed.findAll('p').length,
+      empty: empty.findAll('p').length,
+      emptyText: empty.text(),
+    }).toEqual({
+      listed: 4,
+      empty: 3,
+      emptyText: expect.stringContaining('this page is the work sample'),
+    })
   })
 
   it('signs the notice with the name and both profiles it is handed', async () => {
@@ -113,28 +122,36 @@ describe('colophon output', () => {
       },
     })
 
-    expect(component.text()).toContain('Wilhelmina Ashgrove')
-    expect(hrefs(component)).toEqual([
-      'https://example.test/the-repo',
-      'https://example.test/gh-wilhelmina',
-      'https://example.test/li-wilhelmina',
-    ])
+    expect({
+      text: component.text(),
+      hrefs: hrefs(component),
+    }).toEqual({
+      text: expect.stringContaining('Wilhelmina Ashgrove'),
+      hrefs: [
+        'https://example.test/the-repo',
+        'https://example.test/gh-wilhelmina',
+        'https://example.test/li-wilhelmina',
+      ],
+    })
   })
 
   it('opens every link without handing over the window', async () => {
     const component = await mount()
 
-    const links = component.findAll('a')
-    expect(links).toHaveLength(3)
-    for (const link of links)
-      expect(link.attributes('rel')).toBe('noopener')
+    expect(component.findAll('a').map(link => link.attributes('rel')))
+      .toEqual(['noopener', 'noopener', 'noopener'])
   })
 
   it('dates the notice by the year it is handed, not by the clock', async () => {
     vi.setSystemTime(new Date('2033-06-01T00:00:00Z'))
 
-    expect((await mount({}, '2031')).text()).toContain('© 2031')
-    expect((await mount({}, '2032')).text()).toContain('© 2032')
+    expect([
+      (await mount({}, '2031')).text(),
+      (await mount({}, '2032')).text(),
+    ]).toEqual([
+      expect.stringContaining('© 2031'),
+      expect.stringContaining('© 2032'),
+    ])
   })
 
   it('prints the year in the digits it is handed', async () => {
@@ -145,9 +162,8 @@ describe('colophon output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(text).not.toContain('Pavel Padron')
-    expect(text).not.toContain('dr46ul')
-    expect(text).not.toContain('vue · nuxt')
+    expect(['Pavel Padron', 'dr46ul', 'vue · nuxt'].filter(fact => text.includes(fact)))
+      .toEqual([])
   })
 
   it('keeps a link click from reaching the session behind it', async () => {
@@ -171,9 +187,11 @@ describe('colophon output', () => {
     it('sets the lede as prose and the stack and copyright as chrome', async () => {
       const component = await mount()
 
-      expect(roleOf(component, 'p', 'No projects gallery')).toBe('text-body')
-      expect(roleOf(component, 'p', 'fortran · cobol')).toBe('text-subtle')
-      expect(roleOf(component, 'p', '©')).toBe('text-subtle')
+      expect({
+        lede: roleOf(component, 'p', 'No projects gallery'),
+        stack: roleOf(component, 'p', 'fortran · cobol'),
+        copyright: roleOf(component, 'p', '©'),
+      }).toEqual({ lede: 'text-body', stack: 'text-subtle', copyright: 'text-subtle' })
     })
   })
 })

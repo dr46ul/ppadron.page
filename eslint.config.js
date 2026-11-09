@@ -53,31 +53,7 @@ export default antfu(
   },
   {
     files: ['test/**/*.ts'],
-    // These predate the rule. Each comes off the list once its tests have one
-    // `expect` each, and none is ever added. See
-    // .agents/rules/one-expect-per-test.md.
-    ignores: [
-      'test/nuxt/session/output/background.test.ts',
-      'test/nuxt/session/output/colophon.test.ts',
-      'test/nuxt/session/output/contact.test.ts',
-      'test/nuxt/session/output/experience.test.ts',
-      'test/nuxt/session/output/help.test.ts',
-      'test/nuxt/session/output/recommendations.test.ts',
-      'test/nuxt/session/output/role-detail.test.ts',
-      'test/nuxt/session/output/unknown.test.ts',
-      'test/nuxt/session/output/whoami.test.ts',
-      'test/nuxt/session/prompt-bar.test.ts',
-      'test/nuxt/session/terminal.test.ts',
-      'test/nuxt/session/use-enquiry.test.ts',
-      'test/nuxt/session/use-session.test.ts',
-      'test/nuxt/use-date-context.test.ts',
-      'test/nuxt/use-theme.test.ts',
-      'test/unit/server/send-enquiry.test.ts',
-      'test/unit/shared/enquiry.test.ts',
-      'test/unit/text-control-focus.test.ts',
-      'test/unit/theme-tokens.test.ts',
-      'test/unit/utils/date-format.test.ts',
-    ],
+    // See .agents/rules/one-expect-per-test.md.
     rules: {
       'test/max-expects': [
         'error',

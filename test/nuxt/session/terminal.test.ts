@@ -193,8 +193,11 @@ describe('terminal', () => {
     it('opens with the Profile name and headline', async () => {
       const { banner } = await mountTerminal()
 
-      expect(banner().text()).toContain('Wilhelmina Ashgrove')
-      expect(banner().text()).toContain('Systems plumber')
+      const text = banner().text()
+      expect([
+        'Wilhelmina Ashgrove',
+        'Systems plumber',
+      ].filter(line => !text.includes(line))).toEqual([])
     })
 
     it('stamps the session with the time it was built, as the Visitor tells time', async () => {
@@ -218,12 +221,15 @@ describe('terminal', () => {
       await session.chip('clear').trigger('click')
       await session.component.vm.$nextTick()
 
-      expect(session.banner().exists()).toBe(false)
+      const afterClear = session.banner().exists()
 
       await session.chip('reset').trigger('click')
       await session.component.vm.$nextTick()
 
-      expect(session.banner().exists()).toBe(true)
+      expect([
+        afterClear,
+        session.banner().exists(),
+      ]).toEqual([false, true])
     })
   })
 
@@ -231,14 +237,17 @@ describe('terminal', () => {
     it('prints the Profile label rather than a spelling of its own', async () => {
       const { availability, banner, promptBar } = await mountTerminal()
 
-      expect(availability()).toHaveLength(2)
-      for (const shown of availability())
-        expect(shown.text()).toBe('Free from the equinox')
-
-      // Neither place words the availability itself; these two are what
-      // they would say if they did.
-      expect(banner().text()).not.toContain('Open for freelance work')
-      expect(promptBar().text()).not.toContain('Available for freelance')
+      expect({
+        shown: availability().map(shown => shown.text()),
+        // Neither place words the availability itself; these two are what
+        // they would say if they did.
+        bannerOwnSpelling: banner().text().includes('Open for freelance work'),
+        promptBarOwnSpelling: promptBar().text().includes('Available for freelance'),
+      }).toEqual({
+        shown: ['Free from the equinox', 'Free from the equinox'],
+        bannerOwnSpelling: false,
+        promptBarOwnSpelling: false,
+      })
     })
 
     it('separates the label from its own copy, whatever the label ends in', async () => {
@@ -254,21 +263,26 @@ describe('terminal', () => {
     it('accents the availability while Pavel is open to work', async () => {
       const { availability } = await mountTerminal()
 
-      for (const shown of availability()) {
-        expect(shown.classes()).toContain('text-accent')
-        expect(shown.classes()).not.toContain('text-subtle')
-      }
+      expect(availability().map(shown =>
+        ['text-accent', 'text-subtle'].filter(name => shown.classes().includes(name)),
+      )).toEqual([
+        ['text-accent'],
+        ['text-accent'],
+      ])
     })
 
     it('mutes the availability once he is not', async () => {
       data.profile.availability = { open: false, label: 'Booked till spring' }
       const { availability } = await mountTerminal()
 
-      for (const shown of availability()) {
-        expect(shown.text()).toBe('Booked till spring')
-        expect(shown.classes()).toContain('text-subtle')
-        expect(shown.classes()).not.toContain('text-accent')
+      const muted = {
+        text: 'Booked till spring',
+        colours: ['text-subtle'],
       }
+      expect(availability().map(shown => ({
+        text: shown.text(),
+        colours: ['text-accent', 'text-subtle'].filter(name => shown.classes().includes(name)),
+      }))).toEqual([muted, muted])
     })
   })
 
@@ -284,40 +298,45 @@ describe('terminal', () => {
       const printed = component.text()
 
       // Everything the page says about Pavel arrives through `app/data`.
-      expect(printed).not.toContain('Pavel Padron')
-      expect(printed).not.toContain('Frontend engineer')
-      expect(printed).not.toContain('Available for freelance')
-      expect(printed).not.toContain('github.com/dr46ul')
+      expect([
+        'Pavel Padron',
+        'Frontend engineer',
+        'Available for freelance',
+        'github.com/dr46ul',
+      ].filter(line => printed.includes(line))).toEqual([])
     })
 
     it('hands the Profile to the Whoami output', async () => {
       const { output } = await mountTerminal()
       const whoami = output('whoami').text()
 
-      expect(whoami).toContain('Wilhelmina Ashgrove')
-      expect(whoami).toContain('Systems plumber · Reykjavík')
-      expect(whoami).toContain(
+      expect([
+        'Wilhelmina Ashgrove',
+        'Systems plumber · Reykjavík',
         'Works with teams whose build takes longer than their standup.',
-      )
+      ].filter(line => !whoami.includes(line))).toEqual([])
     })
 
     it('hands the Roles to the Experience output', async () => {
       const { output } = await mountTerminal()
       const printed = output('ls ~/experience')
 
-      expect(printed.findAll('time[datetime]')).toHaveLength(1)
-      expect(printed.find('time[datetime]').text()).toBe('1998 — 2001')
-      expect(printed.text()).toContain('Kiln & Ash')
+      expect({
+        periods: printed.findAll('time[datetime]').map(time => time.text()),
+        text: printed.text(),
+      }).toEqual({
+        periods: ['1998 — 2001'],
+        text: expect.stringContaining('Kiln & Ash'),
+      })
     })
 
     it('hands the Recommendations to the Recommendations output', async () => {
       const { output } = await mountTerminal()
       const printed = output('cat ~/recommendations')
 
-      expect(printed.findAll('blockquote')).toHaveLength(1)
-      expect(printed.find('blockquote').text()).toBe(
+      expect(printed.findAll('blockquote').map(quote => quote.text())).toEqual([
         'He rewired the kiln and never once mentioned it afterwards.',
-      )
+      ])
     })
 
     it('hands the Profile to the Colophon output', async () => {
@@ -325,10 +344,17 @@ describe('terminal', () => {
       const printed = output('cat ~/colophon')
       const hrefs = printed.findAll('a').map(link => link.attributes('href'))
 
-      expect(hrefs).toContain('https://example.test/repo-ashgrove')
-      expect(hrefs).toContain('https://example.test/gh-ashgrove')
-      expect(hrefs).toContain('https://example.test/li-ashgrove')
-      expect(printed.text()).toContain('duct tape · a longer wrench')
+      expect({
+        hrefs,
+        text: printed.text(),
+      }).toEqual({
+        hrefs: expect.arrayContaining([
+          'https://example.test/repo-ashgrove',
+          'https://example.test/gh-ashgrove',
+          'https://example.test/li-ashgrove',
+        ]),
+        text: expect.stringContaining('duct tape · a longer wrench'),
+      })
     })
 
     it('dates the Colophon by the visit, and the banner by the build', async () => {
@@ -339,8 +365,13 @@ describe('terminal', () => {
       // `built-at` state the first one left behind.
       const { banner, output } = await mountTerminal()
 
-      expect(output('cat ~/colophon').text()).toContain('© 2027')
-      expect(banner().text()).toContain('Last login: Sat 14 Mar, 09:05:07 GMT')
+      expect({
+        colophon: output('cat ~/colophon').text(),
+        banner: banner().text(),
+      }).toEqual({
+        colophon: expect.stringContaining('© 2027'),
+        banner: expect.stringContaining('Last login: Sat 14 Mar, 09:05:07 GMT'),
+      })
     })
 
     it('dates the Colophon in the Visitor\'s own time zone and digits', async () => {
@@ -390,8 +421,13 @@ describe('terminal', () => {
 
       const contact = session.output('mail pavel')
 
-      expect(contact.find('[role="status"]').text()).toContain('Sent.')
-      expect(contact.find('[role="alert"]').exists()).toBe(false)
+      expect({
+        status: contact.find('[role="status"]').text(),
+        alert: contact.find('[role="alert"]').exists(),
+      }).toEqual({
+        status: expect.stringContaining('Sent.'),
+        alert: false,
+      })
     })
 
     it('sends what the Contact output reports, as the delivery will read it', async () => {
@@ -426,8 +462,10 @@ describe('terminal', () => {
 
       const contact = session.output('mail pavel')
 
-      expect(contact.find('button[type="submit"]').text()).toBe('sent')
-      expect(contact.find('[name="name"]').attributes('readonly')).toBeDefined()
+      expect({
+        button: contact.find('button[type="submit"]').text(),
+        readonly: contact.find('[name="name"]').attributes('readonly') !== undefined,
+      }).toEqual({ button: 'sent', readonly: true })
     })
 
     it('hands the Profile address to the Contact output', async () => {
@@ -484,30 +522,35 @@ describe('terminal', () => {
 
       const thinking = session.entries().at(-1)!
 
-      expect(thinking.find('.session-busy').exists()).toBe(true)
-      expect(thinking.text()).toContain('Working…')
-      expect(thinking.find('[role="status"]').text()).toBe('Working…')
+      const whileThinking = {
+        busy: thinking.find('.session-busy').exists(),
+        status: thinking.find('[role="status"]').text(),
+      }
 
       await session.settle()
 
-      expect(session.entries().at(-1)!.find('.session-busy').exists()).toBe(
-        false,
-      )
+      expect({
+        whileThinking,
+        busyOnceDone: session.entries().at(-1)!.find('.session-busy').exists(),
+      }).toEqual({
+        whileThinking: { busy: true, status: 'Working…' },
+        busyOnceDone: false,
+      })
     })
 
     it('animates what the visitor ran and nothing that was seeded', async () => {
       const session = await mountTerminal()
 
-      expect(session.entries().at(0)!.find('.session-print').exists()).toBe(
-        false,
-      )
+      const seeded = session.entries().at(0)!.find('.session-print').exists()
 
       await session.chip('whoami').trigger('click')
       await session.settle()
 
-      expect(session.entries().at(-1)!.find('.session-print').exists()).toBe(
-        true,
-      )
+      expect({
+        seeded,
+        ran: session.entries().at(-1)!.find('.session-print').exists(),
+      })
+        .toEqual({ seeded: false, ran: true })
     })
 
     it('reports how many blocks the scrollback dropped', async () => {
@@ -519,13 +562,18 @@ describe('terminal', () => {
         await session.settle()
       }
 
-      expect(session.component.text()).toContain('1 earlier block dropped')
-      expect(session.component.text()).toContain('scrollback is 14')
+      const once = session.component.text()
 
       await session.chip('whoami').trigger('click')
       await session.settle()
 
-      expect(session.component.text()).toContain('2 earlier blocks dropped')
+      expect({
+        once,
+        twice: session.component.text(),
+      }).toEqual({
+        once: expect.stringMatching(/1 earlier block dropped[\s\S]*scrollback is 14/),
+        twice: expect.stringContaining('2 earlier blocks dropped'),
+      })
     })
 
     it('says nothing about the scrollback until it drops something', async () => {
@@ -548,8 +596,10 @@ describe('terminal', () => {
       await session.run('cat ~/experience/kelp-and-tar')
 
       const text = session.output('cat ~/experience/kelp-and-tar').text()
-      expect(text).toContain('Dried kelp on the roof until the tar ran out.')
-      expect(text).not.toContain('Spent three winters')
+      expect({
+        named: text.includes('Dried kelp on the roof until the tar ran out.'),
+        other: text.includes('Spent three winters'),
+      }).toEqual({ named: true, other: false })
     })
 
     it('resolves the Role whatever case it was typed in', async () => {
@@ -567,8 +617,10 @@ describe('terminal', () => {
       await session.run('cat ~/experience/Nowhere-Inc')
 
       const text = session.output('cat ~/experience/Nowhere-Inc').text()
-      expect(text).toContain('~/experience/Nowhere-Inc: No such file or directory')
-      expect(text).not.toContain('command not found')
+      expect({
+        noSuchFile: text.includes('~/experience/Nowhere-Inc: No such file or directory'),
+        notFound: text.includes('command not found'),
+      }).toEqual({ noSuchFile: true, notFound: false })
     })
 
     it('hands the Profile to the Background output', async () => {
@@ -578,9 +630,11 @@ describe('terminal', () => {
       await session.settle()
 
       const text = session.output('cat ~/about').text()
-      expect(text).toContain('Learned plumbing from a lighthouse keeper.')
-      expect(text).toContain('soldering')
-      expect(text).toContain('University of Reykjavík')
+      expect([
+        'Learned plumbing from a lighthouse keeper.',
+        'soldering',
+        'University of Reykjavík',
+      ].filter(line => !text.includes(line))).toEqual([])
     })
 
     describe('from the Experience list', () => {
@@ -594,10 +648,14 @@ describe('terminal', () => {
         await row(session).trigger('click')
         await session.settle()
 
-        expect(session.entries().at(-1)!.find('p').text())
-          .toContain('cat ~/experience/kiln-and-ash')
-        expect(session.entries().at(-1)!.text())
-          .toContain('Spent three winters learning')
+        const last = session.entries().at(-1)!
+        expect({
+          echo: last.find('p').text(),
+          output: last.text(),
+        }).toEqual({
+          echo: expect.stringContaining('cat ~/experience/kiln-and-ash'),
+          output: expect.stringContaining('Spent three winters learning'),
+        })
       })
 
       it('goes into the history like anything typed', async () => {
@@ -622,9 +680,14 @@ describe('terminal', () => {
         row(session).element.dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'touch' }))
         await session.settle()
 
-        expect(focus).not.toHaveBeenCalled()
-        expect(session.entries().at(-1)!.find('p').text())
-          .toContain('cat ~/experience/kiln-and-ash')
+        expect({
+          focused: focus.mock.calls.length,
+          echo: session.entries().at(-1)!.find('p').text(),
+        })
+          .toEqual({
+            focused: 0,
+            echo: expect.stringContaining('cat ~/experience/kiln-and-ash'),
+          })
       })
     })
   })
@@ -664,8 +727,8 @@ describe('terminal', () => {
       const session = await mountTerminal()
       const chips = session.promptBar().findAll('button').map(button => button.text())
 
-      expect(chips).toContain('cat ~/about')
-      expect(chips.filter(chip => chip.includes('kiln-and-ash'))).toEqual([])
+      expect(chips.filter(chip => chip === 'cat ~/about' || chip.includes('kiln-and-ash')))
+        .toEqual(['cat ~/about'])
     })
 
     describe('completing on Tab', () => {
@@ -684,9 +747,11 @@ describe('terminal', () => {
         const prompt = component.find<HTMLInputElement>('#prompt')
         await prompt.setValue('reco')
 
-        expect(press(prompt).defaultPrevented).toBe(true)
+        const prevented = press(prompt).defaultPrevented
         await nextTick()
-        expect(prompt.element.value).toBe('recommendations')
+
+        expect({ prevented, value: prompt.element.value })
+          .toEqual({ prevented: true, value: 'recommendations' })
       })
 
       it('completes the path of a Role it read from the Content', async () => {
@@ -717,12 +782,11 @@ describe('terminal', () => {
       const prompt = session.component.find<HTMLInputElement>('#prompt')
 
       await prompt.trigger('keydown', { key: 'ArrowUp' })
-
-      expect(prompt.element.value).toBe('whoami')
+      const back = prompt.element.value
 
       await prompt.trigger('keydown', { key: 'ArrowDown' })
 
-      expect(prompt.element.value).toBe('')
+      expect([back, prompt.element.value]).toEqual(['whoami', ''])
     })
   })
 
@@ -801,10 +865,17 @@ describe('terminal', () => {
     it('sets the whole login banner as chrome, bar the domain it is named for', async () => {
       const { banner } = await mountTerminal()
 
-      expect(roleOf(banner(), 'p', 'Last login')).toBe('text-subtle')
-      expect(roleOf(banner(), 'span', 'Wilhelmina Ashgrove, Systems plumber')).toBe('text-subtle')
-      expect(roleOf(banner(), 'span', 'Everything below is already printed')).toBe('text-subtle')
-      expect(roleOf(banner(), 'span', 'ppadron.page')).toBeUndefined()
+      expect({
+        login: roleOf(banner(), 'p', 'Last login'),
+        byline: roleOf(banner(), 'span', 'Wilhelmina Ashgrove, Systems plumber'),
+        hint: roleOf(banner(), 'span', 'Everything below is already printed'),
+        domain: roleOf(banner(), 'span', 'ppadron.page'),
+      }).toEqual({
+        login: 'text-subtle',
+        byline: 'text-subtle',
+        hint: 'text-subtle',
+        domain: undefined,
+      })
     })
 
     it('sets the dropped-blocks notice as chrome', async () => {
@@ -865,8 +936,14 @@ describe('terminal', () => {
 
       await component.find('[data-scheme-switch] button:last-of-type').trigger('click')
 
-      expect(html.dataset.theme).toBe('teletype')
-      expect(pressed(component)).toEqual(['light'])
+      expect({
+        theme: html.dataset.theme,
+        pressed: pressed(component),
+      })
+        .toEqual({
+          theme: 'teletype',
+          pressed: ['light'],
+        })
     })
 
     it('keeps the switch in step with the theme chip', async () => {
@@ -876,8 +953,14 @@ describe('terminal', () => {
       await session.chip('theme').trigger('click')
       await session.settle()
 
-      expect(html.dataset.theme).toBe('teletype')
-      expect(pressed(session.component)).toEqual(['light'])
+      expect({
+        theme: html.dataset.theme,
+        pressed: pressed(session.component),
+      })
+        .toEqual({
+          theme: 'teletype',
+          pressed: ['light'],
+        })
     })
 
     it('keeps the switch in step with a theme typed at the prompt', async () => {
@@ -886,8 +969,14 @@ describe('terminal', () => {
 
       await session.run('dark')
 
-      expect(html.dataset.theme).toBe('terminal')
-      expect(pressed(session.component)).toEqual(['dark'])
+      expect({
+        theme: html.dataset.theme,
+        pressed: pressed(session.component),
+      })
+        .toEqual({
+          theme: 'terminal',
+          pressed: ['dark'],
+        })
     })
   })
 
@@ -938,28 +1027,45 @@ describe('terminal', () => {
       const { component, banner, promptBar } = await mountTerminal()
       const main = component.find('main')
 
-      expect(component.findAll('main')).toHaveLength(1)
-      expect(main.find('[data-banner]').exists()).toBe(true)
-      expect(main.find('[data-entry]').exists()).toBe(true)
-      expect(main.find('[data-prompt-bar]').exists()).toBe(false)
-      expect(main.find('#prompt').exists()).toBe(false)
-      expect(banner().exists()).toBe(true)
-      expect(promptBar().exists()).toBe(true)
+      expect({
+        mains: component.findAll('main').length,
+        inMain: {
+          banner: main.find('[data-banner]').exists(),
+          transcript: main.find('[data-entry]').exists(),
+          promptBar: main.find('[data-prompt-bar]').exists(),
+          prompt: main.find('#prompt').exists(),
+        },
+        onPage: {
+          banner: banner().exists(),
+          promptBar: promptBar().exists(),
+        },
+      }).toEqual({
+        mains: 1,
+        inMain: {
+          banner: true,
+          transcript: true,
+          promptBar: false,
+          prompt: false,
+        },
+        onPage: { banner: true, promptBar: true },
+      })
     })
 
     it('keeps the skip link outside main, pointing at the prompt', async () => {
       const { component } = await mountTerminal()
       const skip = component.find('a[href="#prompt"]')
 
-      expect(skip.text()).toBe('Skip to the prompt')
-      expect(component.find('main').find('a[href="#prompt"]').exists()).toBe(false)
+      expect({
+        text: skip.text(),
+        inMain: component.find('main').find('a[href="#prompt"]').exists(),
+      }).toEqual({ text: 'Skip to the prompt', inMain: false })
     })
 
     it('titles the page with the name Whoami prints', async () => {
       const { component, entries } = await mountTerminal()
 
-      expect(entries().length).toBeGreaterThan(0)
-      expect(component.findAll('h1')).toHaveLength(1)
+      expect({ printed: entries().length > 0, titles: component.findAll('h1').length })
+        .toEqual({ printed: true, titles: 1 })
     })
   })
 })
