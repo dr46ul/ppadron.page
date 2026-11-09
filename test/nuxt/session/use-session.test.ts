@@ -402,6 +402,108 @@ describe('useSession', () => {
     })
   })
 
+  describe('theme', () => {
+    afterEach(() => {
+      delete document.documentElement.dataset.theme
+      localStorage.clear()
+      clearNuxtState('scheme')
+    })
+
+    function scheme() {
+      return useTheme().scheme.value
+    }
+
+    it('switches dark to light when run on its own', () => {
+      useTheme().set('dark')
+
+      useSession(SLUGS).exec('theme')
+
+      expect(scheme()).toBe('light')
+    })
+
+    it('switches light back to dark when run on its own', () => {
+      useTheme().set('light')
+
+      useSession(SLUGS).exec('theme')
+
+      expect(scheme()).toBe('dark')
+    })
+
+    it.each(['light', 'dark'] as const)('sets %s by name, whichever was showing', (named) => {
+      const session = useSession(SLUGS)
+
+      for (const from of ['dark', 'light'] as const) {
+        useTheme().set(from)
+        session.exec(`theme ${named}`)
+
+        expect(scheme()).toBe(named)
+      }
+    })
+
+    it.each(['light', 'dark'] as const)('takes `%s` on its own as the theme it names', (named) => {
+      useTheme().set(named === 'light'
+        ? 'dark'
+        : 'light')
+
+      useSession(SLUGS).exec(named)
+
+      expect(scheme()).toBe(named)
+    })
+
+    it('reads the theme whatever case it is typed in', () => {
+      useTheme().set('dark')
+
+      useSession(SLUGS).exec('Theme LIGHT')
+
+      expect(scheme()).toBe('light')
+    })
+
+    it('prints nothing, because the page changing is the answer', () => {
+      const session = useSession(SLUGS)
+      const before = session.entries.value.length
+
+      session.exec('theme')
+
+      expect(session.entries.value.length).toBe(before)
+    })
+
+    it('leaves itself in the history as typed', () => {
+      const session = useSession(SLUGS)
+
+      session.exec('theme light')
+      session.recall(1)
+
+      expect(session.input.value).toBe('theme light')
+    })
+
+    it('empties the prompt', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'theme'
+
+      session.exec(session.input.value)
+
+      expect(session.input.value).toBe('')
+    })
+
+    it('reports a theme it does not have as an unknown command and keeps the one showing', async () => {
+      useTheme().set('dark')
+      const session = useSession(SLUGS)
+
+      session.exec('theme sepia')
+      await vi.runAllTimersAsync()
+
+      expect(session.entries.value.at(-1)).toMatchObject({ cmd: 'theme sepia', output: 'unknown' })
+      expect(scheme()).toBe('dark')
+    })
+
+    it('completes from part of its name', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'the'
+
+      expect(session.completion.value).toBe('theme')
+    })
+  })
+
   describe('reset', () => {
     it('puts the transcript back as it loaded', async () => {
       const session = useSession(SLUGS)

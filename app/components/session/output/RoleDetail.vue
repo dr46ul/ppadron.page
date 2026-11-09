@@ -17,14 +17,14 @@ defineProps<{
     <!-- The labels below are paragraphs because the Session's outline stops at
          whoami's title. -->
     <p class="flex flex-wrap items-baseline gap-x-3">
-      <span class="font-semibold">{{ role.company }}</span>
-      <span class="text-muted text-xs">
+      <span class="text-prose font-semibold">{{ role.company }}</span>
+      <span class="text-muted text-meta">
         {{ role.title }}
       </span>
     </p>
     <time
       :datetime="role.since"
-      class="text-muted mt-1 block text-xs tabular-nums"
+      class="text-muted mt-1 block text-meta tabular-nums"
     >
       {{ role.exactPeriod }}
     </time>
@@ -33,7 +33,7 @@ defineProps<{
       <p
         v-for="(paragraph, index) in role.account"
         :key="index"
-        class="text-body"
+        class="text-prose text-body"
       >
         {{ paragraph }}
       </p>
@@ -44,13 +44,13 @@ defineProps<{
       :key="project.name"
       class="mt-5"
     >
-      <p class="text-muted text-xs">
+      <p class="text-muted text-meta">
         {{ project.name }}
       </p>
       <p
         v-for="phase in project.phases"
         :key="phase.name"
-        class="mt-1 grid gap-x-6 text-xs sm:grid-cols-[8.5rem_1fr]"
+        class="mt-1 grid gap-x-6 text-meta sm:grid-cols-[9rem_1fr]"
       >
         <span class="text-muted">{{ phase.name }}</span>
         <span class="text-subtle">{{ phase.tech.join(' · ') }}</span>
@@ -58,10 +58,10 @@ defineProps<{
     </div>
 
     <template v-if="role.stack.length > 0">
-      <p class="text-muted mt-5 text-xs">
+      <p class="text-muted mt-5 text-meta">
         Tech stack
       </p>
-      <p class="text-subtle mt-1 text-xs">
+      <p class="text-subtle mt-1 text-meta">
         {{ role.stack.join(' · ') }}
       </p>
     </template>
@@ -69,7 +69,7 @@ defineProps<{
 
   <p
     v-else
-    class="text-error text-xs"
+    class="text-error text-meta"
   >
     cat: ~/experience/{{ roleName }}: No such file or directory — try
     <span class="text-accent">ls ~/experience</span>

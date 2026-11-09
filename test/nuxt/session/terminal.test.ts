@@ -632,8 +632,9 @@ describe('terminal', () => {
   describe('what it hands the prompt bar', () => {
     it('hands every command and every meta command to the chips', async () => {
       const { promptBar } = await mountTerminal()
+      // The chip row only: the theme switch beside the prompt is buttons too.
       const chips = promptBar()
-        .findAll('button')
+        .findAll('[data-prompt-bar] > div button')
         .map(button => button.text().trim())
 
       expect(chips).toEqual([
@@ -815,6 +816,112 @@ describe('terminal', () => {
       }
 
       expect(roleOf(session.component, 'p', 'earlier block dropped')).toBe('text-subtle')
+    })
+  })
+
+  describe('the theme', () => {
+    const html = document.documentElement
+
+    function systemPrefers(scheme: 'dark' | 'light') {
+      vi.stubGlobal('matchMedia', (query: string) => ({
+        matches: query === `(prefers-color-scheme: ${scheme})`,
+      }))
+    }
+
+    function pressed(component: Awaited<ReturnType<typeof mountTerminal>>['component']) {
+      return component
+        .findAll('[data-scheme-switch] button')
+        .filter(button => button.attributes('aria-pressed') === 'true')
+        .map(button => button.text().trim())
+    }
+
+    afterEach(() => {
+      delete html.dataset.theme
+      localStorage.clear()
+      clearNuxtState('scheme')
+      vi.unstubAllGlobals()
+    })
+
+    it('shows the theme the system asked for once mounted', async () => {
+      systemPrefers('light')
+      const { component } = await mountTerminal()
+      await component.vm.$nextTick()
+
+      expect(pressed(component)).toEqual(['light'])
+    })
+
+    it('shows a theme chosen on an earlier visit once mounted', async () => {
+      systemPrefers('dark')
+      html.dataset.theme = 'teletype'
+      const { component } = await mountTerminal()
+      await component.vm.$nextTick()
+
+      expect(pressed(component)).toEqual(['light'])
+    })
+
+    it('repaints the page from the switch', async () => {
+      systemPrefers('dark')
+      const { component } = await mountTerminal()
+
+      await component.find('[data-scheme-switch] button:last-of-type').trigger('click')
+
+      expect(html.dataset.theme).toBe('teletype')
+      expect(pressed(component)).toEqual(['light'])
+    })
+
+    it('keeps the switch in step with the theme chip', async () => {
+      systemPrefers('dark')
+      const session = await mountTerminal()
+
+      await session.chip('theme').trigger('click')
+      await session.settle()
+
+      expect(html.dataset.theme).toBe('teletype')
+      expect(pressed(session.component)).toEqual(['light'])
+    })
+
+    it('keeps the switch in step with a theme typed at the prompt', async () => {
+      systemPrefers('light')
+      const session = await mountTerminal()
+
+      await session.run('dark')
+
+      expect(html.dataset.theme).toBe('terminal')
+      expect(pressed(session.component)).toEqual(['dark'])
+    })
+  })
+
+  describe('the command line over each block', () => {
+    function label(block: ReturnType<Awaited<ReturnType<typeof mountTerminal>>['output']>) {
+      return block.find('[data-entry-label]')
+    }
+
+    it('says what the command does', async () => {
+      const { output } = await mountTerminal()
+
+      expect(label(output('ls ~/experience')).text()).toBe('the work itself')
+    })
+
+    it('says what an alias resolved to', async () => {
+      const session = await mountTerminal()
+
+      await session.run('work')
+
+      expect(label(session.output('work')).text()).toBe('the work itself')
+    })
+
+    it('says nothing over a command that does not exist', async () => {
+      const session = await mountTerminal()
+
+      await session.run('zzz')
+
+      expect(label(session.output('zzz')).exists()).toBe(false)
+    })
+
+    it('keeps the label out of the line the command is echoed on', async () => {
+      const { output } = await mountTerminal()
+
+      expect(output('ls ~/experience').find('p').text()).not.toContain('the work itself')
     })
   })
 

@@ -300,10 +300,11 @@ nothing at all.
 **`test/unit/contrast.ts` is the palette's oracle.** It converts oklch to sRGB,
 composites `in srgb` and returns a WCAG ratio, so a test can recompute what a
 token renders at instead of trusting a number in a comment.
-`theme-tokens.test.ts` parses each role token out of `main.css` and checks it
-against the interface audit's measured ramp; the oracle reproduces that ramp
-exactly (`/100` 18.10, `/60` 6.86, `/50` 5.07, `/45` 4.31), which is what makes
-it usable as one. Reuse it for any new colour pair rather than measuring by
+`theme-tokens.test.ts` parses each theme's tokens out of `main.css` and checks
+every text role, the accent and the control edge on both the page and the
+prompt bar's surface, in both themes. The oracle reproduced the interface
+audit's measured ramp exactly (`/100` 18.10, `/60` 6.86, `/50` 5.07, `/45`
+4.31), which is what makes it usable as one. Reuse it for any new colour pair rather than measuring by
 hand — including the 3:1 WCAG 1.4.11 asks of a control's boundary.
 
 ## Proving a test can fail

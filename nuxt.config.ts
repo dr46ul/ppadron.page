@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { themeScript } from './shared/theme'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -11,10 +12,15 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      // No `data-theme`: the stylesheet follows the system until the Visitor
+      // chooses, and the script applies that choice before first paint. See
+      // docs/adr/0011-a-terminal-and-a-teletype.md.
       htmlAttrs: {
-        'lang': 'en',
-        'data-theme': 'terminal',
+        lang: 'en',
       },
+      script: [
+        { innerHTML: themeScript, tagPosition: 'head' },
+      ],
       title: 'Pavel Padron — Frontend Engineer',
       meta: [
         { name: 'description', content: 'Pavel Padron\'s portfolio' },
@@ -53,12 +59,14 @@ export default defineNuxtConfig({
   ignore: ['.worktrees/**'],
 
   fonts: {
-    // The page is a terminal, so one register and one family.
+    // The typeface is declared as a custom property in main.css, and the
+    // module only finds a family it sees in CSS, so it has to read those.
+    processCSSVariables: true,
     families: [
       {
-        name: 'IBM Plex Mono',
+        name: 'Courier Prime',
         provider: 'google',
-        weights: [400, 500, 600, 700],
+        weights: [400, 700],
       },
     ],
   },

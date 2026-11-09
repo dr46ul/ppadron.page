@@ -22,23 +22,23 @@ function open(event: MouseEvent, slug: string) {
   <div>
     <!-- ADR-0001: there is no Work section, and a visitor arriving at a
          developer's site will notice. Say why rather than let them wonder. -->
-    <p class="text-subtle max-w-prose text-xs">
+    <p class="text-subtle max-w-prose text-meta">
       Freelance client work is under NDA, so there is no projects gallery. This
       is the work itself.
     </p>
 
-    <ul class="mt-5 flex flex-col gap-6">
+    <ul class="mt-5 flex flex-col gap-8">
       <template
         v-for="(role, index) in roles"
         :key="role.since"
       >
         <li
           :style="{ '--i': index }"
-          class="grid gap-x-6 gap-y-1 sm:grid-cols-[8.5rem_1fr]"
+          class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
         >
           <time
             :datetime="role.since"
-            class="text-xs tabular-nums"
+            class="text-meta tabular-nums"
             :class="index === 0 ? 'text-accent' : 'text-muted'"
           >
             {{ role.period }}
@@ -53,24 +53,24 @@ function open(event: MouseEvent, slug: string) {
               class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
               @click.stop="open($event, role.slug)"
             >
-              <span class="decoration-edge group-hover:text-accent font-semibold underline underline-offset-4">{{ role.company }}</span>
-              <span class="text-muted text-xs">
+              <span class="decoration-edge group-hover:text-accent text-prose font-semibold underline underline-offset-4">{{ role.company }}</span>
+              <span class="text-muted text-meta">
                 {{ role.title }}
               </span>
             </button>
-            <p class="text-body mt-1 max-w-prose">
+            <p class="text-prose text-body mt-1 max-w-prose">
               {{ role.summary }}
             </p>
-            <p class="text-subtle mt-1 text-xs">
+            <p class="text-subtle mt-1 text-meta">
               {{ role.tech.join(' · ') }}
             </p>
           </div>
         </li>
         <li
           v-if="role.before"
-          class="grid gap-x-6 sm:grid-cols-[8.5rem_1fr]"
+          class="grid gap-x-6 sm:grid-cols-[9rem_1fr]"
         >
-          <p class="text-subtle text-xs sm:col-start-2">
+          <p class="text-subtle text-meta sm:col-start-2">
             {{ role.before }}
           </p>
         </li>

@@ -45,13 +45,13 @@ function mount(overrides: Partial<Profile> = {}) {
 }
 
 describe('whoami output', () => {
-  it('prints the name as the page title, with the look it already had', async () => {
+  it('prints the name as the page title, in the name step', async () => {
     const component = await mount({ name: 'Wilhelmina Ashgrove' })
     const title = component.find('h1')
 
     expect(title.text()).toBe('Wilhelmina Ashgrove')
     expect(title.classes()).toEqual(
-      expect.arrayContaining(['text-lg', 'font-semibold', 'tracking-tight']),
+      expect.arrayContaining(['text-name', 'font-semibold']),
     )
   })
 
