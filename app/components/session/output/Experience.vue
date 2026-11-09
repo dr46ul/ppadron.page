@@ -68,11 +68,28 @@ function open(event: MouseEvent, slug: string) {
         </li>
         <li
           v-if="role.before"
-          class="grid gap-x-6 sm:grid-cols-[9rem_1fr]"
+          class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
         >
-          <p class="text-subtle text-meta sm:col-start-2">
-            {{ role.before }}
-          </p>
+          <time
+            :datetime="role.before.since"
+            class="text-muted text-meta tabular-nums"
+          >
+            {{ role.before.period }}
+          </time>
+          <div>
+            <p class="flex flex-wrap items-baseline gap-x-3">
+              <span class="text-prose font-semibold">{{ role.before.name }}</span>
+              <span class="text-muted text-meta">
+                {{ role.before.title }}
+              </span>
+            </p>
+            <p class="text-prose text-body mt-1 max-w-prose">
+              {{ role.before.summary }}
+            </p>
+            <p class="text-subtle mt-1 text-meta">
+              {{ role.before.tech.join(' · ') }}
+            </p>
+          </div>
         </li>
       </template>
     </ul>

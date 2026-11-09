@@ -16,6 +16,18 @@ export interface RoleProject {
   phases: RolePhase[]
 }
 
+export interface RoleNote {
+  /** Written the way a Role's `period` is, since the two share a column. */
+  period: string
+  /** Machine-readable start, for <time datetime>. */
+  since: string
+  /** Stands where a Role has its company, for time with no single employer. */
+  name: string
+  title: string
+  summary: string
+  tech: string[]
+}
+
 export interface Role {
   /** The name in the Role's path, `~/experience/<slug>`. Stable once published. */
   slug: string
@@ -35,10 +47,10 @@ export interface Role {
   tech: string[]
   account: string[]
   /**
-   * A line the Experience list prints under this Role, for time before it that
-   * was not a Role. It is not openable and has no slug.
+   * An entry the Experience list prints under this Role, for time before it
+   * that was not a Role. It is not openable and has no slug.
    */
-  before?: string
+  before?: RoleNote
   history?: RoleProject[]
   stack: string[]
 }
@@ -136,7 +148,22 @@ export const roles: Role[] = [
     period: '2014 — 2022',
     exactPeriod: 'Nov 2014 – Mar 2022',
     since: '2014',
-    before: '2011 – 2014: freelance, mostly Magento e-commerce stores.',
+    before: {
+      period: '2011 — 2014',
+      since: '2011',
+      name: 'Freelance',
+      title: 'Middle Frontend Developer',
+      summary:
+        'Built custom Magento themes for several e-commerce stores, turning each shop\'s design into a working storefront, from the catalogue and product pages through to cart and checkout.',
+      tech: [
+        'HTML5',
+        'CSS3',
+        'JavaScript',
+        'jQuery',
+        'Magento',
+        'PHP',
+      ],
+    },
     summary:
       'Built the interfaces of the Rogue Fitness e-commerce web store and Rogue Mobile App as their stack evolved, from Magento 1 to Magento 2 and from Cordova and Ionic to React Native.',
     tech: [
