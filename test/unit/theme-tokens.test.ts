@@ -64,16 +64,17 @@ describe.each(themes)('the $scheme theme ($name)', (theme) => {
   it('holds its strongest text under the glare of pure white on black', () => {
     const ratio = contrast(theme.token('color-base-content'), theme.page)
 
-    expect(ratio).toBeLessThan(16.5)
-    expect(ratio).toBeGreaterThan(12)
+    expect(ratio).toSatisfy((ratio: number) => ratio > 12 && ratio < 16.5)
   })
 
   it('steps text back in order: body under content, the quiet roles under body', () => {
     const ratio = (t: string) => contrast(theme.token(t), theme.page)
 
-    expect(ratio('color-body')).toBeLessThan(ratio('color-base-content'))
-    expect(ratio('color-muted')).toBeLessThan(ratio('color-body'))
-    expect(ratio('color-subtle')).toBeLessThanOrEqual(ratio('color-muted'))
+    expect({
+      bodyUnderContent: ratio('color-body') < ratio('color-base-content'),
+      mutedUnderBody: ratio('color-muted') < ratio('color-body'),
+      subtleNotOverMuted: ratio('color-subtle') <= ratio('color-muted'),
+    }).toEqual({ bodyUnderContent: true, mutedUnderBody: true, subtleNotOverMuted: true })
   })
 
   it('keeps a filled accent button readable', () => {
@@ -83,12 +84,14 @@ describe.each(themes)('the $scheme theme ($name)', (theme) => {
 
   /** WCAG 1.4.11 asks 3:1 of the boundary that identifies a control. */
   it('draws control edges at the 3:1 a boundary needs, and no brighter than a hairline', () => {
-    for (const [, surface] of surfaces(theme)) {
-      const ratio = contrast(theme.token('color-edge'), surface)
+    const ratios = surfaces(theme).map(([name, surface]) =>
+      [
+        name,
+        contrast(theme.token('color-edge'), surface),
+      ] as const,
+    )
 
-      expect(ratio).toBeGreaterThanOrEqual(3)
-      expect(ratio).toBeLessThan(5)
-    }
+    expect(ratios.filter(([, ratio]) => ratio < 3 || ratio >= 5)).toEqual([])
   })
 
   it('keeps the divider quieter than a control edge', () => {
@@ -127,13 +130,23 @@ describe('switching theme', () => {
 
 describe('which theme a Visitor who never chose is shown', () => {
   it('is the teletype by default', () => {
-    expect(themeBlock(THEMES.light)).toMatch(/default:\s*true/)
-    expect(themeBlock(THEMES.dark)).not.toMatch(/default:\s*true/)
+    expect({
+      light: themeBlock(THEMES.light),
+      dark: themeBlock(THEMES.dark),
+    }).toEqual({
+      light: expect.stringMatching(/default:\s*true/),
+      dark: expect.not.stringMatching(/default:\s*true/),
+    })
   })
 
   it('is the terminal when the system prefers dark', () => {
-    expect(themeBlock(THEMES.dark)).toMatch(/prefersdark:\s*true/)
-    expect(themeBlock(THEMES.light)).not.toMatch(/prefersdark:\s*true/)
+    expect({
+      dark: themeBlock(THEMES.dark),
+      light: themeBlock(THEMES.light),
+    }).toEqual({
+      dark: expect.stringMatching(/prefersdark:\s*true/),
+      light: expect.not.stringMatching(/prefersdark:\s*true/),
+    })
   })
 
   it.each(Object.entries(THEMES))('tells the browser %s, so form controls and scrollbars match', (scheme, name) => {

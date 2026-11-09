@@ -114,11 +114,11 @@ describe('useSession', () => {
       session.exec('sudo rm -rf /')
       await vi.advanceTimersByTimeAsync(299)
 
-      expect(session.entries.value.at(-1)!.output).toBeNull()
+      const justBefore = session.entries.value.at(-1)!.output
 
       await vi.advanceTimersByTimeAsync(1)
 
-      expect(session.entries.value.at(-1)!.output).toBe('unknown')
+      expect([justBefore, session.entries.value.at(-1)!.output]).toEqual([null, 'unknown'])
     })
   })
 
@@ -142,14 +142,17 @@ describe('useSession', () => {
       session.openRole('kiln-and-ash')
       await vi.runAllTimersAsync()
 
-      expect(session.entries.value.at(-1)).toMatchObject({
-        cmd: 'cat ~/experience/kiln-and-ash',
-        output: 'role-detail',
-        roleName: 'kiln-and-ash',
-      })
-
+      const opened = session.entries.value.at(-1)
       session.recall(1)
-      expect(session.input.value).toBe('cat ~/experience/kiln-and-ash')
+
+      expect({ opened, recalled: session.input.value }).toEqual({
+        opened: expect.objectContaining({
+          cmd: 'cat ~/experience/kiln-and-ash',
+          output: 'role-detail',
+          roleName: 'kiln-and-ash',
+        }),
+        recalled: 'cat ~/experience/kiln-and-ash',
+      })
     })
 
     it('finds the Role whatever case it is typed in, and echoes it as typed', async () => {
@@ -217,11 +220,11 @@ describe('useSession', () => {
       session.exec('cat ~/experience/kiln-and-ash')
       await vi.advanceTimersByTimeAsync(479)
 
-      expect(session.entries.value.at(-1)!.output).toBeNull()
+      const justBefore = session.entries.value.at(-1)!.output
 
       await vi.advanceTimersByTimeAsync(1)
 
-      expect(session.entries.value.at(-1)!.output).toBe('role-detail')
+      expect([justBefore, session.entries.value.at(-1)!.output]).toEqual([null, 'role-detail'])
     })
 
     it('prints a Role again when it is asked for again, up to the cap', async () => {
@@ -232,11 +235,14 @@ describe('useSession', () => {
         await vi.runAllTimersAsync()
       }
 
-      expect(session.entries.value.length).toBe(session.scrollback)
-      expect(session.trimmed.value).toBe(3)
-      expect(session.entries.value.at(-1)).toMatchObject({
-        output: 'role-detail',
-        roleName: 'kiln-and-ash',
+      expect({
+        length: session.entries.value.length,
+        trimmed: session.trimmed.value,
+        last: session.entries.value.at(-1),
+      }).toEqual({
+        length: session.scrollback,
+        trimmed: 3,
+        last: expect.objectContaining({ output: 'role-detail', roleName: 'kiln-and-ash' }),
       })
     })
 
@@ -247,8 +253,8 @@ describe('useSession', () => {
       await vi.runAllTimersAsync()
       session.exec('reset')
 
-      expect(session.entries.value.map(entry => entry.output)).not.toContain('role-detail')
-      expect(session.entries.value.every(entry => entry.roleName === '')).toBe(true)
+      expect(session.entries.value.filter(entry => entry.output === 'role-detail' || entry.roleName !== ''))
+        .toEqual([])
     })
   })
 
@@ -286,11 +292,11 @@ describe('useSession', () => {
       session.exec('cat ~/about')
       await vi.advanceTimersByTimeAsync(439)
 
-      expect(session.entries.value.at(-1)!.output).toBeNull()
+      const justBefore = session.entries.value.at(-1)!.output
 
       await vi.advanceTimersByTimeAsync(1)
 
-      expect(session.entries.value.at(-1)!.output).toBe('background')
+      expect([justBefore, session.entries.value.at(-1)!.output]).toEqual([null, 'background'])
     })
   })
 
@@ -328,8 +334,8 @@ describe('useSession', () => {
     it('opens with the banner showing and nothing dropped', () => {
       const session = useSession(SLUGS)
 
-      expect(session.cleared.value).toBe(false)
-      expect(session.trimmed.value).toBe(0)
+      expect({ cleared: session.cleared.value, trimmed: session.trimmed.value })
+        .toEqual({ cleared: false, trimmed: 0 })
     })
   })
 
@@ -347,8 +353,8 @@ describe('useSession', () => {
 
       await overflow(session, 9)
 
-      expect(session.entries.value.length).toBe(session.scrollback)
-      expect(session.trimmed.value).toBe(0)
+      expect({ length: session.entries.value.length, trimmed: session.trimmed.value })
+        .toEqual({ length: session.scrollback, trimmed: 0 })
     })
 
     it('holds at the cap and counts what it dropped', async () => {
@@ -356,8 +362,8 @@ describe('useSession', () => {
 
       await overflow(session, 12)
 
-      expect(session.entries.value.length).toBe(session.scrollback)
-      expect(session.trimmed.value).toBe(3)
+      expect({ length: session.entries.value.length, trimmed: session.trimmed.value })
+        .toEqual({ length: session.scrollback, trimmed: 3 })
     })
 
     it('drops the oldest block first', async () => {
@@ -376,8 +382,8 @@ describe('useSession', () => {
 
       session.exec('clear')
 
-      expect(session.entries.value).toEqual([])
-      expect(session.cleared.value).toBe(true)
+      expect({ entries: session.entries.value, cleared: session.cleared.value })
+        .toEqual({ entries: [], cleared: true })
     })
 
     it('forgets how many blocks were dropped', async () => {
@@ -492,8 +498,13 @@ describe('useSession', () => {
       session.exec('theme sepia')
       await vi.runAllTimersAsync()
 
-      expect(session.entries.value.at(-1)).toMatchObject({ cmd: 'theme sepia', output: 'unknown' })
-      expect(scheme()).toBe('dark')
+      expect({
+        last: session.entries.value.at(-1),
+        scheme: scheme(),
+      }).toEqual({
+        last: expect.objectContaining({ cmd: 'theme sepia', output: 'unknown' }),
+        scheme: 'dark',
+      })
     })
 
     it('completes from part of its name', () => {
@@ -513,14 +524,19 @@ describe('useSession', () => {
       session.exec('clear')
       session.exec('reset')
 
-      expect(session.entries.value.map(entry => entry.output)).toEqual([
-        'whoami',
-        'experience',
-        'recommendations',
-        'contact',
-        'colophon',
-      ])
-      expect(session.cleared.value).toBe(false)
+      expect({
+        outputs: session.entries.value.map(entry => entry.output),
+        cleared: session.cleared.value,
+      }).toEqual({
+        outputs: [
+          'whoami',
+          'experience',
+          'recommendations',
+          'contact',
+          'colophon',
+        ],
+        cleared: false,
+      })
     })
 
     it('forgets how many blocks were dropped', async () => {
@@ -560,8 +576,8 @@ describe('useSession', () => {
       session.exec('clear')
       session.exec('restart')
 
-      expect(session.cleared.value).toBe(false)
-      expect(session.entries.value.length).toBe(5)
+      expect({ cleared: session.cleared.value, length: session.entries.value.length })
+        .toEqual({ cleared: false, length: 5 })
     })
 
     it('throws away the Enquiry draft and its state', async () => {
@@ -571,8 +587,11 @@ describe('useSession', () => {
       await session.enquiry.submit()
       session.exec('reset')
 
-      expect(session.enquiry.draft).toEqual({ name: '', email: '', message: '' })
-      expect(session.enquiry.state).toBe('idle')
+      expect({ draft: session.enquiry.draft, state: session.enquiry.state })
+        .toEqual({
+          draft: { name: '', email: '', message: '' },
+          state: 'idle',
+        })
     })
   })
 
@@ -598,12 +617,15 @@ describe('useSession', () => {
       session.enquiry.edit(enquiry())
       await session.enquiry.submit()
 
-      expect(session.enquiry.state).toBe('sent')
+      const sent = session.enquiry.state
 
       session.exec('mail pavel')
 
-      expect(session.enquiry.draft).toEqual({ name: '', email: '', message: '' })
-      expect(session.enquiry.state).toBe('idle')
+      expect({ sent, draft: session.enquiry.draft, state: session.enquiry.state }).toEqual({
+        sent: 'sent',
+        draft: { name: '', email: '', message: '' },
+        state: 'idle',
+      })
     })
 
     it('keeps what the visitor had already typed', async () => {
@@ -725,8 +747,8 @@ describe('useSession', () => {
       const session = useSession(SLUGS)
       session.input.value = 'reco'
 
-      expect(session.completion.value).toBe('recommendations')
-      expect(session.input.value).toBe('reco')
+      expect({ completion: session.completion.value, input: session.input.value })
+        .toEqual({ completion: 'recommendations', input: 'reco' })
     })
   })
 
@@ -750,13 +772,13 @@ describe('useSession', () => {
     it('walks back through the history, most recent first', () => {
       const session = withHistory()
 
+      const walked: string[] = []
       session.recall(1)
-
-      expect(session.input.value).toBe('help')
-
+      walked.push(session.input.value)
       session.recall(1)
+      walked.push(session.input.value)
 
-      expect(session.input.value).toBe('whoami')
+      expect(walked).toEqual(['help', 'whoami'])
     })
 
     it('stops at the oldest command', () => {
@@ -775,24 +797,22 @@ describe('useSession', () => {
       session.recall(1)
       session.recall(1)
       session.recall(-1)
-
-      expect(session.input.value).toBe('help')
-
+      const walked = [session.input.value]
       session.recall(-1)
+      walked.push(session.input.value)
 
-      expect(session.input.value).toBe('')
+      expect(walked).toEqual(['help', ''])
     })
 
     it('stops at the empty prompt rather than wrapping round', () => {
       const session = withHistory()
 
       session.recall(-1)
-
-      expect(session.input.value).toBe('')
-
+      const walked = [session.input.value]
       session.recall(1)
+      walked.push(session.input.value)
 
-      expect(session.input.value).toBe('help')
+      expect(walked).toEqual(['', 'help'])
     })
   })
 
@@ -868,10 +888,10 @@ describe('useSession', () => {
 
       await vi.runAllTimersAsync()
 
-      expect(session.entries.value.length).toBe(session.scrollback)
-      expect(
-        session.entries.value.some(entry => entry.output === 'recommendations'),
-      ).toBe(false)
+      expect({
+        length: session.entries.value.length,
+        printed: session.entries.value.some(entry => entry.output === 'recommendations'),
+      }).toEqual({ length: session.scrollback, printed: false })
     })
   })
 })

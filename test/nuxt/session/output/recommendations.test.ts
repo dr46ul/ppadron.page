@@ -34,9 +34,11 @@ describe('recommendations output', () => {
     ])
 
     const text = component.text()
-    expect(text).toContain('Pavel shipped the migration nobody else would touch.')
-    expect(text).toContain('Alex Rivers')
-    expect(text).toContain('Staff Engineer, Acme')
+    expect([
+      'Pavel shipped the migration nobody else would touch.',
+      'Alex Rivers',
+      'Staff Engineer, Acme',
+    ].filter(line => !text.includes(line))).toEqual([])
   })
 
   it('keeps the order it was handed', async () => {
@@ -72,11 +74,10 @@ describe('recommendations output', () => {
       }),
     ])
 
-    const quotes = component.findAll('blockquote')
-    expect(quotes).toHaveLength(1)
-    expect(quotes[0]!.findAll('p').map(paragraph => paragraph.text())).toEqual([
-      'He rewrote the build.',
-      'Then he taught us how it worked.',
+    expect(component.findAll('blockquote').map(quote =>
+      quote.findAll('p').map(paragraph => paragraph.text()),
+    )).toEqual([
+      ['He rewrote the build.', 'Then he taught us how it worked.'],
     ])
   })
 
@@ -93,10 +94,13 @@ describe('recommendations output', () => {
   it('still says where these come from when it has none', async () => {
     const component = await mount([])
 
-    expect(component.text()).toContain(
-      'Verbatim from LinkedIn. Colleagues and managers, not clients.',
-    )
-    expect(component.findAll('li')).toHaveLength(0)
+    expect({
+      text: component.text(),
+      items: component.findAll('li').length,
+    }).toEqual({
+      text: expect.stringContaining('Verbatim from LinkedIn. Colleagues and managers, not clients.'),
+      items: 0,
+    })
   })
 
   it('holds no placeholder markers of its own', async () => {
@@ -118,11 +122,13 @@ describe('recommendations output', () => {
         }),
       ])
 
-      expect(roleOf(component, 'blockquote', 'Pavel shipped')).toBe('text-body')
-      // The name has to carry out of the attribution line it sits inside, and
-      // colour is the only device distinguishing it from the title beside it.
-      expect(roleOf(component, 'span', 'Alex Rivers')).toBe('text-body')
-      expect(roleOf(component, 'p', 'Staff Engineer, Acme')).toBe('text-subtle')
+      expect({
+        quote: roleOf(component, 'blockquote', 'Pavel shipped'),
+        // The name has to carry out of the attribution line it sits inside, and
+        // colour is the only device distinguishing it from the title beside it.
+        name: roleOf(component, 'span', 'Alex Rivers'),
+        attribution: roleOf(component, 'p', 'Staff Engineer, Acme'),
+      }).toEqual({ quote: 'text-body', name: 'text-body', attribution: 'text-subtle' })
     })
 
     it('sets the provenance note as chrome', async () => {

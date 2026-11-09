@@ -87,10 +87,12 @@ describe('parseEnquiry', () => {
   })
 
   it('collapses whitespace inside the name, which reaches the mail subject', () => {
-    expect(nameOf('Dana\n\nWhitfield')).toBe('Dana Whitfield')
-    expect(nameOf('Dana \t Whitfield')).toBe('Dana Whitfield')
-    // Two runs, so a collapse that stops after the first is caught.
-    expect(nameOf('  Dana   Mary\n\nWhitfield ')).toBe('Dana Mary Whitfield')
+    expect([
+      nameOf('Dana\n\nWhitfield'),
+      nameOf('Dana \t Whitfield'),
+      // Two runs, so a collapse that stops after the first is caught.
+      nameOf('  Dana   Mary\n\nWhitfield '),
+    ]).toEqual(['Dana Whitfield', 'Dana Whitfield', 'Dana Mary Whitfield'])
   })
 
   it('reports a message one character under the form\'s own minimum as too short', () => {

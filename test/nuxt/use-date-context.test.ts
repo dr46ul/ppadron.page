@@ -81,8 +81,10 @@ describe('useDateContext', () => {
     const mismatches = logged
       .flatMap(spy => spy.mock.calls)
       .filter(args => String(args[0]).includes('Hydration'))
-    expect(mismatches).toEqual([])
-    expect(root.textContent).toBe('Sa., 14. März, 10:05:07 MEZ')
+    expect({ mismatches, text: root.textContent }).toEqual({
+      mismatches: [],
+      text: 'Sa., 14. März, 10:05:07 MEZ',
+    })
     app.unmount()
   })
 })
