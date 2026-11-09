@@ -1,4 +1,4 @@
-import type { Role } from '~/data/experience'
+import type { Role, RoleNote } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
@@ -111,32 +111,110 @@ describe('experience output', () => {
   })
 
   describe('a note before a role', () => {
-    it('prints the line between that role and the next, as a note and not a role', async () => {
+    function note(overrides: Partial<RoleNote> = {}): RoleNote {
+      return {
+        period: '2011 — 2014',
+        since: '2011',
+        name: 'Freelance',
+        title: 'Potter',
+        summary: 'Threw bowls for several kilns.',
+        tech: ['Clay', 'Glaze'],
+        ...overrides,
+      }
+    }
+
+    it('prints the entry between that role and the next', async () => {
       const component = await mount([
-        role({ company: 'Newest', since: '2022', before: '2011 – 2014: freelance, mostly kilns.' }),
+        role({
+          company: 'Newest',
+          since: '2022',
+          before: note({ name: 'Freelance' }),
+        }),
         role({ company: 'Oldest', since: '2009' }),
       ])
 
       expect(component.findAll('li').map(item => item.text())).toEqual([
         expect.stringContaining('Newest'),
-        '2011 – 2014: freelance, mostly kilns.',
+        expect.stringContaining('Freelance'),
         expect.stringContaining('Oldest'),
       ])
-      expect(component.findAll('button')).toHaveLength(2)
-      expect(component.findAll('time')).toHaveLength(2)
     })
 
-    it('sets the note as chrome', async () => {
+    it('cannot be opened, as a role can', async () => {
       const component = await mount([
-        role({ before: '2011 – 2014: freelance.' }),
+        role({
+          before: note(),
+        }),
       ])
 
-      expect(roleOf(component, 'p', '2011 – 2014: freelance.')).toBe('text-subtle')
+      expect(component.findAll('li')[1]!.findAll('button, a')).toHaveLength(0)
+    })
+
+    it('prints every field of the note', async () => {
+      const component = await mount([
+        role({
+          before: note(),
+        }),
+      ])
+
+      const entry = component.findAll('li')[1]!
+      expect({
+        period: entry.get('time').text(),
+        datetime: entry.get('time').attributes('datetime'),
+        lines: [
+          ...entry.findAll('span'),
+          ...entry.findAll('p').slice(1),
+        ].map(line => line.text()),
+      }).toEqual({
+        period: '2011 — 2014',
+        datetime: '2011',
+        lines: [
+          'Freelance',
+          'Potter',
+          'Threw bowls for several kilns.',
+          'Clay · Glaze',
+        ],
+      })
+    })
+
+    it('sets the name in bold, as a role sets its company, but not underlined as a link', async () => {
+      const component = await mount([
+        role({
+          before: note({ name: 'Freelance' }),
+        }),
+      ])
+
+      const name = component.findAll('li')[1]!.findAll('span').find(span => span.text() === 'Freelance')!
+      expect(['font-semibold', 'underline'].filter(style => name.classes().includes(style)))
+        .toEqual(['font-semibold'])
+    })
+
+    it('sets each line of the note as an earlier role sets its own', async () => {
+      const component = await mount([
+        role({
+          before: note(),
+        }),
+      ])
+
+      expect({
+        period: roleOf(component, 'time', '2011 — 2014'),
+        title: roleOf(component, 'span', 'Potter'),
+        summary: roleOf(component, 'p', 'Threw bowls for several kilns.'),
+        tech: roleOf(component, 'p', 'Clay · Glaze'),
+      }).toEqual({
+        period: 'text-muted',
+        title: 'text-muted',
+        summary: 'text-body',
+        tech: 'text-subtle',
+      })
     })
 
     it('leaves the print cascade numbering to the roles', async () => {
       const component = await mount([
-        role({ since: '2022', before: 'a note' }),
+        role({
+          since: '2022',
+          before: note(),
+        }),
         role({ since: '2019' }),
       ])
 
