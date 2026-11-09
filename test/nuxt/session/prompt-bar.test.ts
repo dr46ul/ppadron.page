@@ -125,11 +125,12 @@ describe('prompt bar', () => {
         .toEqual(['flex-wrap'])
     })
 
-    it('trims each chip\'s text box to its capitals, so the label centres on its letters', async () => {
+    it('centres each label on its letters, with no padding of its own to pull it off centre', async () => {
       const component = await mount()
+      const centring = ['centre-on-letters']
 
-      expect(component.findAll(CHIPS).map(button => button.classes().includes('trim-to-caps')))
-        .toEqual([true, true, true])
+      expect(component.findAll(CHIPS).map(button => button.classes().filter(name => name === 'centre-on-letters' || name.startsWith('py-'))))
+        .toEqual([centring, centring, centring])
     })
 
     it('titles each chip with what it does', async () => {

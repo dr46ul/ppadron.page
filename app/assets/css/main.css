@@ -138,9 +138,17 @@
 
 /* Courier Prime's line box keeps more room below the baseline than above the
    capitals, so a label centred on its line box reads high. Browsers without
-   `text-box` keep the untrimmed box, a pixel or two high. */
-@utility trim-to-caps {
+   `text-box` keep the untrimmed box, a pixel or two high.
+   Trimmed to the capitals, a label still leans high: the lowercase ascenders
+   rise above the capitals and few labels have a descender, and `text-box` has
+   no ascender edge. 0.1em of top padding moves the letters down the 0.05em
+   that centres ascender to baseline, measured for Courier Prime. */
+@utility centre-on-letters {
   text-box: trim-both cap alphabetic;
+
+  @supports (text-box: trim-both cap alphabetic) {
+    padding-top: 0.1em;
+  }
 }
 
 @layer base {
