@@ -123,7 +123,7 @@ describe('experience output', () => {
       }
     }
 
-    it('prints the entry between that role and the next, as a note and not a role', async () => {
+    it('prints the entry between that role and the next', async () => {
       const component = await mount([
         role({
           company: 'Newest',
@@ -133,14 +133,21 @@ describe('experience output', () => {
         role({ company: 'Oldest', since: '2009' }),
       ])
 
-      const items = component.findAll('li')
-      expect(items.map(item => item.text())).toEqual([
+      expect(component.findAll('li').map(item => item.text())).toEqual([
         expect.stringContaining('Newest'),
         expect.stringContaining('Freelance'),
         expect.stringContaining('Oldest'),
       ])
-      expect(items[1]!.findAll('button')).toHaveLength(0)
-      expect(items[1]!.findAll('a')).toHaveLength(0)
+    })
+
+    it('cannot be opened, as a role can', async () => {
+      const component = await mount([
+        role({
+          before: note(),
+        }),
+      ])
+
+      expect(component.findAll('li')[1]!.findAll('button, a')).toHaveLength(0)
     })
 
     it('prints every field of the note', async () => {
@@ -151,15 +158,26 @@ describe('experience output', () => {
       ])
 
       const entry = component.findAll('li')[1]!
-      expect(entry.get('time').text()).toBe('2011 — 2014')
-      expect(entry.get('time').attributes('datetime')).toBe('2011')
-      expect(entry.text()).toContain('Freelance')
-      expect(entry.text()).toContain('Potter')
-      expect(entry.text()).toContain('Threw bowls for several kilns.')
-      expect(entry.text()).toContain('Clay · Glaze')
+      expect({
+        period: entry.get('time').text(),
+        datetime: entry.get('time').attributes('datetime'),
+        lines: [
+          ...entry.findAll('span'),
+          ...entry.findAll('p').slice(1),
+        ].map(line => line.text()),
+      }).toEqual({
+        period: '2011 — 2014',
+        datetime: '2011',
+        lines: [
+          'Freelance',
+          'Potter',
+          'Threw bowls for several kilns.',
+          'Clay · Glaze',
+        ],
+      })
     })
 
-    it('sets the name in bold, as a role sets its company, but not as a link', async () => {
+    it('sets the name in bold, as a role sets its company, but not underlined as a link', async () => {
       const component = await mount([
         role({
           before: note({ name: 'Freelance' }),
@@ -167,8 +185,8 @@ describe('experience output', () => {
       ])
 
       const name = component.findAll('li')[1]!.findAll('span').find(span => span.text() === 'Freelance')!
-      expect(name.classes()).toContain('font-semibold')
-      expect(name.classes()).not.toContain('underline')
+      expect(['font-semibold', 'underline'].filter(style => name.classes().includes(style)))
+        .toEqual(['font-semibold'])
     })
 
     it('sets each line of the note as an earlier role sets its own', async () => {
@@ -178,10 +196,17 @@ describe('experience output', () => {
         }),
       ])
 
-      expect(roleOf(component, 'time', '2011 — 2014')).toBe('text-muted')
-      expect(roleOf(component, 'span', 'Potter')).toBe('text-muted')
-      expect(roleOf(component, 'p', 'Threw bowls for several kilns.')).toBe('text-body')
-      expect(roleOf(component, 'p', 'Clay · Glaze')).toBe('text-subtle')
+      expect({
+        period: roleOf(component, 'time', '2011 — 2014'),
+        title: roleOf(component, 'span', 'Potter'),
+        summary: roleOf(component, 'p', 'Threw bowls for several kilns.'),
+        tech: roleOf(component, 'p', 'Clay · Glaze'),
+      }).toEqual({
+        period: 'text-muted',
+        title: 'text-muted',
+        summary: 'text-body',
+        tech: 'text-subtle',
+      })
     })
 
     it('leaves the print cascade numbering to the roles', async () => {
