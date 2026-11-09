@@ -61,6 +61,12 @@ describe('the prompt caret', () => {
   })
 })
 
+describe('the prompt caret\'s place on the line', () => {
+  it('centres the block on the prompt\'s line rather than dropping it to a baseline', () => {
+    expect(declarations('.prompt-caret')).toMatch(/translate:\s*none/)
+  })
+})
+
 describe('the prompt input', () => {
   it('hides the browser\'s own caret, so the block is the only one', () => {
     expect(declarations('.prompt-input')).toMatch(/caret-color:\s*transparent/)

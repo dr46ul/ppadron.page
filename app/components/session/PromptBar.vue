@@ -132,7 +132,7 @@ defineExpose({
           id="prompt"
           ref="prompt"
           v-model="typed"
-          class="prompt-input w-full bg-transparent text-base text-ellipsis"
+          class="prompt-input block w-full bg-transparent text-base text-ellipsis"
           type="text"
           autocomplete="off"
           autocapitalize="off"

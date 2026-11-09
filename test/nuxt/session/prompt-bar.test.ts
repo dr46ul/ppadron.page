@@ -235,6 +235,12 @@ describe('prompt bar', () => {
       expect(prompt(component).classes()).toContain('prompt-input')
     })
 
+    it('sets the prompt as a block, so the line the block is centred on is the prompt\'s own', async () => {
+      const component = await mount()
+
+      expect(prompt(component).classes()).toContain('block')
+    })
+
     it('sits at the start of an empty prompt', async () => {
       const component = await mount()
 

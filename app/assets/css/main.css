@@ -188,6 +188,13 @@
   /* A terminal draws a solid block while it has focus and a hollow one while it
      does not. The blink is dropped with the fill, so a still outline is what
      tells a Visitor the prompt is not listening. */
+  /* `.caret` is nudged down to sit on the baseline of the text it follows. The
+     prompt's block is a flex item already centred on the line, where the
+     nudge only drops it below the letters. */
+  .prompt-caret {
+    translate: none;
+  }
+
   input:not(:focus) ~ .prompt-mirror .prompt-caret {
     background: transparent;
     box-shadow: inset 0 0 0 1px var(--color-accent);
