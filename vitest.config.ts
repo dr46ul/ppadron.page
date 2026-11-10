@@ -25,11 +25,7 @@ export default defineConfig({
         statements: 100,
         functions: 100,
         lines: 100,
-        // Negative is a maximum uncovered *count*, not a percentage. The four
-        // are auto-import artefacts in Terminal.vue that no test can reach; a
-        // count cannot drift as the tree grows, so a fifth fails the run. Cover
-        // it, don't raise this. See docs/agents/testing.md.
-        branches: -4,
+        branches: 100,
       },
     },
     projects: [
