@@ -215,21 +215,70 @@ describe('terminal', () => {
       expect(banner().text()).toContain('ppadron.page')
     })
 
-    it('goes with the scrollback on clear, and comes back on reset', async () => {
+    it('stays on screen after clear, though the scrollback goes', async () => {
       const session = await mountTerminal()
 
       await session.chip('clear').trigger('click')
       await session.component.vm.$nextTick()
 
-      const afterClear = session.banner().exists()
+      expect({
+        banner: session.banner().exists(),
+        entries: session.entries().length,
+      }).toEqual({ banner: true, entries: 0 })
+    })
 
+    it('stops saying everything below is printed once clear leaves nothing below', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('clear').trigger('click')
+      await session.component.vm.$nextTick()
+
+      expect(session.banner().text()).not.toContain('already printed')
+    })
+  })
+
+  describe('the hint on an empty Transcript', () => {
+    const hint = (session: Awaited<ReturnType<typeof mountTerminal>>) =>
+      session.component.find('[data-empty-hint]')
+
+    it('is not there while the Transcript has blocks', async () => {
+      const session = await mountTerminal()
+
+      expect(hint(session).exists()).toBe(false)
+    })
+
+    it('suggests what to run next once clear has emptied the Transcript', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('clear').trigger('click')
+      await session.component.vm.$nextTick()
+
+      expect(['help', 'whoami'].filter(cmd => !hint(session).text().includes(cmd)))
+        .toEqual([])
+    })
+
+    it('goes once the next Command prints', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('clear').trigger('click')
+      await session.chip('help').trigger('click')
+      await session.component.vm.$nextTick()
+
+      expect(hint(session).exists()).toBe(false)
+    })
+
+    it('is not there after reset, which restores the seeded tour', async () => {
+      const session = await mountTerminal()
+
+      await session.chip('clear').trigger('click')
       await session.chip('reset').trigger('click')
       await session.component.vm.$nextTick()
 
-      expect([
-        afterClear,
-        session.banner().exists(),
-      ]).toEqual([false, true])
+      expect({
+        hint: hint(session).exists(),
+        entries: session.entries().length,
+      })
+        .toEqual({ hint: false, entries: 5 })
     })
   })
 
