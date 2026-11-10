@@ -125,6 +125,14 @@ describe('prompt bar', () => {
         .toEqual(['flex-wrap'])
     })
 
+    it('centres each label on its letters, with no padding of its own to pull it off centre', async () => {
+      const component = await mount()
+      const centring = ['centre-on-letters']
+
+      expect(component.findAll(CHIPS).map(button => button.classes().filter(name => name === 'centre-on-letters' || name.startsWith('py-'))))
+        .toEqual([centring, centring, centring])
+    })
+
     it('titles each chip with what it does', async () => {
       const component = await mount()
 

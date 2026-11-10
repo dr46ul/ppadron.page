@@ -93,7 +93,7 @@ defineExpose({
       <template v-for="(command, index) in commands" :key="command.cmd">
         <button
           type="button"
-          class="border-edge text-muted hover:border-accent hover:text-accent text-meta min-h-8 shrink-0 border px-2.5 py-1 whitespace-nowrap"
+          class="border-edge text-muted hover:border-accent hover:text-accent text-meta centre-on-letters min-h-8 shrink-0 border px-2.5 whitespace-nowrap"
           :title="command.label"
           :aria-describedby="`chip-hint-${index}`"
           @click="emit('run', command.cmd)"
@@ -108,7 +108,7 @@ defineExpose({
       <template v-for="(command, index) in metaCommands" :key="command.cmd">
         <button
           type="button"
-          class="text-muted hover:text-base-content text-meta min-h-8 shrink-0 px-1.5 py-1 whitespace-nowrap"
+          class="text-muted hover:text-base-content text-meta centre-on-letters min-h-8 shrink-0 px-1.5 whitespace-nowrap"
           :title="command.label"
           :aria-describedby="`meta-hint-${index}`"
           @click="emit('run', command.cmd)"
