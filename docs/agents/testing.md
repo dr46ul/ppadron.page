@@ -32,13 +32,10 @@ first commit of a change is the test that describes the new behaviour.
 
 ## What covered means
 
-`pnpm test` (and CI) enforces 100% lines, functions and statements on
-`app/components/**`, `app/composables/**`, `app/utils/**`, `server/utils/**` and `shared/**`, and **at most
-four uncovered branches** in that tree — a count, not a percentage, so the gate cannot drift as
-the tree grows. Exactly four exist today, all unreachable, all in `Terminal.vue`
-(see "A `.vue` file will not reach 100% branches" below); the cap is sized to
-them, so one new uncovered branch anywhere makes it five and the run fails.
-Cover a new branch, don't raise the cap.
+`pnpm test` (and CI) enforces 100% lines, functions, statements and branches on
+`app/components/**`, `app/composables/**`, `app/utils/**`, `server/utils/**` and `shared/**`.
+A new uncovered branch fails the run: cover it (see "A `.vue` file's template
+must name what it uses as a script binding" below).
 
 **`server/api/**` is outside the allowlist on purpose, and that shapes how a
 route is written.** A route handler only ever runs inside the built server the
@@ -347,24 +344,18 @@ This cost a re-apply and one worthless run on issue #47, using a script copied
 from issue #29 — where the code under test was already merged, so reverting was
 safe there and destructive here.
 
-**A `.vue` file will not reach 100% branches.** The v8 provider counts branches
-in the compiled render function and maps them back through the sourcemap, so a
-conditional the toolchain writes into that function surfaces as an uncovered
-`cond-expr` branch at a source position that has none. `Terminal.vue` carries
-four of them, one for each time its template names the auto-imported `commands`
-or `metaCommands` — the `:commands` and `:meta-commands` it hands Help and the
-Prompt bar. Nuxt's auto-import rewrites each `_ctx.commands` that
-`@vue/compiler-sfc` emits into a ternary,
-`("commands" in _ctx ? _ctx.commands : _unref(commands))`, and the `_ctx` arm
-never runs. No test can reach them; do not chase them.
-
-This is why the branch gate is a count of four rather than 100% — `branches: -4`
-in `vitest.config.ts`. If the four ever move or multiply (a template edit shifts
-which prop expression the sourcemap lands on), confirm the newly-reported
-positions are artefacts the same way issue #19 did — compile the template with
-`@vue/compiler-sfc`, look for a conditional at that source position, and
-remember the auto-import rewrite runs after it — before touching the cap. A
-real uncovered branch gets a test, not a bigger number.
+**A `.vue` file's template must name what it uses as a script binding.** The v8
+provider counts branches in the compiled render function and maps them back
+through the sourcemap. Nuxt's auto-import rewrites each template use of an
+auto-imported name into a ternary,
+`("commands" in _ctx ? _ctx.commands : _unref(commands))`, whose `_ctx` arm never
+runs, so it surfaces as an uncovered `cond-expr` branch at a source position that
+has none. `Terminal.vue` used to carry four of them, one for each time its
+template named `commands` or `metaCommands`. Importing them explicitly makes them
+script bindings, and the ternaries are gone. So in a `.vue` template, import what
+you use explicitly rather than leaning on auto-import; if a branch is reported at
+a position with no conditional, compile the template with `@vue/compiler-sfc`
+and look for the rewrite before suspecting a missing test.
 
 ## Verifying what the browser actually paints
 

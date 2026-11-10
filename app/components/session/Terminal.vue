@@ -16,6 +16,7 @@
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
 import type { SessionOutput } from '~/composables/useSession'
+import { commands, metaCommands } from '~/composables/useSession'
 import { roles } from '~/data/experience'
 import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
