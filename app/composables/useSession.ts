@@ -180,8 +180,6 @@ export function useSession(roleSlugs: string[]) {
 
   const entries = ref<SessionEntry[]>(seed())
   const trimmed = ref(0)
-  /** `clear` takes the login banner with it; only `reset` brings it back. */
-  const cleared = ref(false)
 
   const input = ref('')
   const history = ref<string[]>([])
@@ -212,7 +210,6 @@ export function useSession(roleSlugs: string[]) {
   function reset() {
     entries.value = seed()
     trimmed.value = 0
-    cleared.value = false
     history.value = []
     historyIndex.value = -1
     input.value = ''
@@ -224,7 +221,6 @@ export function useSession(roleSlugs: string[]) {
   function clear() {
     entries.value = []
     trimmed.value = 0
-    cleared.value = true
 
     nextTick(() => window.scrollTo({ top: 0, behavior: 'auto' }))
   }
@@ -362,7 +358,6 @@ export function useSession(roleSlugs: string[]) {
   return {
     entries,
     trimmed,
-    cleared,
     scrollback: SCROLLBACK,
     input,
     exec,

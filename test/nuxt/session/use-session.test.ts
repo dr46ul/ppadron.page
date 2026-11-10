@@ -334,8 +334,7 @@ describe('useSession', () => {
     it('opens with the banner showing and nothing dropped', () => {
       const session = useSession(SLUGS)
 
-      expect({ cleared: session.cleared.value, trimmed: session.trimmed.value })
-        .toEqual({ cleared: false, trimmed: 0 })
+      expect(session.trimmed.value).toBe(0)
     })
   })
 
@@ -377,13 +376,12 @@ describe('useSession', () => {
   })
 
   describe('clear', () => {
-    it('empties the scrollback and takes the banner with it', () => {
+    it('empties the scrollback', () => {
       const session = useSession(SLUGS)
 
       session.exec('clear')
 
-      expect({ entries: session.entries.value, cleared: session.cleared.value })
-        .toEqual({ entries: [], cleared: true })
+      expect(session.entries.value).toEqual([])
     })
 
     it('forgets how many blocks were dropped', async () => {
@@ -524,19 +522,13 @@ describe('useSession', () => {
       session.exec('clear')
       session.exec('reset')
 
-      expect({
-        outputs: session.entries.value.map(entry => entry.output),
-        cleared: session.cleared.value,
-      }).toEqual({
-        outputs: [
-          'whoami',
-          'experience',
-          'recommendations',
-          'contact',
-          'colophon',
-        ],
-        cleared: false,
-      })
+      expect(session.entries.value.map(entry => entry.output)).toEqual([
+        'whoami',
+        'experience',
+        'recommendations',
+        'contact',
+        'colophon',
+      ])
     })
 
     it('forgets how many blocks were dropped', async () => {
@@ -576,8 +568,7 @@ describe('useSession', () => {
       session.exec('clear')
       session.exec('restart')
 
-      expect({ cleared: session.cleared.value, length: session.entries.value.length })
-        .toEqual({ cleared: false, length: 5 })
+      expect(session.entries.value).toHaveLength(5)
     })
 
     it('throws away the Enquiry draft and its state', async () => {

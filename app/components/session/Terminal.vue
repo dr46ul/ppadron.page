@@ -26,7 +26,6 @@ import { recommendations } from '~/data/recommendations'
 const {
   entries,
   trimmed,
-  cleared,
   scrollback,
   input,
   exec,
@@ -99,10 +98,9 @@ function focusPrompt(event: MouseEvent) {
     </a>
 
     <main class="session-gutter flex-1 py-10">
-      <!-- A session opens with a login banner, not a header. `clear` takes it
-           with the rest of the scrollback; only `reset` brings it back. -->
+      <!-- A session opens with a login banner, not a header. `clear` leaves it:
+           it says who this is, which an emptied page would otherwise not. -->
       <div
-        v-if="!cleared"
         data-banner
         class="border-base-300 mb-[4.5rem] border-b pb-6"
       >
@@ -126,10 +124,19 @@ function focusPrompt(event: MouseEvent) {
           <!-- The label is the Profile's, and may or may not end in a full
                stop, so the separator is this component's to supply. -->
           <span class="text-subtle">
-            · Everything below is already printed — read on, or run a command.
+            · {{ entries.length > 0
+              ? 'Everything below is already printed — read on, or run a command.'
+              : 'Run a command.' }}
           </span>
         </p>
       </div>
+
+      <!-- Plain text in reading order rather than a live region: `clear` is
+           the Visitor's own action and focus stays on the prompt. -->
+      <p v-if="entries.length === 0" data-empty-hint class="text-subtle">
+        Scrollback cleared. Run <span class="text-accent">help</span> for what
+        there is, or <span class="text-accent">whoami</span> to start.
+      </p>
 
       <p v-if="trimmed > 0" class="text-subtle text-meta mb-10">
         [ {{ trimmed }} earlier {{ trimmed === 1 ? 'block' : 'blocks' }} dropped
