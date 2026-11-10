@@ -1,9 +1,10 @@
 import type { Role } from '~/data/experience'
 import type { Profile } from '~/data/profile'
 import type { Recommendation } from '~/data/recommendations'
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
+import { arrived, emails, useContactRoute } from '../contact-route'
 import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
@@ -31,15 +32,7 @@ vi.mock('~/data/recommendations', () => ({
   recommendations: data.recommendations,
 }))
 
-/**
- * Unstubbed, a submit fails because the test runtime mounts none of `server/`,
- * so a failure-path test would pass for that reason alone. Every test that
- * submits an Enquiry names the outcome it wants.
- */
-const { post } = vi.hoisted(() => ({
-  post: vi.fn(),
-}))
-mockNuxtImport('$fetch', () => post)
+const resend = useContactRoute()
 
 function profileFixture(): Profile {
   return {
@@ -137,8 +130,8 @@ async function mountTerminal() {
       await component.vm.$nextTick()
     },
     /**
-     * A draft the delivery's rules accept, so the outcome under test is the
-     * stubbed post's and not the form refusing it.
+     * A draft the delivery's rules accept, so the outcome under test is
+     * Resend's and not the form refusing it.
      */
     async submitEnquiry() {
       await this.chip('mail pavel').trigger('click')
@@ -149,6 +142,7 @@ async function mountTerminal() {
         .find('[name="message"]')
         .setValue('The kiln wants rewiring before the winter firing.')
       await this.enquiryForm().trigger('submit')
+      await arrived(resend)
       await this.settle()
     },
     async run(cmd: string) {
@@ -172,7 +166,6 @@ describe('terminal', () => {
       now: new Date('2026-03-14T09:05:07Z'),
     })
     visitFrom(['en-GB'], 'Europe/London')
-    post.mockReset()
 
     Object.assign(data.profile, profileFixture())
     data.roles.splice(0, data.roles.length, roleFixture())
@@ -463,7 +456,6 @@ describe('terminal', () => {
     })
 
     it('confirms a sent Enquiry in the Contact output', async () => {
-      post.mockResolvedValue({ ok: true })
       const session = await mountTerminal()
 
       await session.submitEnquiry()
@@ -480,7 +472,6 @@ describe('terminal', () => {
     })
 
     it('sends what the Contact output reports, as the delivery will read it', async () => {
-      post.mockResolvedValue({ sent: true })
       const session = await mountTerminal()
 
       await session.chip('mail pavel').trigger('click')
@@ -491,20 +482,19 @@ describe('terminal', () => {
         .find('[name="message"]')
         .setValue('The kiln wants rewiring before the winter firing.')
       await session.enquiryForm().trigger('submit')
+      await arrived(resend)
       await session.settle()
 
-      expect(post).toHaveBeenCalledWith('/api/contact', {
-        method: 'POST',
-        body: {
-          name: 'Dagny Vole',
-          email: 'dagny@example.test',
-          message: 'The kiln wants rewiring before the winter firing.',
-        },
-      })
+      expect(emails(resend)).toEqual([
+        expect.objectContaining({
+          reply_to: 'dagny@example.test',
+          subject: 'Enquiry from Dagny Vole',
+          text: 'Dagny Vole <dagny@example.test>\n\nThe kiln wants rewiring before the winter firing.\n',
+        }),
+      ])
     })
 
     it('locks the Contact output once its Enquiry has gone', async () => {
-      post.mockResolvedValue({ sent: true })
       const session = await mountTerminal()
 
       await session.submitEnquiry()
@@ -518,7 +508,7 @@ describe('terminal', () => {
     })
 
     it('hands the Profile address to the Contact output', async () => {
-      post.mockRejectedValue(new Error('offline'))
+      resend.mockRejectedValue(new Error('offline'))
       const session = await mountTerminal()
 
       await session.submitEnquiry()
@@ -529,7 +519,7 @@ describe('terminal', () => {
     })
 
     it('announces the Enquiry result from a single live region', async () => {
-      post.mockRejectedValue(new Error('offline'))
+      resend.mockRejectedValue(new Error('offline'))
       const session = await mountTerminal()
 
       await session.submitEnquiry()
