@@ -51,6 +51,8 @@ _Avoid_: Result, response, section, view
 The scrollback: every Command echoed with its output, most recent last. It is
 seeded on load with the full tour so the page can be read without typing, and
 capped so it cannot grow without bound.
+`clear` empties it but leaves the login banner, and an empty Transcript prints a
+hint suggesting what to run next until a Command is echoed.
 _Avoid_: Feed, log, history
 
 **Prompt bar**:

@@ -309,6 +309,11 @@ hand — including the 3:1 WCAG 1.4.11 asks of a control's boundary.
 
 ## Proving a test can fail
 
+**Red is a `FAIL` line, never a count of skipped.** A `-t` filter that matches no
+test runs nothing and reports `N skipped`, which reads like a pass. Check that
+the test you meant to run is listed as failing before you write the code, and as
+passing after.
+
 A test written against code that already works is green from the start, which
 proves nothing. Break the code one way at a time and check that the test goes
 red — and that it is the one that catches it. `useSession.ts` was covered this
