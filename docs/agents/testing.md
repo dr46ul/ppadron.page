@@ -245,17 +245,35 @@ still checked against `.output`: open it in a Playwright context with a
 production build logs `Hydration completed but contains mismatches.` when the
 two differ, and nothing when they do not.
 
-**`$fetch` cannot be stubbed with `vi.stubGlobal`.** It is an auto-import, not a
-global: `useEnquiry.ts` gets its own binding, and stubbing `globalThis.$fetch`
-leaves that binding pointing at the real thing. The stub then does nothing and a
-test asserting the failure path passes because the request genuinely failed —
-a green test proving nothing. Use `mockNuxtImport('$fetch', …)`.
+**A submit in `test/nuxt` goes through the real route; stub only Resend.** Call
+`useContactRoute()` (`test/nuxt/contact-route.ts`) at the top of the file. It
+registers `server/api/contact.post.ts` as `/api/contact`, so a submit crosses the
+route's own parse, its 400 and `sendEnquiry`'s throw, and it returns the stand-in
+for the `fetch` to Resend: `resend.mockRejectedValue(…)` for a network failure,
+`resend.mockResolvedValue(new Response('…', { status: 422 }))` for a refusal, and
+`emails(resend)` for what was sent. A failure-path test that forgets to name its
+failure gets a 200 and ends `sent`, so it fails visibly instead of passing
+because a request went nowhere.
 
-**Server code uses the real `fetch`, and that one does stub.** `server/utils/`
-runs in the `unit` project, where there are no auto-imports: `sendEnquiry` looks
-`fetch` up on the global at each call, so `vi.stubGlobal('fetch', …)` genuinely
-replaces it and no mail leaves. The trap above is about Nuxt's `$fetch`
-specifically, not about every name that resembles it.
+Two consequences of the route being real:
+
+- **The route's own 400 is out of `useEnquiry`'s reach.** The composable refuses
+  a bad draft before it posts, so `test/nuxt/contact-route.test.ts` posts one
+  with a direct `$fetch`.
+- **The send is not instant.** A submit reaches Resend a few async hops later, so
+  a test that counts sends or settles under fake timers waits with
+  `await arrived(resend)` first.
+- **The route needs what Nitro would give it.** The nuxt runtime has none of the
+  server auto-imports, so the helper puts `defineEventHandler`, `readBody`,
+  `createError` and `sendEnquiry` on the global before it imports the route, and
+  fills in the delivery config, which is empty there. A new auto-import in the
+  route means one more line in the helper.
+
+**`$fetch` still cannot be stubbed with `vi.stubGlobal`.** It is an auto-import,
+not a global, so `mockNuxtImport('$fetch', …)` is the way if a test ever needs
+it. Nothing does today. **Server code uses the real `fetch`, and that one does
+stub:** `sendEnquiry` looks `fetch` up on the global at each call, so
+`vi.stubGlobal('fetch', …)` replaces it and no mail leaves.
 
 **An assertion against the whole page cannot fail. Scope it.** The same Content
 is printed in more than one place, so a page-wide `toContain` is satisfied by a
@@ -281,14 +299,10 @@ moment an edit reuses one. Scope the assertion instead.
 ## Adding a helper
 
 The suite uses `mountSuspended` for anything that needs a component, and
-`mockNuxtImport` for the one boundary the code reaches across (`$fetch`, in
-`test/nuxt/session/use-enquiry.test.ts`). `mockComponent`, `renderSuspended` and
+`registerEndpoint` for the one server route the client reaches
+(`useContactRoute()`). `mockNuxtImport`, `mockComponent`, `renderSuspended` and
 Vitest browser mode are available from `@nuxt/test-utils` but are not in use —
 reach for one when a test actually needs it, not for completeness.
-`registerEndpoint` still has no subject, though `/api/contact` now exists. It
-registers a substitute handler rather than running the real one, so pointing it
-at that path would only re-prove the client contract `use-enquiry.test.ts`
-already holds.
 
 **A composable does not always need a component.** `useSession()` holds no
 component state, so its tests call it directly and `use-session.test.ts` mounts

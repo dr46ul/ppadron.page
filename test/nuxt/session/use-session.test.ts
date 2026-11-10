@@ -1,5 +1,5 @@
-import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useContactRoute } from '../contact-route'
 
 /**
  * `useSession()` holds no component state, so every test here calls it
@@ -7,15 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
  * mounted in this file. `Terminal`'s own tests cover the wiring.
  */
 
-/**
- * `$fetch` is an auto-import, not a global, so `vi.stubGlobal` cannot reach the
- * binding the composable holds: the real request goes out and a test asserting
- * `failed` passes because it genuinely failed.
- */
-const { post } = vi.hoisted(() => ({
-  post: vi.fn(),
-}))
-mockNuxtImport('$fetch', () => post)
+useContactRoute()
 
 /** A draft the delivery's rules accept, so a send gets as far as `sent`. */
 function enquiry(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
@@ -33,8 +25,6 @@ const SLUGS = ['kiln-and-ash', 'kelp-and-tar']
 describe('useSession', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    post.mockReset()
-    post.mockResolvedValue({ ok: true })
   })
 
   afterEach(() => {

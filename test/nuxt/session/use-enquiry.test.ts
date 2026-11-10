@@ -1,11 +1,7 @@
-import { mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { arrived, emails, useContactRoute } from '../contact-route'
 
-/** Not `vi.stubGlobal`, which cannot reach it: see docs/agents/testing.md. */
-const { post } = vi.hoisted(() => ({
-  post: vi.fn(),
-}))
-mockNuxtImport('$fetch', () => post)
+const resend = useContactRoute()
 
 /** A draft the delivery's rules accept, as a Visitor might type it. */
 function draft(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
@@ -18,11 +14,6 @@ function draft(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
 }
 
 describe('useEnquiry', () => {
-  beforeEach(() => {
-    post.mockReset()
-    post.mockResolvedValue({ sent: true })
-  })
-
   it('opens on an empty draft that nobody has sent', () => {
     const enquiry = useEnquiry()
 
@@ -78,14 +69,13 @@ describe('useEnquiry', () => {
       enquiry.edit(draft())
       await enquiry.submit()
 
-      expect(post).toHaveBeenCalledWith('/api/contact', {
-        method: 'POST',
-        body: {
-          name: 'Dana Okafor',
-          email: 'dana@example.test',
-          message: 'Our checkout has three states and all of them are wrong.',
-        },
-      })
+      expect(emails(resend)).toEqual([
+        expect.objectContaining({
+          reply_to: 'dana@example.test',
+          subject: 'Enquiry from Dana Okafor',
+          text: 'Dana Okafor <dana@example.test>\n\nOur checkout has three states and all of them are wrong.\n',
+        }),
+      ])
     })
 
     it('refuses a draft the delivery would refuse, without asking it', async () => {
@@ -94,29 +84,29 @@ describe('useEnquiry', () => {
       enquiry.edit(draft({ message: 'hi' }))
       await enquiry.submit()
 
-      expect({ sends: post.mock.calls.length, state: enquiry.state })
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
         .toEqual({ sends: 0, state: 'idle' })
     })
 
     it('leaves a failed send failed when the draft is refused', async () => {
       const enquiry = useEnquiry()
-      post.mockRejectedValue(new Error('offline'))
+      resend.mockRejectedValue(new Error('offline'))
 
       enquiry.edit(draft())
       await enquiry.submit()
       enquiry.edit(draft({ email: 'dana@' }))
       await enquiry.submit()
 
-      expect({ sends: post.mock.calls.length, state: enquiry.state })
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
         .toEqual({ sends: 1, state: 'failed' })
     })
 
     it('reports that it is sending before it knows the outcome', async () => {
       const enquiry = useEnquiry()
       let deliver: () => void
-      post.mockReturnValue(
-        new Promise<void>((resolve) => {
-          deliver = resolve
+      resend.mockReturnValue(
+        new Promise<Response>((resolve) => {
+          deliver = () => resolve(new Response('{}'))
         }),
       )
 
@@ -133,23 +123,35 @@ describe('useEnquiry', () => {
 
     it('reports a delivery that failed', async () => {
       const enquiry = useEnquiry()
-      post.mockRejectedValue(new Error('offline'))
+      resend.mockRejectedValue(new Error('offline'))
 
       enquiry.edit(draft())
       await enquiry.submit()
 
-      expect(enquiry.state).toBe('failed')
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 1, state: 'failed' })
+    })
+
+    it('reports a delivery that Resend refused', async () => {
+      const enquiry = useEnquiry()
+      resend.mockResolvedValue(new Response('invalid sender', { status: 422 }))
+
+      enquiry.edit(draft())
+      await enquiry.submit()
+
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
+        .toEqual({ sends: 1, state: 'failed' })
     })
 
     it('tries again after a delivery that failed', async () => {
       const enquiry = useEnquiry()
-      post.mockRejectedValueOnce(new Error('offline'))
+      resend.mockRejectedValueOnce(new Error('offline'))
 
       enquiry.edit(draft())
       await enquiry.submit()
       await enquiry.submit()
 
-      expect({ sends: post.mock.calls.length, state: enquiry.state })
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
         .toEqual({ sends: 2, state: 'sent' })
     })
 
@@ -160,7 +162,7 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       enquiry.edit(draft({ message: 'typed afterwards, and long enough to pass' }))
 
-      expect(post.mock.calls[0]![1].body.message).toBe(
+      expect(emails(resend)[0].text).toContain(
         'Our checkout has three states and all of them are wrong.',
       )
     })
@@ -172,19 +174,20 @@ describe('useEnquiry', () => {
       await enquiry.submit()
       await enquiry.submit()
 
-      expect({ sends: post.mock.calls.length, state: enquiry.state })
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
         .toEqual({ sends: 1, state: 'sent' })
     })
 
     it('does not send a second copy while the first is on its way', async () => {
       const enquiry = useEnquiry()
-      post.mockReturnValue(new Promise(() => {}))
+      resend.mockReturnValue(new Promise(() => {}))
 
       enquiry.edit(draft())
       void enquiry.submit()
       await enquiry.submit()
+      await arrived(resend)
 
-      expect({ sends: post.mock.calls.length, state: enquiry.state })
+      expect({ sends: resend.mock.calls.length, state: enquiry.state })
         .toEqual({ sends: 1, state: 'sending' })
     })
   })
@@ -207,7 +210,7 @@ describe('useEnquiry', () => {
     it.each([
       [
         'delivered',
-        () => Promise.resolve({ sent: true }),
+        () => new Response('{}'),
       ],
       [
         'failed',
@@ -218,7 +221,7 @@ describe('useEnquiry', () => {
       async (_, outcome) => {
         const enquiry = useEnquiry()
         let settle: () => void
-        post.mockReturnValue(
+        resend.mockReturnValue(
           new Promise<void>((resolve) => {
             settle = resolve
           }).then(outcome),
@@ -262,7 +265,7 @@ describe('useEnquiry', () => {
 
     it('keeps a draft that failed to send, and offers to send it again', async () => {
       const enquiry = useEnquiry()
-      post.mockRejectedValue(new Error('offline'))
+      resend.mockRejectedValue(new Error('offline'))
 
       enquiry.edit(draft())
       await enquiry.submit()
@@ -277,7 +280,7 @@ describe('useEnquiry', () => {
 
     it('leaves a send that is on its way to finish', () => {
       const enquiry = useEnquiry()
-      post.mockReturnValue(new Promise(() => {}))
+      resend.mockReturnValue(new Promise(() => {}))
 
       enquiry.edit(draft())
       void enquiry.submit()
