@@ -202,6 +202,7 @@ function focusPrompt(event: MouseEvent) {
               v-else-if="entry.output === 'contact'"
               :model-value="enquiry.draft"
               :state="enquiry.state"
+              :failures="enquiry.failures"
               :email="profile.email"
               @update:model-value="enquiry.edit"
               @submit="enquiry.submit"

@@ -33,6 +33,44 @@ describe('useEnquiry', () => {
       })
   })
 
+  describe('failures', () => {
+    it('is empty for a draft the delivery accepts', () => {
+      const enquiry = useEnquiry()
+
+      enquiry.edit(draft())
+
+      expect(enquiry.failures).toEqual({})
+    })
+
+    it('names the first rule each field breaks', () => {
+      const enquiry = useEnquiry()
+
+      enquiry.edit(draft({ name: '', email: 'dana@', message: 'hi' }))
+
+      expect(enquiry.failures).toEqual({
+        name: 'missing',
+        email: 'not-an-address',
+        message: 'too-short',
+      })
+    })
+
+    it('follows the draft as it is edited', () => {
+      const enquiry = useEnquiry()
+
+      enquiry.edit(draft({ message: 'hi' }))
+      const before = Object.keys(enquiry.failures)
+      enquiry.edit(draft())
+
+      expect([
+        before,
+        Object.keys(enquiry.failures),
+      ]).toEqual([
+        ['message'],
+        [],
+      ])
+    })
+  })
+
   describe('submit', () => {
     it('posts the draft as the delivery will read it, not as it was typed', async () => {
       const enquiry = useEnquiry()

@@ -187,6 +187,37 @@ describe('parseEnquiry', () => {
     })
   })
 
+  it.each([
+    'josé@example.test',
+    'a,b@example.test',
+    'dagny@example.test.',
+  ])('accepts %s, which a browser\'s own address grammar would refuse', (email) => {
+    expect(parseEnquiry(body({ email })).success).toBe(true)
+  })
+
+  it.each([
+    [
+      'name',
+      ` ${'x'.repeat(200)} `,
+    ],
+    [
+      'email',
+      ` ${address(320)} `,
+    ],
+    [
+      'message',
+      ` ${'x'.repeat(5000)} `,
+    ],
+  ])('measures the cap of a %s after trimming, so padding cannot reach it', (field, value) => {
+    expect(parseEnquiry(body({ [field]: value })).success).toBe(true)
+  })
+
+  it('measures a name\'s cap after its spaces are collapsed', () => {
+    const name = `${'x'.repeat(100)}${' '.repeat(10)}${'x'.repeat(95)}`
+
+    expect(parseEnquiry(body({ name })).success).toBe(true)
+  })
+
   it('reports every field that fails, not just the first', () => {
     expect(
       parseEnquiry({

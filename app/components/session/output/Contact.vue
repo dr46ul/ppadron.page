@@ -8,14 +8,16 @@
  * Rendered as command output, so it is a mail client's header block rather
  * than a card: labelled fields on one axis, the body beneath them.
  */
-import type { EnquiryField, EnquiryRule } from '#shared/enquiry'
+import type { EnquiryFailures, EnquiryField, EnquiryRule } from '#shared/enquiry'
 import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
-import { FIELDS, LIMITS, MESSAGE_MIN, parseEnquiry } from '#shared/enquiry'
+import { FIELDS, LIMITS, MESSAGE_MIN } from '#shared/enquiry'
 
 const props = defineProps<{
   /** The draft `useEnquiry` owns. Reported back whole, never written through. */
   modelValue: EnquiryDraft
   state: EnquiryState
+  /** The rules the draft breaks, which `useEnquiry` also refuses to send over. */
+  failures: EnquiryFailures
   /** Pavel's own address, revealed when a send fails. */
   email: string
 }>()
@@ -85,17 +87,12 @@ const controls = {
 } satisfies Record<EnquiryField, unknown>
 
 /**
- * The browser's own validation speaks, but with the delivery's rules: `a@b` is
- * no address, and a message padded with spaces up to the floor is still short.
+ * The browser's own validation speaks, but with the delivery's rules, which
+ * arrive as `failures` rather than being worked out again here.
  */
 watchPostEffect(() => {
-  const parsed = parseEnquiry(props.modelValue)
-  const failures = parsed.success
-    ? {}
-    : parsed.failures
-
   for (const key of FIELDS) {
-    const rule = failures[key]
+    const rule = props.failures[key]
     controls[key].value!.setCustomValidity(rule
       ? complaint(key, rule)
       : '')
