@@ -1,3 +1,4 @@
+import type { EnquiryFailures } from '#shared/enquiry'
 import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
@@ -20,12 +21,14 @@ function enquiry(overrides: Partial<EnquiryDraft> = {}): EnquiryDraft {
 function mount(props: {
   modelValue?: EnquiryDraft
   state?: EnquiryState
+  failures?: EnquiryFailures
   email?: string
 } = {}) {
   return mountSuspended(Contact, {
     props: {
       modelValue: enquiry(),
       state: 'idle' satisfies EnquiryState,
+      failures: {},
       email: 'pavel@example.test',
       ...props,
     },
@@ -47,11 +50,6 @@ const MORE = 'A little more, please — at least 20 characters.'
 
 function cap(characters: number) {
   return `Keep it to ${characters} characters; the rest can follow by email.`
-}
-
-/** `@example.test` is 13 characters, so this is an address exactly `length` long. */
-function address(length: number) {
-  return `${'a'.repeat(length - 13)}@example.test`
 }
 
 describe('contact output', () => {
@@ -299,164 +297,58 @@ describe('contact output', () => {
   })
 
   describe('what it will not send', () => {
-    it('has nothing to say about a draft the delivery accepts', async () => {
-      const component = await mount()
+    it('has nothing to say when it is handed no failures', async () => {
+      const component = await mount({ failures: {} })
 
-      for (const name of ['name', 'email', 'message'])
-        expect(complaint(component, name)).toBe('')
+      expect({
+        name: complaint(component, 'name'),
+        email: complaint(component, 'email'),
+        message: complaint(component, 'message'),
+      }).toEqual({ name: '', email: '', message: '' })
     })
 
     it.each([
+      ['name', 'missing', WHO],
       [
         'name',
-        'missing',
-        { name: '' },
-        WHO,
-      ],
-      [
-        'name',
-        'only spaces',
-        { name: '    ' },
-        WHO,
-      ],
-      [
-        'name',
-        'one over its cap',
-        {
-          name: 'n'.repeat(201),
-        },
+        'too-long',
         cap(200),
       ],
-      [
-        'name',
-        'one over its cap once spaces are collapsed',
-        { name: `${'n'.repeat(200)}  n` },
-        cap(200),
-      ],
+      ['email', 'missing', ADDRESS],
+      ['email', 'not-an-address', ADDRESS],
       [
         'email',
-        'missing',
-        { email: '' },
-        ADDRESS,
-      ],
-      [
-        'email',
-        'only spaces',
-        { email: '   ' },
-        ADDRESS,
-      ],
-      [
-        'email',
-        'a@b, which has no domain to reply to',
-        { email: 'a@b' },
-        ADDRESS,
-      ],
-      [
-        'email',
-        'one over its cap',
-        {
-          email: address(321),
-        },
+        'too-long',
         cap(320),
       ],
+      ['message', 'missing', MORE],
+      ['message', 'too-short', MORE],
       [
         'message',
-        'missing',
-        { message: '' },
-        MORE,
-      ],
-      [
-        'message',
-        'one under the floor',
-        {
-          message: 'm'.repeat(19),
-        },
-        MORE,
-      ],
-      [
-        'message',
-        'padded with spaces up to the floor',
-        { message: `${'m'.repeat(19)}  ` },
-        MORE,
-      ],
-      [
-        'message',
-        'one over its cap',
-        {
-          message: 'm'.repeat(5001),
-        },
+        'too-long',
         cap(5000),
       ],
-    ] as const)('refuses the %s field when it is %s', async (name, _, overrides, expected) => {
+    ] as const)('complains about the %s field when it is %s', async (name, rule, expected) => {
       const component = await mount({
-        modelValue: enquiry(overrides),
+        failures: { [name]: rule },
       })
 
       expect(complaint(component, name)).toBe(expected)
     })
 
-    it.each([
-      [
-        'name',
-        'at its cap',
-        {
-          name: 'n'.repeat(200),
-        },
-      ],
-      [
-        'name',
-        'at its cap once trimmed',
-        { name: ` ${'n'.repeat(200)} ` },
-      ],
-      [
-        'email',
-        'at its cap',
-        {
-          email: address(320),
-        },
-      ],
-      [
-        'email',
-        'padded with spaces',
-        { email: ' dagny@example.test ' },
-      ],
-      [
-        'message',
-        'exactly at the floor',
-        {
-          message: 'm'.repeat(20),
-        },
-      ],
-      [
-        'message',
-        'at its cap',
-        {
-          message: 'm'.repeat(5000),
-        },
-      ],
-    ] as const)('accepts the %s field when it is %s', async (name, _, overrides) => {
+    it('leaves the delivery alone to decide that an address is one', async () => {
       const component = await mount({
-        modelValue: enquiry(overrides),
+        modelValue: enquiry({ email: 'josé@example.test' }),
+        failures: {},
       })
+      const control = component.find<HTMLInputElement>('[name="email"]').element
 
-      expect(complaint(component, name)).toBe('')
+      expect(control.validity.valid).toBe(true)
     })
-
-    it.each(['josé@example.test', 'a,b@example.test', 'dagny@example.test.'])(
-      'leaves the delivery alone to decide that %s is an address',
-      async (email) => {
-        const component = await mount({
-          modelValue: enquiry({ email }),
-        })
-        const control = component.find<HTMLInputElement>('[name="email"]').element
-
-        expect(control.validity.valid).toBe(true)
-      },
-    )
 
     it('says nothing about one field because of another', async () => {
       const component = await mount({
-        modelValue: enquiry({ name: '' }),
+        failures: { name: 'missing' },
       })
 
       expect({
@@ -466,19 +358,16 @@ describe('contact output', () => {
       }).toEqual({ name: WHO, email: '', message: '' })
     })
 
-    it('changes its mind as the draft it is handed changes', async () => {
+    it('changes its mind as the failures it is handed change', async () => {
       const component = await mount({
-        modelValue: enquiry({ name: '' }),
+        failures: { name: 'missing' },
       })
 
-      await component.setProps({
-        modelValue: enquiry(),
-      })
-
+      await component.setProps({ failures: {} })
       const nameOnceFixed = complaint(component, 'name')
 
       await component.setProps({
-        modelValue: enquiry({ email: 'a@b' }),
+        failures: { email: 'not-an-address' },
       })
 
       expect({

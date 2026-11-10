@@ -1,4 +1,4 @@
-import type { EnquiryField } from '#shared/enquiry'
+import type { EnquiryFailures, EnquiryField } from '#shared/enquiry'
 import { parseEnquiry } from '#shared/enquiry'
 
 export type EnquiryDraft = Record<EnquiryField, string>
@@ -28,12 +28,17 @@ export function useEnquiry() {
     Object.assign(draft, next)
   }
 
+  const parsed = computed(() => parseEnquiry(draft))
+  const failures = computed((): EnquiryFailures => parsed.value.success
+    ? {}
+    : parsed.value.failures)
+
   async function submit() {
     if (state.value === 'sending' || state.value === 'sent')
       return
 
-    const parsed = parseEnquiry(draft)
-    if (!parsed.success)
+    const outcome = parsed.value
+    if (!outcome.success)
       return
 
     const current = ++attempt
@@ -45,7 +50,7 @@ export function useEnquiry() {
     state.value = 'sending'
 
     try {
-      await $fetch('/api/contact', { method: 'POST', body: parsed.enquiry })
+      await $fetch('/api/contact', { method: 'POST', body: outcome.enquiry })
       settle('sent')
     }
     catch {
@@ -74,6 +79,7 @@ export function useEnquiry() {
   return readonly({
     draft,
     state,
+    failures,
     edit,
     submit,
     clear,
