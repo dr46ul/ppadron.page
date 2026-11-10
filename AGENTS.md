@@ -10,7 +10,7 @@ Issues and specs are tracked in GitHub Issues (`dr46ul/ppadron.page`) via the `g
 
 ### Triage labels
 
-Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. An issue without `ready-for-agent` is the human's to clear: say so before building it, unless they named that issue. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

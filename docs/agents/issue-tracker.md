@@ -10,6 +10,8 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
+- **Before building**: `git log --oneline --grep "#<number>"`, then read the code the issue names. A fix can land under another issue's number and leave this one open; if it is already done, close it with a comment naming the commit rather than building it again.
+- **Link the PR**: end the PR body with `Closes #<number>` so merging closes the issue.
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
