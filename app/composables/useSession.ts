@@ -192,6 +192,12 @@ export function useSession(roleSlugs: string[]) {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   }
 
+  function scrollBehavior(): ScrollBehavior {
+    return reducedMotion()
+      ? 'auto'
+      : 'smooth'
+  }
+
   /**
    * Follow the output to the foot of the document. The print cascade animates
    * opacity and transform only, so a block occupies its full height the moment
@@ -200,10 +206,28 @@ export function useSession(roleSlugs: string[]) {
   function scrollToEnd() {
     window.scrollTo({
       top: document.body.scrollHeight,
-      behavior: reducedMotion()
-        ? 'auto'
-        : 'smooth',
+      behavior: scrollBehavior(),
     })
+  }
+
+  /**
+   * Follow a block that has just printed: to the foot of the page, unless the
+   * block is taller than the window, when the foot would leave the Visitor at
+   * its end and they would have to scroll back up to find where it starts.
+   * Found by the `data-entry` Terminal stamps on each block; with none
+   * rendered, there is only the foot to go to.
+   */
+  function scrollToPrinted(id: number) {
+    const block = document.querySelector(`[data-entry="${id}"]`)
+    const foot = document.body.scrollHeight - window.innerHeight
+    if (block && window.scrollY + block.getBoundingClientRect().top < foot) {
+      block.scrollIntoView({
+        block: 'start',
+        behavior: scrollBehavior(),
+      })
+      return
+    }
+    scrollToEnd()
   }
 
   /** Back to the transcript as it loaded. A reset is not an animation. */
@@ -309,7 +333,7 @@ export function useSession(roleSlugs: string[]) {
           return
 
         target.output = output
-        nextTick(scrollToEnd)
+        nextTick(() => scrollToPrinted(id))
       },
       reducedMotion()
         ? 0
