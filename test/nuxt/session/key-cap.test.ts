@@ -59,6 +59,16 @@ describe('key cap', () => {
     expect(missingClasses(component.classes(), ['px-0', 'border-b'])).toEqual([])
   })
 
+  it('centres a named key on its letters', async () => {
+    const component = await mountSuspended(KeyCap, {
+      slots: {
+        default: () => 'esc',
+      },
+    })
+
+    expect(component.get('span').classes()).toContain('centre-on-letters')
+  })
+
   it('names a glyph key to a screen reader', async () => {
     const names = await Promise.all((['up', 'down', 'enter'] as const).map(async (glyph) => {
       const component = await mountSuspended(KeyCap, {

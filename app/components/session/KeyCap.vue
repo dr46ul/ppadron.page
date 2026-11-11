@@ -2,7 +2,8 @@
 /**
  * One key, drawn as a cap: a glyph for the keys that have one, its name otherwise.
  * A glyph cap drops the library's inline padding so it stays square, and every cap
- * drops the thicker bottom edge, which pushes the content off centre.
+ * drops the thicker bottom edge, which pushes the content off centre. A named key
+ * is trimmed to its letters so they sit in the middle rather than leaning high.
  */
 defineProps<{ glyph?: keyof typeof KEYS }>()
 </script>
@@ -21,6 +22,6 @@ const KEYS = {
       <svg aria-hidden="true" viewBox="0 0 16 16"><path :d="KEYS[glyph].path" /></svg>
       <span class="sr-only">{{ KEYS[glyph].name }}</span>
     </template>
-    <slot v-else />
+    <span v-else class="centre-on-letters"><slot /></span>
   </kbd>
 </template>
