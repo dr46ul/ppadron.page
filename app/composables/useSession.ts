@@ -5,7 +5,7 @@
  *
  * See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
-import type { Scheme } from '#shared/theme'
+import type { ThemeChoice } from '#shared/theme'
 
 export type SessionOutput
   = | 'whoami'
@@ -19,10 +19,10 @@ export type SessionOutput
     | 'unknown'
 
 export interface SessionCommand {
-  /** The canonical spelling, as it is echoed and as the chips advertise it. */
+  /** The canonical spelling, as it is echoed and as the palette lists it. */
   cmd: string
   output: SessionOutput
-  /** What the chip's title and the `help` listing say it does. */
+  /** What the palette and the `help` listing say it does. */
   label: string
   /**
    * How long the machine appears to spend on it. A constant delay is the tell
@@ -102,12 +102,18 @@ export interface MetaCommand {
 export const metaCommands: MetaCommand[] = [
   { cmd: 'reset', label: 'back to how the page loaded' },
   { cmd: 'clear', label: 'empty the scrollback' },
-  { cmd: 'theme', label: 'switch between dark and light' },
+  { cmd: 'theme', label: 'light, dark, or follow the system' },
 ]
 
-/** `theme` on its own toggles; with a scheme it sets that one. */
-const THEME_COMMANDS: Record<string, Scheme | 'toggle'> = {
+/**
+ * `theme` on its own toggles; with a flag it sets that choice. Without the
+ * flag, `theme dark` and `theme light` read the way a Visitor would say them.
+ */
+const THEME_COMMANDS: Record<string, ThemeChoice | 'toggle'> = {
   'theme': 'toggle',
+  'theme --light': 'light',
+  'theme --dark': 'dark',
+  'theme --system': 'system',
   'theme dark': 'dark',
   'theme light': 'light',
 }
@@ -134,8 +140,8 @@ export const aliases: Record<string, string> = {
 }
 
 /**
- * Takes the Role as an argument, so it stays out of `commands`: a chip per Role
- * would grow the row with Content.
+ * Takes the Role as an argument, so it stays out of `commands`: a row per Role
+ * would grow the palette with Content.
  */
 const ROLE_DETAIL = {
   path: 'cat ~/experience/',
@@ -158,7 +164,7 @@ const TOUR: SessionOutput[] = [
 
 /**
  * A terminal's scrollback is finite and so is this one. Without a cap the DOM
- * grows without bound as a visitor works through the command chips.
+ * grows without bound as a visitor works through the commands.
  */
 const SCROLLBACK = 14
 
@@ -346,6 +352,22 @@ export function useSession(roleSlugs: string[]) {
   }
 
   /**
+   * Whether `exec` would run this as something other than `unknown`. A Role
+   * path counts only for a Role that exists: its Command is right, but its
+   * answer would be that there is no such Role.
+   */
+  function recognises(raw: string) {
+    const typed = raw.trim().toLowerCase()
+    const normalised = aliases[typed] ?? typed
+
+    return normalised === 'reset'
+      || normalised === 'clear'
+      || Object.hasOwn(THEME_COMMANDS, normalised)
+      || commands.some(entry => entry.cmd === normalised)
+      || roleSlugs.some(slug => rolePath(slug) === normalised)
+  }
+
+  /**
    * What Tab would turn the prompt into, over every spelling a visitor might
    * be part-way through. Undefined when it would change nothing, so Tab can be
    * handed back to the browser.
@@ -386,6 +408,7 @@ export function useSession(roleSlugs: string[]) {
     input,
     exec,
     openRole,
+    recognises,
     completion,
     recall,
     enquiry,

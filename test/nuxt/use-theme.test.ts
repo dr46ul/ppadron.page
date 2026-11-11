@@ -124,4 +124,93 @@ describe('useTheme', () => {
         .toEqual({ scheme: 'dark', theme: 'terminal' })
     })
   })
+
+  describe('following the system', () => {
+    it('hands the page back to the stylesheet\'s own query', () => {
+      const theme = useTheme()
+      theme.set('light')
+
+      theme.set('system')
+
+      expect(html.dataset.theme).toBeUndefined()
+    })
+
+    it('forgets the theme kept for the next visit', () => {
+      const theme = useTheme()
+      theme.set('light')
+
+      theme.set('system')
+
+      expect(localStorage.getItem('theme')).toBeNull()
+    })
+
+    it('still hands the page back when storage refuses the removal', () => {
+      const theme = useTheme()
+      theme.set('light')
+      vi.stubGlobal('localStorage', {
+        clear: () => {},
+        removeItem: () => {
+          throw new DOMException('denied', 'SecurityError')
+        },
+      })
+
+      theme.set('system')
+
+      expect(html.dataset.theme).toBeUndefined()
+    })
+
+    it('reports the theme the system shows', () => {
+      systemPrefers('light')
+      const theme = useTheme()
+      theme.set('dark')
+
+      theme.set('system')
+
+      expect(theme.scheme.value).toBe('light')
+    })
+
+    it('toggles away from the theme the system shows', () => {
+      systemPrefers('light')
+      const theme = useTheme()
+      theme.set('system')
+
+      theme.toggle()
+
+      expect(theme.scheme.value).toBe('dark')
+    })
+  })
+
+  describe('what was chosen', () => {
+    afterEach(() => clearNuxtState('theme'))
+
+    it.each(['light', 'dark', 'system'] as const)('reports %s once it is chosen', (choice) => {
+      systemPrefers('dark')
+      const theme = useTheme()
+
+      theme.set(choice)
+
+      expect(theme.choice.value).toBe(choice)
+    })
+
+    it('reads a choice the head script applied as that choice', () => {
+      systemPrefers('dark')
+      html.dataset.theme = 'teletype'
+      const theme = useTheme()
+
+      theme.resolve()
+
+      expect(theme.choice.value).toBe('light')
+    })
+
+    it('reads a page painted by the stylesheet alone as following the system', () => {
+      systemPrefers('light')
+      const theme = useTheme()
+      theme.set('dark')
+      delete html.dataset.theme
+
+      theme.resolve()
+
+      expect(theme.choice.value).toBe('system')
+    })
+  })
 })

@@ -44,7 +44,9 @@ curious, never the only way in. Commands the Visitor runs themselves _do_
 print a line at a time, because that is the difference between reading a
 transcript and operating a machine.
 
-**The commands are listed as chips above the prompt, not behind `help`.** A
+**The commands are listed as chips above the prompt, not behind `help`.**
+_Superseded by [ADR-0012](./0012-commands-open-in-a-palette.md), which moves
+them into a palette the Prompt bar opens; the reason below still holds._ A
 Visitor who does not already know that `help` exists is exactly the Visitor
 this page is for.
 

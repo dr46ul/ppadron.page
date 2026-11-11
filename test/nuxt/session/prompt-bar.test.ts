@@ -1,15 +1,15 @@
-import type { Scheme } from '#shared/theme'
+import type { ThemeChoice } from '#shared/theme'
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
-import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { enableAutoUnmount } from '@vue/test-utils'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
+import CommandPalette from '~/components/session/CommandPalette.vue'
 import PromptBar from '~/components/session/PromptBar.vue'
-import { roleOf, rolesOf } from '../text-role'
 
 /**
- * Commands and an availability the real Content cannot supply, so nothing here
- * can go green off the component's own markup or the real command list.
+ * Commands the real Content cannot supply, so nothing here can go green off
+ * the component's own markup or the real command list.
  */
 const commands: SessionCommand[] = [
   {
@@ -30,19 +30,23 @@ const metaCommands: MetaCommand[] = [
   { cmd: 'sweep', label: 'empty the hearth' },
 ]
 
+function recognises(typed: string) {
+  return typed === 'kiln --hot'
+}
+
 function mount(props: {
   modelValue?: string
   completion?: string
-  availability?: Profile['availability']
-  scheme?: Scheme
+  theme?: ThemeChoice
 } = {}) {
   return mountSuspended(PromptBar, {
+    attachTo: document.body,
     props: {
       commands,
       metaCommands,
+      recognises,
       modelValue: '',
-      availability: { open: true, label: 'Free from the equinox' },
-      scheme: 'dark',
+      theme: 'system',
       ...props,
     },
   })
@@ -76,27 +80,6 @@ async function moveInsertion(component: Mounted, start: number, end = start, dir
   await nextTick()
 }
 
-/** The chip row's buttons, and not the theme switch beside the prompt. */
-const CHIPS = '[data-prompt-bar] > div button'
-
-function chip(component: Mounted, cmd: string) {
-  return component.findAll(CHIPS).find(button => button.text().trim() === cmd)!
-}
-
-/** The dark / light switch beside the prompt. */
-function schemeSwitch(component: Mounted) {
-  return component.find('[data-scheme-switch]')
-}
-
-function schemeButton(component: Mounted, scheme: Scheme) {
-  return schemeSwitch(component).findAll('button').find(button => button.text().trim() === scheme)!
-}
-
-/** The availability tag, beside the prompt. */
-function availability(component: Mounted) {
-  return component.find('[data-availability]')
-}
-
 /** A real keydown, so whether it was cancelled can be read back. */
 function press(component: Mounted, init: KeyboardEventInit) {
   const event = new KeyboardEvent('keydown', {
@@ -108,76 +91,176 @@ function press(component: Mounted, init: KeyboardEventInit) {
   return event
 }
 
+/** A shortcut pressed with focus anywhere, so it reaches the document. */
+function chord(init: KeyboardEventInit) {
+  const event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    ...init,
+  })
+  document.body.dispatchEvent(event)
+  return event
+}
+
+function commandsButton(component: Mounted) {
+  return component.find('[data-commands]')
+}
+
+function palette(component: Mounted) {
+  return component.findComponent(CommandPalette)
+}
+
+function isOpen(component: Mounted) {
+  return palette(component).find<HTMLDialogElement>('dialog').element.open
+}
+
+// Each one listens on the document for the shortcut, so one left mounted would
+// answer a chord meant for the next.
+enableAutoUnmount(afterEach)
+
 describe('prompt bar', () => {
-  describe('the chips', () => {
-    it('lists every command it is handed as a chip, and every meta command after them', async () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+    vi.restoreAllMocks()
+  })
+
+  describe('the commands button', () => {
+    it('says what it opens', async () => {
       const component = await mount()
 
-      expect(component.findAll(CHIPS).map(button => button.text().trim()))
-        .toEqual(['cat ~/vault', 'ls ~/kiln', 'sweep'])
+      expect({
+        text: commandsButton(component).find('[data-word]').text(),
+        popup: commandsButton(component).attributes('aria-haspopup'),
+      }).toEqual({ text: 'commands', popup: 'dialog' })
     })
 
-    it('wraps onto further rows rather than scrolling a chip out of sight', async () => {
+    it('opens the palette', async () => {
       const component = await mount()
-      const row = component.find('[data-prompt-bar] > div')
 
-      expect(['flex-wrap', 'overflow-x-auto'].filter(name => row.classes().includes(name)))
-        .toEqual(['flex-wrap'])
+      await commandsButton(component).trigger('click')
+
+      expect(isOpen(component)).toBe(true)
     })
 
-    it('centres each label on its letters, with no padding of its own to pull it off centre', async () => {
+    it('keeps its click from reaching the session, which would pull focus to the prompt', async () => {
       const component = await mount()
-      const centring = ['centre-on-letters']
+      const behind = vi.fn()
+      document.body.addEventListener('click', behind)
 
-      expect(component.findAll(CHIPS).map(button => button.classes().filter(name => name === 'centre-on-letters' || name.startsWith('py-'))))
-        .toEqual([centring, centring, centring])
+      await commandsButton(component).trigger('click')
+      document.body.removeEventListener('click', behind)
+
+      expect(behind).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the shortcut', () => {
+    it.each(['metaKey', 'ctrlKey'])('opens the palette on K with %s, and keeps the browser from taking it', async (modifier) => {
+      const component = await mount()
+
+      const event = chord({ key: 'k', [modifier]: true })
+      await nextTick()
+
+      expect({
+        open: isOpen(component),
+        prevented: event.defaultPrevented,
+      })
+        .toEqual({ open: true, prevented: true })
     })
 
-    it('titles each chip with what it does', async () => {
+    it.each([
+      [
+        'K alone',
+        { key: 'k' },
+      ],
+      [
+        'another key with the modifier',
+        { key: 'j', metaKey: true },
+      ],
+    ])('leaves %s alone', async (_, init) => {
       const component = await mount()
 
-      for (const command of [
-        ...commands,
-        ...metaCommands,
-      ])
-        expect(chip(component, command.cmd).attributes('title')).toBe(command.label)
+      const event = chord(init)
+      await nextTick()
+
+      expect({
+        open: isOpen(component),
+        prevented: event.defaultPrevented,
+      })
+        .toEqual({ open: false, prevented: false })
     })
 
-    it('describes each chip to a keyboard or screen-reader user', async () => {
+    it('stops listening once the prompt bar is gone', async () => {
       const component = await mount()
+      component.unmount()
 
-      // `title` is a pointer-only tooltip; the description is what reaches
-      // focus and touch.
-      for (const command of [
-        ...commands,
-        ...metaCommands,
-      ]) {
-        const id = chip(component, command.cmd).attributes('aria-describedby')!
+      const event = chord({ key: 'k', metaKey: true })
 
-        expect(component.find(`#${id}`).text()).toBe(command.label)
-      }
+      expect(event.defaultPrevented).toBe(false)
     })
 
-    it('runs the command a chip names', async () => {
+    it.each([
+      ['an Apple device', 'MacIntel', '⌘'],
+      ['anything else', 'Win32', 'ctrl'],
+    ])('names the modifier the way %s labels it', async (_, platform, named) => {
+      vi.spyOn(navigator, 'platform', 'get').mockReturnValue(platform)
       const component = await mount()
 
-      await chip(component, 'ls ~/kiln').trigger('click')
-      await chip(component, 'sweep').trigger('click')
+      expect(commandsButton(component).find('[data-modifier]').text()).toBe(named)
+    })
+  })
+
+  describe('the palette', () => {
+    it('lets it shut, so the button can open it again', async () => {
+      const component = await mount()
+      await commandsButton(component).trigger('click')
+
+      palette(component).find<HTMLDialogElement>('dialog').element.close()
+      await nextTick()
+      await commandsButton(component).trigger('click')
+
+      expect(isOpen(component)).toBe(true)
+    })
+
+    it('hands it every command and meta command', async () => {
+      const component = await mount()
+
+      expect({
+        commands: palette(component).props('commands'),
+        metaCommands: palette(component).props('metaCommands'),
+      }).toEqual({ commands, metaCommands })
+    })
+
+    it('hands it what the session would run', async () => {
+      const component = await mount()
+
+      expect(palette(component).props('recognises')).toBe(recognises)
+    })
+
+    it('runs the command picked in it', async () => {
+      const component = await mount()
+
+      palette(component).vm.$emit('run', 'ls ~/kiln')
 
       expect(component.emitted('run')).toEqual([
         ['ls ~/kiln'],
-        ['sweep'],
       ])
     })
 
-    it('keeps a chip click from reaching the session behind it', async () => {
+    it('shows it the theme chosen', async () => {
+      const component = await mount({ theme: 'dark' })
+
+      expect(palette(component).props('theme')).toBe('dark')
+    })
+
+    it('reports a theme chosen in it', async () => {
       const component = await mount()
-      const behind = vi.fn()
-      component.element.parentElement!.addEventListener('click', behind)
 
-      await chip(component, 'cat ~/vault').trigger('click')
+      palette(component).vm.$emit('update:theme', 'light')
 
-      expect(behind).not.toHaveBeenCalled()
+      expect(component.emitted('update:theme')).toEqual([
+        ['light'],
+      ])
     })
   })
 
@@ -216,11 +299,11 @@ describe('prompt bar', () => {
         .toEqual(['text-base'])
     })
 
-    it('invites a pick rather than a click', async () => {
+    it('points at the list for a Visitor with nothing to type', async () => {
       const component = await mount()
 
       expect(prompt(component).attributes('placeholder')).toBe(
-        'type a command, or pick one above',
+        'type a command, or open the list',
       )
     })
 
@@ -421,173 +504,19 @@ describe('prompt bar', () => {
     )
   })
 
-  describe('one line', () => {
-    it('sets the prompt, the theme switch and the availability on one baseline, though their sizes differ', async () => {
-      const component = await mount()
-      const classes = component.find('form').classes()
-
-      expect(['items-baseline', 'items-center'].filter(name => classes.includes(name)))
-        .toEqual(['items-baseline'])
-    })
-
-    it('takes the availability\'s baseline from its words and centres its dot on them', async () => {
-      const component = await mount()
-
-      expect({
-        tag: ['items-baseline', 'items-center'].filter(name => availability(component).classes().includes(name)),
-        dot: availability(component).find('span').classes().includes('self-center'),
-      }).toEqual({
-        tag: ['items-baseline'],
-        dot: true,
-      })
-    })
-  })
-
-  describe('the availability', () => {
-    it('prints the label it is handed rather than a spelling of its own', async () => {
-      const component = await mount()
-
-      expect({
-        label: availability(component).text(),
-        ownSpelling: component.text().includes('Available for freelance'),
-      }).toEqual({ label: 'Free from the equinox', ownSpelling: false })
-    })
-
-    it('accents the availability while Pavel is open to work', async () => {
-      const component = await mount()
-
-      const dot = availability(component).find('span[aria-hidden="true"]')
-
-      expect({
-        label: ['text-accent', 'text-subtle'].filter(name => availability(component).classes().includes(name)),
-        dot: ['bg-success', 'bg-base-300'].filter(name => dot.classes().includes(name)),
-      }).toEqual({
-        label: ['text-accent'],
-        dot: ['bg-success'],
-      })
-    })
-
-    it('mutes the availability once he is not', async () => {
-      const component = await mount({
-        availability: { open: false, label: 'Booked till spring' },
-      })
-      const dot = availability(component).find('span[aria-hidden="true"]')
-
-      expect({
-        text: availability(component).text(),
-        label: ['text-accent', 'text-subtle'].filter(name => availability(component).classes().includes(name)),
-        dot: ['bg-success', 'bg-base-300'].filter(name => dot.classes().includes(name)),
-      }).toEqual({
-        text: 'Booked till spring',
-        label: ['text-subtle'],
-        dot: ['bg-base-300'],
-      })
-    })
-  })
-
-  describe('the theme switch', () => {
-    it('offers dark and light, as one labelled group', async () => {
-      const component = await mount()
-
-      expect({
-        role: schemeSwitch(component).attributes('role'),
-        label: schemeSwitch(component).attributes('aria-label'),
-        options: schemeSwitch(component).findAll('button').map(button => button.text().trim()),
-      }).toEqual({
-        role: 'group',
-        label: 'Theme',
-        options: ['dark', 'light'],
-      })
-    })
-
-    it.each(['dark', 'light'] as const)('presses %s while it is the theme showing', async (scheme) => {
-      const component = await mount({ scheme })
-      const other = scheme === 'dark'
-        ? 'light'
-        : 'dark'
-
-      expect({
-        showing: schemeButton(component, scheme).attributes('aria-pressed'),
-        other: schemeButton(component, other).attributes('aria-pressed'),
-      }).toEqual({ showing: 'true', other: 'false' })
-    })
-
-    it('accents the theme showing and steps the other back', async () => {
-      const component = await mount({ scheme: 'light' })
-
-      expect({
-        showing: schemeButton(component, 'light').classes().includes('text-accent'),
-        other: roleOf(component, '[data-scheme-switch] button', 'dark'),
-      }).toEqual({ showing: true, other: 'text-muted' })
-    })
-
-    it('reports the theme picked', async () => {
-      const component = await mount({ scheme: 'dark' })
-
-      await schemeButton(component, 'light').trigger('click')
-
-      expect(component.emitted('update:scheme')).toEqual([
-        ['light'],
-      ])
-    })
-
-    it('keeps a pick from reaching the session, which would pull focus to the prompt', async () => {
-      const component = await mount()
-      const behind = vi.fn()
-      component.element.parentElement!.addEventListener('click', behind)
-
-      await schemeButton(component, 'light').trigger('click')
-
-      expect(behind).not.toHaveBeenCalled()
-    })
-
-    it('stays on screen on a phone, where the availability tag is hidden', async () => {
-      const component = await mount()
-
-      expect(schemeSwitch(component).classes()).not.toContain('hidden')
-    })
-  })
-
-  describe('text roles', () => {
-    it('sets every chip as a label and the rail they sit on as chrome', async () => {
-      const component = await mount()
-
-      // The meta chips are control text too, not a footnote, so they read at
-      // the same step as the commands rather than a step below them.
-      expect({
-        chips: rolesOf(component, CHIPS),
-        rail: roleOf(component, 'span', 'Run'),
-      })
-        .toEqual({
-          chips: ['text-muted', 'text-muted', 'text-muted'],
-          rail: 'text-subtle',
-        })
-    })
-  })
-
   describe('edges', () => {
-    it('draws every command chip and the bar\'s rule in the control-edge token', async () => {
+    it('draws the bar\'s rule and the commands button in the control-edge token', async () => {
       const component = await mount()
-      const bordered = component.findAll(CHIPS).filter(button =>
-        button.classes().includes('border'),
-      )
-
       const edges = (classes: string[]) =>
         ['border-edge', 'border-base-300'].filter(name => classes.includes(name))
 
       expect({
-        chips: bordered.map(button => edges(button.classes())),
-        rule: edges(component.classes()),
+        rule: edges(component.find('[data-prompt-bar]').classes()),
+        button: edges(commandsButton(component).classes()),
       }).toEqual({
-        chips: commands.map(() => ['border-edge']),
         rule: ['border-edge'],
+        button: ['border-edge'],
       })
-    })
-
-    it('keeps the chip-row divider on the divider token', async () => {
-      const component = await mount()
-
-      expect(component.find('[data-prompt-bar] > div').classes()).toContain('border-base-300')
     })
   })
 })

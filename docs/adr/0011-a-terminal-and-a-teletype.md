@@ -74,11 +74,16 @@ storage before paint, which is the one thing a cookie offered.
 **`theme` is a meta command.** It acts on the Session rather than printing an
 Output, like `clear`: the page changing is the answer. On its own it toggles;
 `theme dark` and `theme light`, or just `dark` and `light`, set one. It is a
-chip, so a Visitor never has to know it exists.
+chip, so a Visitor never has to know it exists. _The switch and the chip are
+superseded by [ADR-0012](./0012-commands-open-in-a-palette.md): the theme is
+chosen in the Command palette, which adds following the system as a third
+choice and `theme --light`, `--dark` and `--system` as its spelling._
 
 **A theme may declare only colours.** `theme-tokens.test.ts` fails if the two
 theme declarations differ in anything but colour, or if either names a
 typeface or a type size.
 
 **The column is 72rem.** It is the width the RUN row needs to stay on one
-line; prose keeps its own measure inside it.
+line; prose keeps its own measure inside it. _The RUN row is gone
+([ADR-0012](./0012-commands-open-in-a-palette.md)); the column was kept as it
+is._

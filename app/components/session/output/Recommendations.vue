@@ -190,17 +190,11 @@ function move(event: KeyboardEvent) {
         aria-hidden="true"
         class="text-subtle text-label mt-4 flex items-center gap-1.5 pointer-coarse:hidden"
       >
-        <kbd class="recommendation-key">
-          <svg viewBox="0 0 16 16"><path d="M8 13V3M4 7l4-4 4 4" /></svg>
-        </kbd>
-        <kbd class="recommendation-key">
-          <svg viewBox="0 0 16 16"><path d="M8 3v10M4 9l4 4 4-4" /></svg>
-        </kbd>
+        <SessionKeyCap glyph="up" />
+        <SessionKeyCap glyph="down" />
         <span class="ml-1">move</span>
         <span class="mx-1">·</span>
-        <kbd class="recommendation-key">
-          <svg viewBox="0 0 16 16"><path d="M13 3v6H3M6 6 3 9l3 3" /></svg>
-        </kbd>
+        <SessionKeyCap glyph="enter" />
         <span class="ml-1">read</span>
       </p>
     </div>

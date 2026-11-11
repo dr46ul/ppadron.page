@@ -5,6 +5,7 @@
  *
  *   pnpm look "ls ~/experience"
  *   pnpm look "cat ~/recommendations" --width 390 --height 844 --scheme light
+ *   pnpm look "whoami" --keys "Meta+k,c,a,ArrowDown"
  *
  * happy-dom lays nothing out, so this is how a change to layout, scrolling,
  * focus or colour gets seen (docs/agents/testing.md). It drives the dev server
@@ -26,6 +27,9 @@ const { values, positionals } = parseArgs({
     width: { type: 'string', default: '1100' },
     height: { type: 'string', default: '800' },
     scheme: { type: 'string', default: 'dark' },
+    // Pressed in order once the Command has printed, comma-separated in
+    // Playwright's spelling, for what only the keyboard opens or moves.
+    keys: { type: 'string', default: '' },
     out: {
       type: 'string',
       default: join(tmpdir(), 'look.png'),
@@ -35,7 +39,7 @@ const { values, positionals } = parseArgs({
 
 const command = positionals.join(' ')
 if (!command) {
-  console.error('usage: pnpm look "<command>" [--width 1100] [--height 800] [--scheme dark|light] [--out file.png]')
+  console.error('usage: pnpm look "<command>" [--width 1100] [--height 800] [--scheme dark|light] [--keys "Meta+k,ArrowDown"] [--out file.png]')
   process.exit(1)
 }
 
@@ -108,6 +112,11 @@ try {
     await page.waitForTimeout(250)
   }
 
+  for (const key of values.keys.split(',').filter(Boolean))
+    await page.keyboard.press(key)
+  if (values.keys)
+    await page.waitForTimeout(300)
+
   const report = await page.evaluate(() => {
     const block = [
       ...document.querySelectorAll('[data-entry]'),
@@ -118,7 +127,9 @@ try {
       blockHeight: Math.round(box.height),
       window: `${window.innerWidth}×${window.innerHeight}`,
       atFoot: Math.ceil(window.scrollY + window.innerHeight) >= document.body.scrollHeight - 1,
-      focus: document.activeElement?.id || document.activeElement?.tagName.toLowerCase(),
+      focus: document.activeElement?.id
+        || document.activeElement?.getAttribute('aria-label')
+        || document.activeElement?.tagName.toLowerCase(),
     }
   })
   await page.screenshot({ path: values.out })

@@ -38,7 +38,7 @@ reachable by alias (`experience`, `work`). Each one prints exactly one kind of
 output. Adding content means adding a Command, not a page section. A Command may
 take an argument that selects which Content its Output prints
 (`cat ~/experience/<slug>`); it is still one Command with one kind of Output,
-and gets one mention in Help rather than a chip per argument.
+and gets one mention in Help rather than a row per argument in the Command palette.
 _Avoid_: Link, route, nav item
 
 **Output**:
@@ -56,12 +56,20 @@ hint suggesting what to run next until a Command is echoed.
 _Avoid_: Feed, log, history
 
 **Prompt bar**:
-The working line at the foot of the Session: a chip for every Command that takes
-no argument, the prompt the Visitor types at, the dark / light theme switch, and
-Pavel's availability. It is always there and is not part of the Transcript.
+The working line at the foot of the Session: the prompt the Visitor types at,
+and the button that opens the Command palette. It is always there, is not part
+of the Transcript, and does not grow as Commands are added.
+Pavel's availability is in the login banner, not here.
 Its prompt owns ↑ and ↓, which recall history as a terminal's do, so an Output
 that walks its own items by key does it only while one of them has focus.
 _Avoid_: Footer, command bar, nav
+
+**Command palette**:
+The modal the Prompt bar opens, from its button or ⌘K / Ctrl+K: every Command
+that takes no argument and every meta command, each beside what it does, then
+the theme choice (light, dark, or follow the system). Typing in it narrows the
+list; Enter runs the highlighted one.
+_Avoid_: Menu, launcher, modal, command bar
 
 **Content**:
 What the site says about Pavel: the Profile, the Roles, the Recommendations,

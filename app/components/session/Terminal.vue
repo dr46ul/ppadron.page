@@ -31,6 +31,7 @@ const {
   input,
   exec,
   openRole,
+  recognises,
   completion,
   recall,
   enquiry,
@@ -41,12 +42,12 @@ const promptBar = useTemplateRef('promptBar')
 const theme = useTheme()
 onMounted(theme.resolve)
 
-const scheme = computed({
-  get: () => theme.scheme.value,
+const themeChoice = computed({
+  get: () => theme.choice.value,
   set: theme.set,
 })
 
-/** What the chip for a block's command says it does, over the block itself. */
+/** What a block's command says it does, printed over the block itself. */
 function labelOf(output: SessionOutput | null) {
   return commands.find(command => command.output === output)?.label
 }
@@ -231,10 +232,10 @@ function focusPrompt(event: MouseEvent) {
     <SessionPromptBar
       ref="promptBar"
       v-model="input"
-      v-model:scheme="scheme"
+      v-model:theme="themeChoice"
       :commands
       :meta-commands
-      :availability="profile.availability"
+      :recognises
       :completion
       @run="exec"
       @recall="recall"
