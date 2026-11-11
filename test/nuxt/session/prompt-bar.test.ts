@@ -134,6 +134,20 @@ describe('prompt bar', () => {
       }).toEqual({ text: 'commands', popup: 'dialog' })
     })
 
+    it('is the library\'s small outlined accent button, resting quieter', async () => {
+      const component = await mount()
+      const classes = commandsButton(component).classes()
+
+      expect([
+        'btn',
+        'btn-outline',
+        'btn-accent',
+        'btn-sm',
+        'text-muted',
+      ].filter(name => !classes.includes(name)))
+        .toEqual([])
+    })
+
     it('opens the palette', async () => {
       const component = await mount()
 

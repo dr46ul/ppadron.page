@@ -147,7 +147,7 @@ defineExpose({
         type="button"
         data-commands
         aria-haspopup="dialog"
-        class="border-edge text-muted hover:border-accent hover:text-accent text-meta ml-auto flex min-h-8 shrink-0 items-center gap-2 self-center border px-2.5"
+        class="btn btn-outline btn-accent btn-sm border-edge text-muted hover:border-accent hover:text-accent-content text-meta ml-auto shrink-0 gap-2 self-center px-2.5 font-normal"
         @click.stop="paletteOpen = true"
       >
         <svg

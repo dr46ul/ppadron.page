@@ -173,7 +173,7 @@ watchPostEffect(() => {
           <button
             type="submit"
             :aria-disabled="locked || undefined"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-meta tracking-[0.15em] uppercase"
+            class="btn btn-outline btn-accent btn-sm px-5 text-meta font-normal tracking-[0.15em] uppercase"
           >
             {{ LABELS[state] ?? 'send' }}
           </button>
