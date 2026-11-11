@@ -59,6 +59,8 @@ _Avoid_: Feed, log, history
 The working line at the foot of the Session: a chip for every Command that takes
 no argument, the prompt the Visitor types at, the dark / light theme switch, and
 Pavel's availability. It is always there and is not part of the Transcript.
+Its prompt owns ↑ and ↓, which recall history as a terminal's do, so an Output
+that walks its own items by key does it only while one of them has focus.
 _Avoid_: Footer, command bar, nav
 
 **Content**:

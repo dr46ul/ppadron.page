@@ -19,7 +19,7 @@ export default defineConfig({
         'server/utils/**',
         'shared/**',
       ],
-      reporter: ['text', 'html', 'lcov'],
+      reporter: ['text', 'html', 'lcov', 'json-summary'],
       // The gate. `pnpm test` fails below these, and CI runs `pnpm test`.
       thresholds: {
         statements: 100,
