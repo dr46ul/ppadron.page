@@ -14,6 +14,14 @@ export const THEMES = {
 
 export const SCHEMES = ['dark', 'light'] as const satisfies Scheme[]
 
+/**
+ * What a Visitor can ask for: one of the two themes, or to go back to whatever
+ * their system prefers. `system` is the absence of a choice, so nothing is kept.
+ */
+export type ThemeChoice = Scheme | 'system'
+
+export const THEME_CHOICES = ['light', 'dark', 'system'] as const satisfies ThemeChoice[]
+
 /** Where an explicit choice is kept between visits. */
 export const THEME_STORAGE_KEY = 'theme'
 

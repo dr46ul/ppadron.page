@@ -98,11 +98,8 @@ async function mountTerminal() {
     /** The login banner, which prints Profile Content of its own. */
     banner: () => component.find('[data-banner]'),
     promptBar: () => component.find('[data-prompt-bar]'),
-    /**
-     * The availability, which the banner and the prompt bar each print. Both
-     * read the one Profile label, so both are asserted together.
-     */
-    availability: () => component.findAll('[data-availability]'),
+    /** The availability, which only the banner prints. */
+    availability: () => component.find('[data-availability]'),
     /**
      * The transcript block one command printed. The banner repeats Content
      * that the outputs also print, so a wiring assertion made against the
@@ -112,10 +109,11 @@ async function mountTerminal() {
       component
         .findAll('[data-entry]')
         .find(entry => entry.find('p')!.text().endsWith(cmd))!,
-    chip: (label: string) =>
+    /** A command's row in the palette, which runs it when clicked. */
+    pick: (cmd: string) =>
       component
-        .findAll('button')
-        .find(button => button.text().trim() === label)!,
+        .findAll('[role="option"]')
+        .find(option => option.find('[data-cmd]').text() === cmd)!,
     /**
      * The transcript holds an Enquiry form of its own, so the prompt has to be
      * identified by the input it wraps rather than by document order.
@@ -134,7 +132,7 @@ async function mountTerminal() {
      * Resend's and not the form refusing it.
      */
     async submitEnquiry() {
-      await this.chip('mail pavel').trigger('click')
+      await this.pick('mail pavel').trigger('click')
       await this.settle()
       await component.find('[name="name"]').setValue('Dagny Vole')
       await component.find('[name="email"]').setValue('dagny@example.test')
@@ -211,7 +209,7 @@ describe('terminal', () => {
     it('stays on screen after clear, though the scrollback goes', async () => {
       const session = await mountTerminal()
 
-      await session.chip('clear').trigger('click')
+      await session.pick('clear').trigger('click')
       await session.component.vm.$nextTick()
 
       expect({
@@ -223,7 +221,7 @@ describe('terminal', () => {
     it('stops saying everything below is printed once clear leaves nothing below', async () => {
       const session = await mountTerminal()
 
-      await session.chip('clear').trigger('click')
+      await session.pick('clear').trigger('click')
       await session.component.vm.$nextTick()
 
       expect(session.banner().text()).not.toContain('already printed')
@@ -243,7 +241,7 @@ describe('terminal', () => {
     it('suggests what to run next once clear has emptied the Transcript', async () => {
       const session = await mountTerminal()
 
-      await session.chip('clear').trigger('click')
+      await session.pick('clear').trigger('click')
       await session.component.vm.$nextTick()
 
       expect(['help', 'whoami'].filter(cmd => !hint(session).text().includes(cmd)))
@@ -253,8 +251,8 @@ describe('terminal', () => {
     it('goes once the next Command prints', async () => {
       const session = await mountTerminal()
 
-      await session.chip('clear').trigger('click')
-      await session.chip('help').trigger('click')
+      await session.pick('clear').trigger('click')
+      await session.pick('help').trigger('click')
       await session.component.vm.$nextTick()
 
       expect(hint(session).exists()).toBe(false)
@@ -263,8 +261,8 @@ describe('terminal', () => {
     it('is not there after reset, which restores the seeded tour', async () => {
       const session = await mountTerminal()
 
-      await session.chip('clear').trigger('click')
-      await session.chip('reset').trigger('click')
+      await session.pick('clear').trigger('click')
+      await session.pick('reset').trigger('click')
       await session.component.vm.$nextTick()
 
       expect({
@@ -277,19 +275,19 @@ describe('terminal', () => {
 
   describe('the availability', () => {
     it('prints the Profile label rather than a spelling of its own', async () => {
-      const { availability, banner, promptBar } = await mountTerminal()
+      const { availability, banner } = await mountTerminal()
 
       expect({
-        shown: availability().map(shown => shown.text()),
-        // Neither place words the availability itself; these two are what
-        // they would say if they did.
-        bannerOwnSpelling: banner().text().includes('Open for freelance work'),
-        promptBarOwnSpelling: promptBar().text().includes('Available for freelance'),
-      }).toEqual({
-        shown: ['Free from the equinox', 'Free from the equinox'],
-        bannerOwnSpelling: false,
-        promptBarOwnSpelling: false,
-      })
+        shown: availability().text(),
+        // What the banner would say if it worded the availability itself.
+        ownSpelling: banner().text().includes('Open for freelance work'),
+      }).toEqual({ shown: 'Free from the equinox', ownSpelling: false })
+    })
+
+    it('prints it in the banner alone, never in the prompt bar', async () => {
+      const { promptBar } = await mountTerminal()
+
+      expect(promptBar().text()).not.toContain('Free from the equinox')
     })
 
     it('separates the label from its own copy, whatever the label ends in', async () => {
@@ -305,26 +303,21 @@ describe('terminal', () => {
     it('accents the availability while Pavel is open to work', async () => {
       const { availability } = await mountTerminal()
 
-      expect(availability().map(shown =>
-        ['text-accent', 'text-subtle'].filter(name => shown.classes().includes(name)),
-      )).toEqual([
-        ['text-accent'],
-        ['text-accent'],
-      ])
+      expect(['text-accent', 'text-subtle'].filter(name => availability().classes().includes(name)))
+        .toEqual(['text-accent'])
     })
 
     it('mutes the availability once he is not', async () => {
       data.profile.availability = { open: false, label: 'Booked till spring' }
       const { availability } = await mountTerminal()
 
-      const muted = {
+      expect({
+        text: availability().text(),
+        colours: ['text-accent', 'text-subtle'].filter(name => availability().classes().includes(name)),
+      }).toEqual({
         text: 'Booked till spring',
         colours: ['text-subtle'],
-      }
-      expect(availability().map(shown => ({
-        text: shown.text(),
-        colours: ['text-accent', 'text-subtle'].filter(name => shown.classes().includes(name)),
-      }))).toEqual([muted, muted])
+      })
     })
   })
 
@@ -427,7 +420,7 @@ describe('terminal', () => {
     it('hands the command list to the Help output', async () => {
       const session = await mountTerminal()
 
-      await session.chip('help').trigger('click')
+      await session.pick('help').trigger('click')
       await session.settle()
 
       const help = session.entries().at(-1)!
@@ -441,13 +434,13 @@ describe('terminal', () => {
     it('hands the shared draft to the Contact output', async () => {
       const session = await mountTerminal()
 
-      await session.chip('mail pavel').trigger('click')
+      await session.pick('mail pavel').trigger('click')
       await session.settle()
       await session.component.find('[name="name"]').setValue('Dagny Vole')
 
       // Running it again replaces the entry, so the form is a fresh instance:
       // the typed name can only come back through the session's own draft.
-      await session.chip('mail pavel').trigger('click')
+      await session.pick('mail pavel').trigger('click')
       await session.settle()
 
       expect(
@@ -474,7 +467,7 @@ describe('terminal', () => {
     it('sends what the Contact output reports, as the delivery will read it', async () => {
       const session = await mountTerminal()
 
-      await session.chip('mail pavel').trigger('click')
+      await session.pick('mail pavel').trigger('click')
       await session.settle()
       await session.component.find('[name="name"]').setValue('  Dagny   Vole ')
       await session.component.find('[name="email"]').setValue('dagny@example.test')
@@ -556,7 +549,7 @@ describe('terminal', () => {
     it('shows a caret while the machine is still thinking', async () => {
       const session = await mountTerminal()
 
-      await session.chip('whoami').trigger('click')
+      await session.pick('whoami').trigger('click')
       await session.component.vm.$nextTick()
 
       const thinking = session.entries().at(-1)!
@@ -582,7 +575,7 @@ describe('terminal', () => {
 
       const seeded = session.entries().at(0)!.find('.session-print').exists()
 
-      await session.chip('whoami').trigger('click')
+      await session.pick('whoami').trigger('click')
       await session.settle()
 
       expect({
@@ -597,13 +590,13 @@ describe('terminal', () => {
 
       // One over the cap of 14, so exactly one block is dropped.
       for (let i = 0; i < 10; i++) {
-        await session.chip('whoami').trigger('click')
+        await session.pick('whoami').trigger('click')
         await session.settle()
       }
 
       const once = session.component.text()
 
-      await session.chip('whoami').trigger('click')
+      await session.pick('whoami').trigger('click')
       await session.settle()
 
       expect({
@@ -665,7 +658,7 @@ describe('terminal', () => {
     it('hands the Profile to the Background output', async () => {
       const session = await mountTerminal()
 
-      await session.chip('cat ~/about').trigger('click')
+      await session.pick('cat ~/about').trigger('click')
       await session.settle()
 
       const text = session.output('cat ~/about').text()
@@ -732,23 +725,22 @@ describe('terminal', () => {
   })
 
   describe('what it hands the prompt bar', () => {
-    it('hands every command and every meta command to the chips', async () => {
+    it('lists every command and every meta command in the palette, the theme as its own row', async () => {
       const { promptBar } = await mountTerminal()
-      // The chip row only: the theme switch beside the prompt is buttons too.
-      const chips = promptBar()
-        .findAll('[data-prompt-bar] > div button')
-        .map(button => button.text().trim())
+      const listed = promptBar()
+        .findAll('[role="option"] [data-cmd]')
+        .map(cmd => cmd.text())
 
-      expect(chips).toEqual([
+      expect(listed).toEqual([
         ...commands.map(command => command.cmd),
-        ...metaCommands.map(command => command.cmd),
+        ...metaCommands.map(command => command.cmd).filter(cmd => cmd !== 'theme'),
       ])
     })
 
-    it('runs the command a chip names', async () => {
+    it('runs a command picked in the palette', async () => {
       const session = await mountTerminal()
 
-      await session.chip('help').trigger('click')
+      await session.pick('help').trigger('click')
       await session.settle()
 
       expect(session.entries().at(-1)!.text()).toContain('this list')
@@ -762,11 +754,22 @@ describe('terminal', () => {
       expect(session.output('help').text()).toContain('this list')
     })
 
-    it('offers a chip for the Background, but none per Role', async () => {
+    it('runs a Command typed in full in the palette that it lists no row for', async () => {
       const session = await mountTerminal()
-      const chips = session.promptBar().findAll('button').map(button => button.text())
+      const find = session.component.find('[role="combobox"]')
 
-      expect(chips.filter(chip => chip === 'cat ~/about' || chip.includes('kiln-and-ash')))
+      await find.setValue(`cat ~/experience/kiln-and-ash`)
+      await find.trigger('keydown', { key: 'Enter' })
+      await session.settle()
+
+      expect(session.output('cat ~/experience/kiln-and-ash').text()).toContain('Kiln technician')
+    })
+
+    it('lists the Background in the palette, but no Role', async () => {
+      const session = await mountTerminal()
+      const listed = session.promptBar().findAll('[data-cmd]').map(cmd => cmd.text())
+
+      expect(listed.filter(cmd => cmd === 'cat ~/about' || cmd.includes('kiln-and-ash')))
         .toEqual(['cat ~/about'])
     })
 
@@ -887,14 +890,14 @@ describe('terminal', () => {
       expect(focus).toHaveBeenCalled()
     })
 
-    it('stays put when a chip is clicked, so the page does not jump', async () => {
-      const { component, promptBar } = await mountTerminal()
+    it('stays put when the commands button is clicked, so the palette keeps focus', async () => {
+      const { component } = await mountTerminal()
       const focus = vi.spyOn(
         component.find<HTMLInputElement>('#prompt').element,
         'focus',
       )
 
-      await promptBar().find('div').trigger('click')
+      await component.find('[data-commands]').trigger('click')
 
       expect(focus).not.toHaveBeenCalled()
     })
@@ -921,7 +924,7 @@ describe('terminal', () => {
       const session = await mountTerminal()
 
       for (let i = 0; i < 10; i++) {
-        await session.chip('whoami').trigger('click')
+        await session.pick('whoami').trigger('click')
         await session.settle()
       }
 
@@ -938,63 +941,60 @@ describe('terminal', () => {
       }))
     }
 
-    function pressed(component: Awaited<ReturnType<typeof mountTerminal>>['component']) {
-      return component
-        .findAll('[data-scheme-switch] button')
+    type Session = Awaited<ReturnType<typeof mountTerminal>>
+
+    function themeRow(session: Session) {
+      return session.component.find('[role="group"][aria-label="Theme"]')
+    }
+
+    function pressed(session: Session) {
+      return themeRow(session)
+        .findAll('button')
         .filter(button => button.attributes('aria-pressed') === 'true')
         .map(button => button.text().trim())
+    }
+
+    function choose(session: Session, choice: string) {
+      return themeRow(session)
+        .findAll('button')
+        .find(button => button.text().trim() === choice)!
+        .trigger('click')
     }
 
     afterEach(() => {
       delete html.dataset.theme
       localStorage.clear()
       clearNuxtState('scheme')
+      clearNuxtState('theme')
       vi.unstubAllGlobals()
     })
 
-    it('shows the theme the system asked for once mounted', async () => {
+    it('shows the system followed when nothing was chosen', async () => {
       systemPrefers('light')
-      const { component } = await mountTerminal()
-      await component.vm.$nextTick()
+      const session = await mountTerminal()
+      await session.component.vm.$nextTick()
 
-      expect(pressed(component)).toEqual(['light'])
+      expect(pressed(session)).toEqual(['system'])
     })
 
     it('shows a theme chosen on an earlier visit once mounted', async () => {
       systemPrefers('dark')
       html.dataset.theme = 'teletype'
-      const { component } = await mountTerminal()
-      await component.vm.$nextTick()
+      const session = await mountTerminal()
+      await session.component.vm.$nextTick()
 
-      expect(pressed(component)).toEqual(['light'])
+      expect(pressed(session)).toEqual(['light'])
     })
 
-    it('repaints the page from the switch', async () => {
-      systemPrefers('dark')
-      const { component } = await mountTerminal()
-
-      await component.find('[data-scheme-switch] button:last-of-type').trigger('click')
-
-      expect({
-        theme: html.dataset.theme,
-        pressed: pressed(component),
-      })
-        .toEqual({
-          theme: 'teletype',
-          pressed: ['light'],
-        })
-    })
-
-    it('keeps the switch in step with the theme chip', async () => {
+    it('repaints the page from the palette', async () => {
       systemPrefers('dark')
       const session = await mountTerminal()
 
-      await session.chip('theme').trigger('click')
-      await session.settle()
+      await choose(session, 'light')
 
       expect({
         theme: html.dataset.theme,
-        pressed: pressed(session.component),
+        pressed: pressed(session),
       })
         .toEqual({
           theme: 'teletype',
@@ -1002,15 +1002,33 @@ describe('terminal', () => {
         })
     })
 
-    it('keeps the switch in step with a theme typed at the prompt', async () => {
+    it('hands the page back to the system from the palette', async () => {
+      systemPrefers('dark')
+      html.dataset.theme = 'teletype'
+      const session = await mountTerminal()
+      await session.component.vm.$nextTick()
+
+      await choose(session, 'system')
+
+      expect({
+        theme: html.dataset.theme,
+        pressed: pressed(session),
+      })
+        .toEqual({
+          theme: undefined,
+          pressed: ['system'],
+        })
+    })
+
+    it('keeps the palette in step with a theme typed at the prompt', async () => {
       systemPrefers('light')
       const session = await mountTerminal()
 
-      await session.run('dark')
+      await session.run('theme --dark')
 
       expect({
         theme: html.dataset.theme,
-        pressed: pressed(session.component),
+        pressed: pressed(session),
       })
         .toEqual({
           theme: 'terminal',

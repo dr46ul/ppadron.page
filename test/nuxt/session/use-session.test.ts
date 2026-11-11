@@ -401,6 +401,7 @@ describe('useSession', () => {
       delete document.documentElement.dataset.theme
       localStorage.clear()
       clearNuxtState('scheme')
+      clearNuxtState('theme')
     })
 
     function scheme() {
@@ -442,6 +443,16 @@ describe('useSession', () => {
       useSession(SLUGS).exec(named)
 
       expect(scheme()).toBe(named)
+    })
+
+    it.each(['light', 'dark', 'system'] as const)('takes `theme --%s` as that choice', (named) => {
+      useTheme().set(named === 'system'
+        ? 'dark'
+        : 'system')
+
+      useSession(SLUGS).exec(`theme --${named}`)
+
+      expect(useTheme().choice.value).toBe(named)
     })
 
     it('reads the theme whatever case it is typed in', () => {
@@ -500,6 +511,37 @@ describe('useSession', () => {
       session.input.value = 'the'
 
       expect(session.completion.value).toBe('theme')
+    })
+  })
+
+  describe('recognising', () => {
+    it('knows every Command, meta command, alias, theme spelling and Role path, whatever the case', () => {
+      const { recognises } = useSession(SLUGS)
+
+      expect([
+        'whoami',
+        'cat ~/about',
+        'reset',
+        'clear',
+        'theme',
+        'Theme --DARK',
+        'theme --system',
+        'dark',
+        'work',
+        ` cat ~/experience/${SLUGS[0]} `,
+      ].filter(typed => !recognises(typed))).toEqual([])
+    })
+
+    it('does not know what it would answer as unknown', () => {
+      const { recognises } = useSession(SLUGS)
+
+      expect([
+        '',
+        'theme sepia',
+        'cat ~/experience/nobody',
+        'constructor',
+        'rm -rf ~',
+      ].filter(typed => recognises(typed))).toEqual([])
     })
   })
 

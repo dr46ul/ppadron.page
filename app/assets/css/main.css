@@ -125,9 +125,8 @@
 
 /* The Session's column, centred, with the gutter growing from a phone's 1rem
    to 2.5rem. The prompt bar spans the screen and uses the same column, so the
-   prompt lines up with the transcript above it. 72rem is the width the chip row
-   needs to stay on one line; prose is held to its own measure
-   inside it by `max-w-prose`. */
+   prompt lines up with the transcript above it. Prose is held to its own
+   measure inside it by `max-w-prose`. */
 @utility session-gutter {
   padding-inline: max(1rem, calc((100% - 72rem) / 2));
 
@@ -304,16 +303,20 @@
     border-left: 1.5px solid currentColor;
   }
 
-  .recommendation-key {
+  /* Wide enough for a glyph, and grows for a key named in letters. */
+  .key-cap {
     display: inline-grid;
     place-items: center;
-    width: 1.5rem;
+    min-width: 1.5rem;
     height: 1.5rem;
+    padding-inline: 0.25rem;
     border: 1px solid var(--color-base-300);
     border-bottom-width: 2px;
+    font-size: var(--text-label);
+    line-height: 1;
   }
 
-  .recommendation-key svg {
+  .key-cap svg {
     width: 0.75rem;
     height: 0.75rem;
     fill: none;
