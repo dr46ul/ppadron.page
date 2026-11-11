@@ -201,7 +201,7 @@ describe('home page', () => {
     })
 
     it('prints the build\'s year in the notice', () => {
-      expect(entry('cat ~/colophon')?.textContent).toContain(
+      expect(page.querySelector('footer')?.textContent).toContain(
         `© ${new Date(builtAt).getUTCFullYear()}`,
       )
     })

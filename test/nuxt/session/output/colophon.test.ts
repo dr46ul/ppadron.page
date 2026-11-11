@@ -36,11 +36,10 @@ function profile(overrides: Partial<Profile> = {}): Profile {
   }
 }
 
-function mount(overrides: Partial<Profile> = {}, year = '2031') {
+function mount(overrides: Partial<Profile> = {}) {
   return mountSuspended(Colophon, {
     props: {
       profile: profile(overrides),
-      year,
     },
   })
 }
@@ -106,56 +105,26 @@ describe('colophon output', () => {
       empty: empty.findAll('p').length,
       emptyText: empty.text(),
     }).toEqual({
-      listed: 4,
-      empty: 3,
+      listed: 3,
+      empty: 2,
       emptyText: expect.stringContaining('this page is the work sample'),
     })
   })
 
-  it('signs the notice with the name and both profiles it is handed', async () => {
-    const component = await mount({
-      name: 'Wilhelmina Ashgrove',
-      links: {
-        github: 'https://example.test/gh-wilhelmina',
-        linkedin: 'https://example.test/li-wilhelmina',
-        repo: 'https://example.test/the-repo',
-      },
-    })
-
-    expect({
-      text: component.text(),
-      hrefs: hrefs(component),
-    }).toEqual({
-      text: expect.stringContaining('Wilhelmina Ashgrove'),
-      hrefs: [
-        'https://example.test/the-repo',
-        'https://example.test/gh-wilhelmina',
-        'https://example.test/li-wilhelmina',
-      ],
-    })
-  })
-
-  it('opens every link without handing over the window', async () => {
+  it('links to the repo alone, leaving the profiles to the footer', async () => {
     const component = await mount()
 
-    expect(component.findAll('a').map(link => link.attributes('rel')))
-      .toEqual(['noopener', 'noopener', 'noopener'])
+    expect(hrefs(component)).toEqual(['https://example.test/the-repo'])
   })
 
-  it('dates the notice by the year it is handed, not by the clock', async () => {
-    vi.setSystemTime(new Date('2033-06-01T00:00:00Z'))
+  it('opens the repo link without handing over the window', async () => {
+    const component = await mount()
 
-    expect([
-      (await mount({}, '2031')).text(),
-      (await mount({}, '2032')).text(),
-    ]).toEqual([
-      expect.stringContaining('© 2031'),
-      expect.stringContaining('© 2032'),
-    ])
+    expect(component.find('a').attributes('rel')).toBe('noopener')
   })
 
-  it('prints the year in the digits it is handed', async () => {
-    expect((await mount({}, '٢٠٢٦')).text()).toContain('© ٢٠٢٦')
+  it('leaves the copyright notice to the footer', async () => {
+    expect((await mount()).text()).not.toContain('©')
   })
 
   it('prints nothing but the Profile it is handed', async () => {
@@ -184,14 +153,13 @@ describe('colophon output', () => {
   })
 
   describe('text roles', () => {
-    it('sets the lede as prose and the stack and copyright as chrome', async () => {
+    it('sets the lede as prose and the stack as chrome', async () => {
       const component = await mount()
 
       expect({
         lede: roleOf(component, 'p', 'No projects gallery'),
         stack: roleOf(component, 'p', 'fortran · cobol'),
-        copyright: roleOf(component, 'p', '©'),
-      }).toEqual({ lede: 'text-body', stack: 'text-subtle', copyright: 'text-subtle' })
+      }).toEqual({ lede: 'text-body', stack: 'text-subtle' })
     })
   })
 })
