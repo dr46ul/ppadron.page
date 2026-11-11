@@ -13,6 +13,7 @@
     "commitlint": "commitlint --edit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "look": "node scripts/look.mjs",
     "test": "vitest run --coverage",
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",

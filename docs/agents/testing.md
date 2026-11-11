@@ -84,12 +84,13 @@ numbers without the build, because `e2e` contributes nothing (above).
 `text-summary`. The totals and the gate are unaffected, and CI prints the whole
 table, but a file missing from the table may be at 100% or may never have been
 counted. `--coverage.skipFull=false` does not bring the rows back: Vitest sets
-the option on the reporter, where the top-level flag does not reach. The `SF:`
-lines in `coverage/lcov.info`, which `pnpm test` already writes, list every file
-that was counted:
+the option on the reporter, where the top-level flag does not reach. Read
+`coverage/coverage-summary.json` instead: every counted file is a key, with its
+lines, statements, functions and branches, and `total` is the gate's own
+figure.
 
 ```sh
-grep '^SF:' coverage/lcov.info
+node -e "const s = require('./coverage/coverage-summary.json'); for (const [f, c] of Object.entries(s)) console.log(c.branches.pct, c.lines.pct, f)"
 ```
 
 ## Where a test goes
@@ -105,6 +106,7 @@ One file per subject, mirroring `app/`:
 | `app/composables/useDateContext.ts`        | `test/nuxt/use-date-context.test.ts`      |
 | `app/composables/useVisitedAt.ts`          | `test/nuxt/use-visited-at.test.ts`        |
 | `app/utils/<name>.ts`                      | `test/unit/utils/<name>.test.ts`          |
+| `app/utils/<name>.ts` that needs the DOM   | `test/nuxt/<name>.test.ts`                |
 | `server/utils/<name>.ts`                   | `test/unit/server/<name>.test.ts`         |
 | `shared/<name>.ts`                         | `test/unit/shared/<name>.test.ts`         |
 | `app/data/*.ts`, the real Content          | `test/unit/content.test.ts`               |
@@ -382,16 +384,24 @@ component renders, and recompute the **value** that token resolves to from the
 stylesheet (see `test/unit/contrast.ts` above). Between them, the unit test
 guards the number and the browser run proves the number reaches the element.
 
-`playwright-core` is already in `devDependencies`. Two things about it:
+**Look before calling a layout, scroll or focus change done:** `pnpm look
+"<command>"` runs one Command in Chromium and prints where its block landed
+(`blockTop`, `blockHeight`, `atFoot`), where focus is, and any console error,
+with a screenshot path to `Read`. `--width`, `--height` and `--scheme light`
+cover a phone and the other theme. It reuses the dev server already running
+from this checkout, found through `.nuxt/nuxt.lock`, and starts one for the run
+otherwise, because a second `nuxt dev` beside a live one refuses to start. For
+anything it does not cover, extend `scripts/look.mjs` rather than writing a
+throwaway beside it.
 
-- **It is CommonJS**, so an ESM script reaches it with `createRequire` and an
-  absolute path rather than an `import`.
-- **It ships no browser.** A fresh clone fails with `Executable doesn't exist`;
-  run `pnpm exec playwright-core install chromium-headless-shell` first. Neither install
-  nor CI does this, because no committed test needs a browser.
+`playwright-core` is already in `devDependencies`, and **ships no browser.** A
+fresh clone fails with `Executable doesn't exist`; run `pnpm exec playwright-core
+install chromium-headless-shell` first. Neither install nor CI does this,
+because no committed test needs a browser.
 
-Drive the server built into `.output`, not the dev server, so what is measured
-is what deploys.
+**Measure contrast against the server built into `.output`**, not the dev
+server, so what is measured is what deploys. Layout and scrolling are the same
+in both, which is why `pnpm look` uses the faster one.
 
 **Two traps make a contrast measurement silently wrong, in opposite
 directions.** Both cost a full false result on issue #32:
