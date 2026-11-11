@@ -222,6 +222,14 @@ with `vi.runAllTimersAsync()` — see `test/nuxt/session/use-session.test.ts`. A
 app is initialised once before the tests run, so anything mutated globally must
 be reset afterwards. `vi.stubGlobal` needs a matching `vi.unstubAllGlobals`.
 
+**Make storage refuse with `vi.stubGlobal('localStorage', …)`, not by spying on
+`Storage.prototype`.** happy-dom's `localStorage` never calls through the
+prototype, so the spy never fires, nothing throws, and a test of the refusal
+passes with the `try/catch` it guards deleted. A spy on the instance does
+reach it, but it is not restored cleanly and leaks into the tests after it.
+Give the stub every method the shared `afterEach` calls (`clear`, in
+`use-theme.test.ts`), or the cleanup throws before it unstubs the global.
+
 **Stub the Visitor's time zone with `vi.stubEnv('TZ', …)`, not by spying on
 `Intl`.** Node re-reads `TZ` whenever it changes, so the zone `Intl` resolves
 to moves with it. A spy on `Intl.DateTimeFormat.prototype.resolvedOptions`
