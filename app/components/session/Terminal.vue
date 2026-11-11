@@ -149,7 +149,7 @@ function focusPrompt(event: MouseEvent) {
           v-for="entry in entries"
           :key="entry.id"
           :data-entry="entry.id"
-          class="mb-[4.5rem] last:mb-0"
+          class="mb-[4.5rem] scroll-mt-10 last:mb-0"
         >
           <!-- Ruled across like a section header, because on a page read top
                to bottom that is what each command is. -->

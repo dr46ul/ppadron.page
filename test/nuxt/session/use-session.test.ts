@@ -858,6 +858,61 @@ describe('useSession', () => {
     })
   })
 
+  describe('following the output', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.unstubAllGlobals()
+      document.querySelectorAll('[data-entry]').forEach(block => block.remove())
+    })
+
+    /**
+     * A page 5000px tall seen through an 800px window, so its foot is reached
+     * at 4200. `top` is where the printed block starts on that page.
+     */
+    async function printBlockAt(top: number) {
+      const session = useSession(SLUGS)
+      vi.spyOn(document.body, 'scrollHeight', 'get').mockReturnValue(5000)
+      vi.stubGlobal('innerHeight', 800)
+      const scrollTo = vi.fn()
+      vi.stubGlobal('scrollTo', scrollTo)
+
+      session.exec('ls ~/experience')
+      const block = document.createElement('div')
+      block.dataset.entry = String(session.entries.value.at(-1)!.id)
+      document.body.append(block)
+      vi.spyOn(block, 'getBoundingClientRect').mockReturnValue(DOMRect.fromRect({ y: top, height: 5000 - top }))
+      const scrollIntoView = vi.spyOn(block, 'scrollIntoView').mockImplementation(() => {})
+      await vi.runAllTimersAsync()
+
+      return {
+        landedOnTop: scrollIntoView.mock.calls,
+        lastScrollTo: scrollTo.mock.calls.at(-1),
+      }
+    }
+
+    it('lands on the top of a block taller than the window, so it reads from its start', async () => {
+      expect(await printBlockAt(1000)).toEqual({
+        landedOnTop: [
+          [
+            { block: 'start', behavior: 'smooth' },
+          ],
+        ],
+        lastScrollTo: [
+          { top: 5000, behavior: 'smooth' },
+        ],
+      })
+    })
+
+    it('follows a block that fits to the foot of the page', async () => {
+      expect(await printBlockAt(4500)).toEqual({
+        landedOnTop: [],
+        lastScrollTo: [
+          { top: 5000, behavior: 'smooth' },
+        ],
+      })
+    })
+  })
+
   describe('a block dropped while the machine is still thinking', () => {
     it('prints nothing and does not fall over', async () => {
       const session = useSession(SLUGS)

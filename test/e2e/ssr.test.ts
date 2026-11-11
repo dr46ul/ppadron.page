@@ -150,17 +150,20 @@ describe('home page', () => {
     })
 
     /**
-     * The quote, because it is what a Recommendation is. The last paragraph of
-     * a long one, because only a quote carried over in full has several, so a
-     * placeholder cannot satisfy this, and a render that dropped all but the
-     * first paragraph fails it.
+     * The quote, because it is what a Recommendation is — its last paragraph,
+     * so a render that dropped all but the first fails should the lead ever
+     * have several. Then every other name, because the rest are listed rather
+     * than quoted, and a list missing one would otherwise go unnoticed.
      */
-    it('prints the Recommendations in the recommendations block', () => {
-      const long = recommendations.find(({ quote }) => quote.length > 1)!
+    it('prints the first Recommendation in full and lists the rest in the recommendations block', () => {
+      const [lead, ...rest] = recommendations
+      const text = entry('cat ~/recommendations')?.textContent ?? ''
 
-      expect(entry('cat ~/recommendations')?.textContent).toContain(
-        long.quote.at(-1),
-      )
+      expect([
+        lead!.quote.at(-1)!,
+        ...rest.map(({ name }) => name),
+      ]
+        .filter(line => !text.includes(line))).toEqual([])
     })
   })
 
