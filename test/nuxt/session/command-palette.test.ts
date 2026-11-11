@@ -368,14 +368,42 @@ describe('command palette', () => {
       ])
     })
 
-    it('closes on a click on the backdrop around it', async () => {
+    it('shows the close button\'s hover accent on its key cap, which sets its own colour', async () => {
       const component = await mount()
 
-      await component.find('dialog').trigger('click')
+      expect(component.get('button[aria-label="Close"] kbd').classes()).toContain('group-hover:text-accent')
+    })
 
-      expect(component.emitted('update:open')).toEqual([
-        [false],
-      ])
+    it('is the library\'s modal, its panel the box', async () => {
+      const component = await mount()
+      const dialog = component.get('dialog')
+
+      expect({
+        modal: dialog.classes().includes('modal'),
+        box: dialog.get('.modal-box').find('[role="listbox"]').exists(),
+      }).toEqual({ modal: true, box: true })
+    })
+
+    // happy-dom does not submit a dialog-method form, so this asserts what the
+    // markup promises and the close itself is confirmed in a browser.
+    it('closes on a click outside through a dialog-method form holding one button', async () => {
+      const component = await mount()
+      const backdrop = component.get('form.modal-backdrop')
+
+      expect({
+        method: backdrop.attributes('method'),
+        buttons: backdrop.findAll('button').length,
+      }).toEqual({ method: 'dialog', buttons: 1 })
+    })
+
+    it('keeps the backdrop\'s button out of the tab order and away from assistive technology', async () => {
+      const component = await mount()
+      const button = component.get('form.modal-backdrop button')
+
+      expect({
+        tabindex: button.attributes('tabindex'),
+        hidden: button.attributes('aria-hidden'),
+      }).toEqual({ tabindex: '-1', hidden: 'true' })
     })
 
     it('stays open on a click inside it', async () => {
