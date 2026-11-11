@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import KeyCap from '~/components/session/KeyCap.vue'
+import { missingClasses } from '../missing-classes'
 
 describe('key cap', () => {
   it('draws the arrow keys and return as glyphs', async () => {
@@ -38,5 +39,44 @@ describe('key cap', () => {
     })
 
     expect(component.element.tagName).toBe('KBD')
+  })
+
+  it('is the library\'s small key cap', async () => {
+    const component = await mountSuspended(KeyCap, {
+      slots: {
+        default: () => 'esc',
+      },
+    })
+
+    expect(missingClasses(component.classes(), ['kbd', 'kbd-sm'])).toEqual([])
+  })
+
+  it('keeps a glyph key square and its edge even', async () => {
+    const component = await mountSuspended(KeyCap, {
+      props: { glyph: 'up' },
+    })
+
+    expect(missingClasses(component.classes(), ['px-0', 'border-b'])).toEqual([])
+  })
+
+  it('centres a named key on its letters', async () => {
+    const component = await mountSuspended(KeyCap, {
+      slots: {
+        default: () => 'esc',
+      },
+    })
+
+    expect(component.get('span').classes()).toContain('centre-on-letters')
+  })
+
+  it('names a glyph key to a screen reader', async () => {
+    const names = await Promise.all((['up', 'down', 'enter'] as const).map(async (glyph) => {
+      const component = await mountSuspended(KeyCap, {
+        props: { glyph },
+      })
+      return component.get('.sr-only').text()
+    }))
+
+    expect(names).toEqual(['up arrow', 'down arrow', 'enter'])
   })
 })

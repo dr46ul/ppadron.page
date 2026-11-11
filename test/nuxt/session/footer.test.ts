@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Footer from '~/components/session/Footer.vue'
+import { missingClasses } from '../missing-classes'
 import { roleOf } from '../text-role'
 
 /**
@@ -66,6 +67,14 @@ describe('session footer', () => {
       'https://example.test/gh-wilhelmina',
       'https://example.test/li-wilhelmina',
     ])
+  })
+
+  it('draws both profiles as plain links that underline on hover, with the site\'s accent ring', async () => {
+    const component = await mount()
+    const wanted = ['link', 'link-hover', 'focus-visible:outline-accent']
+
+    expect(component.findAll('a').map(link => missingClasses(link.classes(), wanted)))
+      .toEqual([[], []])
   })
 
   it('opens every link without handing over the window', async () => {

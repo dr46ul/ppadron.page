@@ -170,10 +170,11 @@ watchPostEffect(() => {
         </label>
 
         <div class="flex flex-wrap items-center gap-4 sm:pl-[6.75rem]">
+          <!-- The library's button is bold; the Session's type is one weight. -->
           <button
             type="submit"
             :aria-disabled="locked || undefined"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-content border px-5 py-1.5 text-meta tracking-[0.15em] uppercase"
+            class="btn btn-outline btn-accent btn-sm px-5 text-meta font-normal tracking-[0.15em] uppercase"
           >
             {{ LABELS[state] ?? 'send' }}
           </button>

@@ -11,9 +11,11 @@ defineProps<{ profile: Profile, year: string }>()
     <p class="text-subtle">
       © {{ year }} {{ profile.name }}
     </p>
+    <!-- The library's link draws its focus ring in the text colour; without
+         `link-accent` the ring is set back to the accent here. -->
     <p class="text-subtle flex gap-4">
       <a
-        class="hover:text-base-content"
+        class="link link-hover focus-visible:outline-accent"
         :href="profile.links.github"
         rel="noopener"
         @click.stop
@@ -21,7 +23,7 @@ defineProps<{ profile: Profile, year: string }>()
         GitHub
       </a>
       <a
-        class="hover:text-base-content"
+        class="link link-hover focus-visible:outline-accent"
         :href="profile.links.linkedin"
         rel="noopener"
         @click.stop

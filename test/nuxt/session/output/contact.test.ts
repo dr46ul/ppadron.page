@@ -131,6 +131,25 @@ describe('contact output', () => {
     }).toEqual({ button: 'send', status: false, alert: false })
   })
 
+  it('draws the send button as the library\'s small outlined accent button, never its disabled one', async () => {
+    const component = await mount({ state: 'sending' })
+    const classes = component.get('button[type="submit"]').classes()
+
+    expect([
+      'btn',
+      'btn-outline',
+      'btn-accent',
+      'btn-sm',
+      'btn-disabled',
+    ].filter(name => classes.includes(name)))
+      .toEqual([
+        'btn',
+        'btn-outline',
+        'btn-accent',
+        'btn-sm',
+      ])
+  })
+
   it('says so and takes no more typing while it is sending', async () => {
     const component = await mount({ state: 'sending' })
 

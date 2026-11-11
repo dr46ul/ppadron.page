@@ -143,11 +143,14 @@ defineExpose({
         </div>
       </div>
 
+      <!-- The library's button is bold and, on hover, fills with the accent, so it
+           is set back to regular weight and the label takes the accent's
+           on-colour (`accent-content`), which is what keeps the key caps legible. -->
       <button
         type="button"
         data-commands
         aria-haspopup="dialog"
-        class="border-edge text-muted hover:border-accent hover:text-accent text-meta ml-auto flex min-h-8 shrink-0 items-center gap-2 self-center border px-2.5"
+        class="btn btn-outline btn-accent btn-sm border-edge text-muted hover:border-accent hover:text-accent-content text-meta ml-auto shrink-0 gap-2 self-center px-2.5 font-normal"
         @click.stop="paletteOpen = true"
       >
         <svg

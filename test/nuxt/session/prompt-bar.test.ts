@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import CommandPalette from '~/components/session/CommandPalette.vue'
 import PromptBar from '~/components/session/PromptBar.vue'
+import { missingClasses } from '../missing-classes'
 
 /**
  * Commands the real Content cannot supply, so nothing here can go green off
@@ -132,6 +133,20 @@ describe('prompt bar', () => {
         text: commandsButton(component).find('[data-word]').text(),
         popup: commandsButton(component).attributes('aria-haspopup'),
       }).toEqual({ text: 'commands', popup: 'dialog' })
+    })
+
+    it('is the library\'s small outlined accent button, resting quieter', async () => {
+      const component = await mount()
+      const classes = commandsButton(component).classes()
+
+      expect(missingClasses(classes, [
+        'btn',
+        'btn-outline',
+        'btn-accent',
+        'btn-sm',
+        'text-muted',
+      ]))
+        .toEqual([])
     })
 
     it('opens the palette', async () => {

@@ -303,20 +303,8 @@
     border-left: 1.5px solid currentColor;
   }
 
-  /* Wide enough for a glyph, and grows for a key named in letters. */
-  .key-cap {
-    display: inline-grid;
-    place-items: center;
-    min-width: 1.5rem;
-    height: 1.5rem;
-    padding-inline: 0.25rem;
-    border: 1px solid var(--color-base-300);
-    border-bottom-width: 2px;
-    font-size: var(--text-label);
-    line-height: 1;
-  }
-
-  .key-cap svg {
+  .kbd svg {
+    display: block;
     width: 0.75rem;
     height: 0.75rem;
     fill: none;

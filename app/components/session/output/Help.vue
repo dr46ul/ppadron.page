@@ -35,7 +35,9 @@ defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
     </p>
 
     <p class="text-subtle mt-1 text-meta">
-      Tab completes · ↑ ↓ walk the history · plain words work too
+      <SessionKeyCap>Tab</SessionKeyCap> completes ·
+      <SessionKeyCap glyph="up" /> <SessionKeyCap glyph="down" /> walk the history ·
+      plain words work too
       (<span class="text-muted">experience</span>,
       <span class="text-muted">contact</span>).
     </p>
