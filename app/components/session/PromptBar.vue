@@ -143,6 +143,9 @@ defineExpose({
         </div>
       </div>
 
+      <!-- The library's button is bold and, on hover, fills with the accent, so it
+           is set back to regular weight and the label takes the accent's
+           on-colour (`accent-content`), which is what keeps the key caps legible. -->
       <button
         type="button"
         data-commands

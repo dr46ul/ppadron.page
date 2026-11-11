@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import KeyCap from '~/components/session/KeyCap.vue'
+import { missingClasses } from '../missing-classes'
 
 describe('key cap', () => {
   it('draws the arrow keys and return as glyphs', async () => {
@@ -47,7 +48,7 @@ describe('key cap', () => {
       },
     })
 
-    expect(['kbd', 'kbd-sm'].filter(name => !component.classes().includes(name))).toEqual([])
+    expect(missingClasses(component.classes(), ['kbd', 'kbd-sm'])).toEqual([])
   })
 
   it('names a glyph key to a screen reader', async () => {

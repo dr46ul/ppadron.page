@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import CommandPalette from '~/components/session/CommandPalette.vue'
 import PromptBar from '~/components/session/PromptBar.vue'
+import { missingClasses } from '../missing-classes'
 
 /**
  * Commands the real Content cannot supply, so nothing here can go green off
@@ -138,13 +139,13 @@ describe('prompt bar', () => {
       const component = await mount()
       const classes = commandsButton(component).classes()
 
-      expect([
+      expect(missingClasses(classes, [
         'btn',
         'btn-outline',
         'btn-accent',
         'btn-sm',
         'text-muted',
-      ].filter(name => !classes.includes(name)))
+      ]))
         .toEqual([])
     })
 

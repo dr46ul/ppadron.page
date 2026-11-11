@@ -110,6 +110,10 @@ onMounted(() => {
     @close="open = false"
     @click.stop
   >
+    <!-- `.stop` on the dialog keeps a click in the palette from reaching the
+         Session behind it, which refocuses the prompt. -->
+    <!-- The modal box caps its width and pads itself; the palette sizes its own
+         box and lets each row pad itself so the row highlight runs edge to edge. -->
     <div class="modal-box bg-base-200 text-base-content border-edge max-h-[min(40rem,calc(100dvh-3rem))] w-[min(36rem,calc(100vw-2rem))] max-w-none flex flex-col border p-0 shadow-2xl">
       <div class="border-base-300 flex items-baseline gap-2 border-b px-4 py-3">
         <span aria-hidden="true" class="text-accent shrink-0 select-none">$</span>
@@ -133,6 +137,7 @@ onMounted(() => {
           @keydown.up.prevent="move(-1)"
           @keydown.enter.prevent="runHighlighted"
         >
+        <!-- The library's kbd sets its own colour, so the cap needs its own hover. -->
         <button
           type="button"
           aria-label="Close"

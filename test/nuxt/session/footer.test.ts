@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Footer from '~/components/session/Footer.vue'
+import { missingClasses } from '../missing-classes'
 import { roleOf } from '../text-role'
 
 /**
@@ -72,7 +73,7 @@ describe('session footer', () => {
     const component = await mount()
     const wanted = ['link', 'link-hover', 'focus-visible:outline-accent']
 
-    expect(component.findAll('a').map(link => wanted.filter(name => !link.classes().includes(name))))
+    expect(component.findAll('a').map(link => missingClasses(link.classes(), wanted)))
       .toEqual([[], []])
   })
 

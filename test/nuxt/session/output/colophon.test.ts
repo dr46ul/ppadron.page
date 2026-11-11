@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Colophon from '~/components/session/output/Colophon.vue'
+import { missingClasses } from '../../missing-classes'
 import { roleOf } from '../../text-role'
 
 /**
@@ -89,8 +90,7 @@ describe('colophon output', () => {
   it('draws the repo link as the library\'s accent link, underlined on hover', async () => {
     const component = await mount()
 
-    expect(['link', 'link-accent', 'link-hover'].filter(name => !component.get('a').classes().includes(name)))
-      .toEqual([])
+    expect(missingClasses(component.get('a').classes(), ['link', 'link-accent', 'link-hover'])).toEqual([])
   })
 
   it('joins the stack it is handed with a middle dot', async () => {

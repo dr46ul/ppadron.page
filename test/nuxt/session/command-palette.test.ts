@@ -386,7 +386,7 @@ describe('command palette', () => {
 
     // happy-dom does not submit a dialog-method form, so this asserts what the
     // markup promises and the close itself is confirmed in a browser.
-    it('closes on a click outside through a dialog-method form holding one button', async () => {
+    it('backs the dialog with a dialog-method form holding one button', async () => {
       const component = await mount()
       const backdrop = component.get('form.modal-backdrop')
 

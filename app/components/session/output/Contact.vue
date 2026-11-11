@@ -170,6 +170,7 @@ watchPostEffect(() => {
         </label>
 
         <div class="flex flex-wrap items-center gap-4 sm:pl-[6.75rem]">
+          <!-- The library's button is bold; the Session's type is one weight. -->
           <button
             type="submit"
             :aria-disabled="locked || undefined"
