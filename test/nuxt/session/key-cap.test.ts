@@ -51,6 +51,14 @@ describe('key cap', () => {
     expect(missingClasses(component.classes(), ['kbd', 'kbd-sm'])).toEqual([])
   })
 
+  it('keeps a glyph key square and its edge even', async () => {
+    const component = await mountSuspended(KeyCap, {
+      props: { glyph: 'up' },
+    })
+
+    expect(missingClasses(component.classes(), ['px-0', 'border-b'])).toEqual([])
+  })
+
   it('names a glyph key to a screen reader', async () => {
     const names = await Promise.all((['up', 'down', 'enter'] as const).map(async (glyph) => {
       const component = await mountSuspended(KeyCap, {

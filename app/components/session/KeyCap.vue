@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-/** One key, drawn as a cap: a glyph for the keys that have one, its name otherwise. */
+/**
+ * One key, drawn as a cap: a glyph for the keys that have one, its name otherwise.
+ * A glyph cap drops the library's inline padding so it stays square, and every cap
+ * drops the thicker bottom edge, which pushes the content off centre.
+ */
 defineProps<{ glyph?: keyof typeof KEYS }>()
 </script>
 
@@ -12,7 +16,7 @@ const KEYS = {
 </script>
 
 <template>
-  <kbd class="kbd kbd-sm">
+  <kbd class="kbd kbd-sm border-b" :class="glyph && 'px-0'">
     <template v-if="glyph">
       <svg aria-hidden="true" viewBox="0 0 16 16"><path :d="KEYS[glyph].path" /></svg>
       <span class="sr-only">{{ KEYS[glyph].name }}</span>
