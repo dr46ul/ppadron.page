@@ -23,7 +23,7 @@ const repoLabel = computed(() =>
     </p>
     <p>
       <a
-        class="text-accent mt-3 inline-block hover:underline"
+        class="link link-accent link-hover mt-3 inline-block"
         :href="profile.links.repo"
         rel="noopener"
         @click.stop

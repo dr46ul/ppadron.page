@@ -68,6 +68,14 @@ describe('session footer', () => {
     ])
   })
 
+  it('draws both profiles as plain links that underline on hover, with the site\'s accent ring', async () => {
+    const component = await mount()
+    const wanted = ['link', 'link-hover', 'focus-visible:outline-accent']
+
+    expect(component.findAll('a').map(link => wanted.filter(name => !link.classes().includes(name))))
+      .toEqual([[], []])
+  })
+
   it('opens every link without handing over the window', async () => {
     const component = await mount()
 

@@ -10,7 +10,7 @@ const emit = defineEmits<{ help: [] }>()
     {{ cmd }}: command not found — try
     <button
       type="button"
-      class="text-accent underline"
+      class="link link-accent"
       @click.stop="emit('help')"
     >
       help

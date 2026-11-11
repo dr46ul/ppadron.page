@@ -13,7 +13,7 @@ defineProps<{ profile: Profile, year: string }>()
     </p>
     <p class="text-subtle flex gap-4">
       <a
-        class="hover:text-base-content"
+        class="link link-hover focus-visible:outline-accent"
         :href="profile.links.github"
         rel="noopener"
         @click.stop
@@ -21,7 +21,7 @@ defineProps<{ profile: Profile, year: string }>()
         GitHub
       </a>
       <a
-        class="hover:text-base-content"
+        class="link link-hover focus-visible:outline-accent"
         :href="profile.links.linkedin"
         rel="noopener"
         @click.stop

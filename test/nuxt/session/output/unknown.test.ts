@@ -27,6 +27,19 @@ describe('unknown output', () => {
     expect(component.emitted('help')).toHaveLength(1)
   })
 
+  it('offers help as a button drawn like an accent link', async () => {
+    const component = await mount()
+    const help = component.get('button')
+
+    expect({
+      tag: help.element.tagName,
+      drawn: ['link', 'link-accent'].filter(name => help.classes().includes(name)),
+    }).toEqual({
+      tag: 'BUTTON',
+      drawn: ['link', 'link-accent'],
+    })
+  })
+
   it('keeps the help click from reaching the session behind it', async () => {
     const component = await mount()
     const behind = vi.fn()

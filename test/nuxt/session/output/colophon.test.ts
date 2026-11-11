@@ -86,6 +86,13 @@ describe('colophon output', () => {
     })
   })
 
+  it('draws the repo link as the library\'s accent link, underlined on hover', async () => {
+    const component = await mount()
+
+    expect(['link', 'link-accent', 'link-hover'].filter(name => !component.get('a').classes().includes(name)))
+      .toEqual([])
+  })
+
   it('joins the stack it is handed with a middle dot', async () => {
     const component = await mount({
       stack: ['fortran', 'cobol', 'apl'],
