@@ -95,8 +95,11 @@ describe('useTheme', () => {
     })
 
     it('still repaints when storage refuses the write', () => {
-      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-        throw new DOMException('full', 'QuotaExceededError')
+      vi.stubGlobal('localStorage', {
+        clear: () => {},
+        setItem: () => {
+          throw new DOMException('full', 'QuotaExceededError')
+        },
       })
 
       useTheme().set('light')
