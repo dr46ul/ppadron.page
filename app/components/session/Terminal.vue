@@ -212,7 +212,6 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputColophon
               v-else-if="entry.output === 'colophon'"
               :profile
-              :year
             />
             <SessionOutputHelp
               v-else-if="entry.output === 'help'"
@@ -240,5 +239,7 @@ function focusPrompt(event: MouseEvent) {
       @run="exec"
       @recall="recall"
     />
+
+    <SessionFooter :profile :year />
   </div>
 </template>

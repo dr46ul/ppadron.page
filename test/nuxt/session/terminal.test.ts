@@ -98,6 +98,7 @@ async function mountTerminal() {
     /** The login banner, which prints Profile Content of its own. */
     banner: () => component.find('[data-banner]'),
     promptBar: () => component.find('[data-prompt-bar]'),
+    footer: () => component.find('footer'),
     /** The availability, which only the banner prints. */
     availability: () => component.find('[data-availability]'),
     /**
@@ -377,44 +378,14 @@ describe('terminal', () => {
     it('hands the Profile to the Colophon output', async () => {
       const { output } = await mountTerminal()
       const printed = output('cat ~/colophon')
-      const hrefs = printed.findAll('a').map(link => link.attributes('href'))
 
       expect({
-        hrefs,
+        hrefs: printed.findAll('a').map(link => link.attributes('href')),
         text: printed.text(),
       }).toEqual({
-        hrefs: expect.arrayContaining([
-          'https://example.test/repo-ashgrove',
-          'https://example.test/gh-ashgrove',
-          'https://example.test/li-ashgrove',
-        ]),
+        hrefs: ['https://example.test/repo-ashgrove'],
         text: expect.stringContaining('duct tape · a longer wrench'),
       })
-    })
-
-    it('dates the Colophon by the visit, and the banner by the build', async () => {
-      await mountTerminal()
-      vi.setSystemTime(new Date('2027-01-01T00:00:01Z'))
-
-      // The second mount is a visit a year after the build, reading the
-      // `built-at` state the first one left behind.
-      const { banner, output } = await mountTerminal()
-
-      expect({
-        colophon: output('cat ~/colophon').text(),
-        banner: banner().text(),
-      }).toEqual({
-        colophon: expect.stringContaining('© 2027'),
-        banner: expect.stringContaining('Last login: Sat 14 Mar, 09:05:07 GMT'),
-      })
-    })
-
-    it('dates the Colophon in the Visitor\'s own time zone and digits', async () => {
-      vi.setSystemTime(new Date('2026-12-31T23:30:00Z'))
-      visitFrom(['ar-EG'], 'Asia/Tokyo')
-      const { output } = await mountTerminal()
-
-      expect(output('cat ~/colophon').text()).toContain('© ٢٠٢٧')
     })
 
     it('hands the command list to the Help output', async () => {
@@ -1076,6 +1047,52 @@ describe('terminal', () => {
       const { banner } = await mountTerminal()
 
       expect(banner().classes()).toContain('border-base-300')
+    })
+  })
+
+  describe('the footer', () => {
+    it('hands the Profile to the footer', async () => {
+      const { footer } = await mountTerminal()
+
+      expect({
+        hrefs: footer().findAll('a').map(link => link.attributes('href')),
+        text: footer().text(),
+      }).toEqual({
+        hrefs: ['https://example.test/gh-ashgrove', 'https://example.test/li-ashgrove'],
+        text: expect.stringContaining('Wilhelmina Ashgrove'),
+      })
+    })
+
+    it('sits under the prompt bar', async () => {
+      const { component } = await mountTerminal()
+
+      expect(component.findAll('[data-prompt-bar], footer').map(found => found.element.tagName))
+        .toEqual(['DIV', 'FOOTER'])
+    })
+
+    it('dates the notice by the visit, and the banner by the build', async () => {
+      await mountTerminal()
+      vi.setSystemTime(new Date('2027-01-01T00:00:01Z'))
+
+      // The second mount is a visit a year after the build, reading the
+      // `built-at` state the first one left behind.
+      const { banner, footer } = await mountTerminal()
+
+      expect({
+        footer: footer().text(),
+        banner: banner().text(),
+      }).toEqual({
+        footer: expect.stringContaining('© 2027'),
+        banner: expect.stringContaining('Last login: Sat 14 Mar, 09:05:07 GMT'),
+      })
+    })
+
+    it('dates the notice in the Visitor\'s own time zone and digits', async () => {
+      vi.setSystemTime(new Date('2026-12-31T23:30:00Z'))
+      visitFrom(['ar-EG'], 'Asia/Tokyo')
+      const { footer } = await mountTerminal()
+
+      expect(footer().text()).toContain('© ٢٠٢٧')
     })
   })
 
