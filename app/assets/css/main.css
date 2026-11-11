@@ -265,6 +265,62 @@
   .session-print li {
     animation-delay: calc((var(--i, 0) + 2) * 45ms);
   }
+
+  /* A Recommendation read from the list prints in the way its block did, one
+     line at a time off `--p`. It starts a beat late, once its name (moved by
+     `flip`) has left the row it was in. */
+  .recommendation-arrive > blockquote > p,
+  .recommendation-arrive [data-credit] {
+    animation: session-line 200ms ease-out both;
+    animation-delay: calc(60ms + var(--p, 0) * 45ms);
+  }
+
+  /* The row the replaced one lands in only fades: its name arrives by moving,
+     and a row that also rose would carry the name with it. That includes
+     the session's own print, which would otherwise play on any row a swap
+     mounts. */
+  .session-print li.recommendation-arrive {
+    animation: none;
+  }
+
+  .recommendation-arrive :is(.recommendation-mark, [data-role], [data-length]) {
+    animation: session-fade 200ms ease-out 120ms both;
+  }
+
+  /* An up chevron, pointing where the row's quote will go. Drawn rather than
+     typed, because Courier Prime has no arrow and a fallback face would set
+     one at its own size. */
+  /* On the name's line rather than centred on the row, which holds two. A
+     box with no text sits at its row's baseline, so it is placed by its own
+     line box instead: half a line down is the middle of the name. */
+  .recommendation-mark {
+    align-self: start;
+    justify-self: center;
+    width: 0.55ch;
+    height: 0.55ch;
+    margin-top: 0.5lh;
+    rotate: 45deg;
+    border-top: 1.5px solid currentColor;
+    border-left: 1.5px solid currentColor;
+  }
+
+  .recommendation-key {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--color-base-300);
+    border-bottom-width: 2px;
+  }
+
+  .recommendation-key svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: square;
+  }
 }
 
 @keyframes caret-blink {
@@ -280,11 +336,19 @@
   }
 }
 
+@keyframes session-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .caret,
   .session-busy,
   .session-print > *,
-  .session-print li {
+  .session-print li,
+  .recommendation-arrive > blockquote > p,
+  .recommendation-arrive [data-credit] {
     animation: none;
   }
 

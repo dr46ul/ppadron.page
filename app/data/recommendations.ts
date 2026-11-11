@@ -4,6 +4,10 @@
  * come from freelance clients, and the page says so plainly rather than
  * letting a visitor infer client references.
  *
+ * The order is the order printed. The first is quoted in full when the block
+ * prints and the rest are listed by name, so the first is the one a Visitor
+ * reads without asking: the shortest, from the most senior of the six.
+ *
  * A `[bracketed]` string is Content Pavel has yet to supply.
  * `test/unit/content.test.ts` fails while one remains, so none can ship.
  */
@@ -21,6 +25,14 @@ export interface Recommendation {
 export const recommendations: Recommendation[] = [
   {
     quote: [
+      'Pavel is a perfect team player with a high degree of skill, always willing to help others, participate in hard problems and grow his individual knowledge. I enjoyed working with him immensely and think he can be an asset to any team, both in terms of front-end velocity and by strengthening team culture. Highly recommended!',
+    ],
+    name: 'Jake Hammond',
+    title: 'Director of Ecommerce',
+    company: 'Rogue Fitness',
+  },
+  {
+    quote: [
       'During my time working with Pavel at Rogue Fitness he was great at working around unique challenges for the front end of our mobile application. Making sure that our website showed the correct content, layout, or styles as required within our mobile app.',
       'Pavel always improved  upon feedback and made sure that he was bringing the best solutions possible to the table.',
       'Pavel was a great team mate and fun to collaborate with.',
@@ -36,14 +48,6 @@ export const recommendations: Recommendation[] = [
     ],
     name: 'Valery Kuzmenka',
     title: 'Hybrid Mobile App/Full-stack Developer',
-    company: 'Rogue Fitness',
-  },
-  {
-    quote: [
-      'Pavel is a perfect team player with a high degree of skill, always willing to help others, participate in hard problems and grow his individual knowledge. I enjoyed working with him immensely and think he can be an asset to any team, both in terms of front-end velocity and by strengthening team culture. Highly recommended!',
-    ],
-    name: 'Jake Hammond',
-    title: 'Director of Ecommerce',
     company: 'Rogue Fitness',
   },
   {
