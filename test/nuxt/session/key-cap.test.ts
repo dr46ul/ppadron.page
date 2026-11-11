@@ -39,4 +39,25 @@ describe('key cap', () => {
 
     expect(component.element.tagName).toBe('KBD')
   })
+
+  it('is the library\'s small key cap', async () => {
+    const component = await mountSuspended(KeyCap, {
+      slots: {
+        default: () => 'esc',
+      },
+    })
+
+    expect(['kbd', 'kbd-sm'].filter(name => !component.classes().includes(name))).toEqual([])
+  })
+
+  it('names a glyph key to a screen reader', async () => {
+    const names = await Promise.all((['up', 'down', 'enter'] as const).map(async (glyph) => {
+      const component = await mountSuspended(KeyCap, {
+        props: { glyph },
+      })
+      return component.get('.sr-only').text()
+    }))
+
+    expect(names).toEqual(['up arrow', 'down arrow', 'enter'])
+  })
 })

@@ -9,11 +9,20 @@ const GLYPHS = {
   down: 'M8 3v10M4 9l4 4 4-4',
   enter: 'M13 3v6H3M6 6 3 9l3 3',
 }
+
+const NAMES = {
+  up: 'up arrow',
+  down: 'down arrow',
+  enter: 'enter',
+}
 </script>
 
 <template>
-  <kbd class="key-cap">
-    <svg v-if="glyph" viewBox="0 0 16 16"><path :d="GLYPHS[glyph]" /></svg>
+  <kbd class="kbd kbd-sm">
+    <template v-if="glyph">
+      <svg aria-hidden="true" viewBox="0 0 16 16"><path :d="GLYPHS[glyph]" /></svg>
+      <span class="sr-only">{{ NAMES[glyph] }}</span>
+    </template>
     <slot v-else />
   </kbd>
 </template>

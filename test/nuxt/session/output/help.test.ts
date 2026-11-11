@@ -89,10 +89,16 @@ describe('help output', () => {
     }).toEqual({
       items: 0,
       text: expect.stringContaining(
-        'Tab completes · ↑ ↓ walk the history · plain words work too '
+        'Tab completes · up arrow down arrow walk the history · plain words work too '
         + '(experience, contact).',
       ),
     })
+  })
+
+  it('draws Tab and both arrows in its closing hint as key caps, read by name', async () => {
+    const component = await mount([], [])
+
+    expect(component.findAll('kbd').map(key => key.text())).toEqual(['Tab', 'up arrow', 'down arrow'])
   })
 
   it('documents the form that opens one Role, whatever Commands it is handed', async () => {
