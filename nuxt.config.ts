@@ -20,9 +20,6 @@ export default defineNuxtConfig({
       // No `data-theme`: the stylesheet follows the system until the Visitor
       // chooses, and the script applies that choice before first paint. See
       // docs/adr/0011-a-terminal-and-a-teletype.md.
-      htmlAttrs: {
-        lang: 'en',
-      },
       script: [
         { innerHTML: themeScript, tagPosition: 'head' },
       ],

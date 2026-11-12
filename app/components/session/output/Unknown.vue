@@ -5,7 +5,7 @@ defineProps<{ cmd: string }>()
 const emit = defineEmits<{ help: [] }>()
 
 /** A Command name, so it reads the same in every Locale. */
-const help = 'help'
+const helpCommand = 'help'
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const help = 'help'
           class="link link-accent"
           @click.stop="emit('help')"
         >
-          {{ help }}
+          {{ helpCommand }}
         </button>
       </template>
     </i18n-t>
