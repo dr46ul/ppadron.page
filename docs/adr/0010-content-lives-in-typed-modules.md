@@ -36,4 +36,6 @@ HTML either, so the Role summaries are what search engines index.
 
 **Translation is the trigger to reopen this.** If long prose becomes painful to
 translate once i18n lands, moving it to per-locale files is the next step. That
-doesn't need a database either.
+doesn't need a database either. _Reopened by
+[ADR-0015](./0015-content-is-typed-modules-per-locale.md): Content is one set of
+typed modules per Locale, and the Recommendations stay one shared module._
