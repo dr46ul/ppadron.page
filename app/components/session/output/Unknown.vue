@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-defineProps<{ cmd: string }>()
+defineProps<{
+  cmd: string
+  /** The Command that lists the commands; a name, so it is never translated. */
+  helpCommand: string
+}>()
 
 /** The session decides what `help` means; this only reports the ask. */
 const emit = defineEmits<{ help: [] }>()
-
-/** A Command name, so it reads the same in every Locale. */
-const helpCommand = 'help'
 </script>
 
 <template>

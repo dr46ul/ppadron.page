@@ -10,9 +10,9 @@ const en: { unknown: { notFound: string } } = JSON.parse(enFile)
  * A command the real list cannot supply, so the assertion cannot go green off
  * the component's own markup.
  */
-function mount(cmd = 'sudo make me a sandwich') {
+function mount(cmd = 'sudo make me a sandwich', helpCommand = 'help') {
   return mountSuspended(Unknown, {
-    props: { cmd },
+    props: { cmd, helpCommand },
   })
 }
 
@@ -23,6 +23,12 @@ describe('unknown output', () => {
     expect(component.text()).toBe(
       en.unknown.notFound.replace('{cmd}', 'xyzzy --twice').replace('{help}', 'help'),
     )
+  })
+
+  it('offers the help command it is handed', async () => {
+    const component = await mount('xyzzy', 'assist')
+
+    expect(component.get('button').text()).toBe('assist')
   })
 
   it('asks for help rather than running it', async () => {
