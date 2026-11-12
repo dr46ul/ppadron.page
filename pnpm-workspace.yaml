@@ -10,6 +10,11 @@ trustPolicyExclude:
 shellEmulator: true
 trustPolicyExcludePrune: true
 
+overrides:
+  # Only @intlify/eslint-plugin-vue-i18n asks for glob 10, which is vulnerable
+  # (GHSA-3g3m-2fjr-6pw4) and has no patched 10.x. The plugin runs at lint time.
+  '@intlify/eslint-plugin-vue-i18n>glob': ^14.0.2
+
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
