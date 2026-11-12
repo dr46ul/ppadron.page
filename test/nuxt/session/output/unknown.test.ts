@@ -1,6 +1,10 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
+import enFile from '~~/i18n/locales/en.json?raw'
 import Unknown from '~/components/session/output/Unknown.vue'
+
+/** Parsed from the raw file: the module compiles a plain JSON import. */
+const en: { unknown: { notFound: string } } = JSON.parse(enFile)
 
 /**
  * A command the real list cannot supply, so the assertion cannot go green off
@@ -16,7 +20,9 @@ describe('unknown output', () => {
   it('prints the command it is handed', async () => {
     const component = await mount('xyzzy --twice')
 
-    expect(component.text()).toContain('xyzzy --twice: command not found')
+    expect(component.text()).toBe(
+      en.unknown.notFound.replace('{cmd}', 'xyzzy --twice').replace('{help}', 'help'),
+    )
   })
 
   it('asks for help rather than running it', async () => {
