@@ -1,0 +1,5 @@
+{
+  "unknown": {
+    "notFound": "{cmd}: command not found — try {help}"
+  }
+}

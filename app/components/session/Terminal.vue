@@ -37,6 +37,10 @@ const {
   enquiry,
 } = useSession(roles.map(role => role.slug))
 
+// Fails loudly if `help` leaves the command list, rather than printing a name
+// that no longer runs.
+const helpCommand = commands.find(command => command.output === 'help')!.cmd
+
 const promptBar = useTemplateRef('promptBar')
 
 const theme = useTheme()
@@ -221,7 +225,8 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputUnknown
               v-else
               :cmd="entry.cmd"
-              @help="exec('help')"
+              :help-command
+              @help="exec(helpCommand)"
             />
           </div>
         </div>

@@ -8,16 +8,18 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
-  modules: ['@nuxt/eslint', '@nuxt/fonts', '@nuxt/test-utils/module'],
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/fonts',
+    '@nuxt/test-utils/module',
+    '@nuxtjs/i18n',
+  ],
 
   app: {
     head: {
       // No `data-theme`: the stylesheet follows the system until the Visitor
       // chooses, and the script applies that choice before first paint. See
       // docs/adr/0011-a-terminal-and-a-teletype.md.
-      htmlAttrs: {
-        lang: 'en',
-      },
       script: [
         { innerHTML: themeScript, tagPosition: 'head' },
       ],
@@ -49,6 +51,22 @@ export default defineNuxtConfig({
     // prerendered pages, and there is one page. Left on, hydration waits on a
     // fetch of it that adds nothing the inline payload does not already hold.
     payloadExtraction: false,
+  },
+
+  // The URL decides the Locale and the browser's language is never read, so
+  // detection is off. See docs/adr/0013-each-locale-is-a-prerendered-page.md.
+  i18n: {
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', language: 'en', file: 'en.json' },
+    ],
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: false,
+    experimental: {
+      // Without it the Messages are served by a Nitro route, a function in
+      // front of the page. See ADR-0013.
+      prerenderMessages: true,
+    },
   },
 
   css: ['@/assets/css/main.css'],

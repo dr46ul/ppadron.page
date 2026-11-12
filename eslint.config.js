@@ -1,4 +1,5 @@
 import antfu from '@antfu/eslint-config'
+import vueI18n from '@intlify/eslint-plugin-vue-i18n'
 
 /**
  * Vue keeps template comments in development, so a comment beside the root
@@ -108,6 +109,50 @@ export default antfu(
         'error',
         'shorthand',
         { sameNameShorthand: 'always' },
+      ],
+    },
+  },
+  ...vueI18n.configs['flat/base'],
+  {
+    files: ['app/**/*.{ts,vue}', 'i18n/locales/*.json'],
+    settings: {
+      'vue-i18n': {
+        localeDir: './i18n/locales/*.json',
+        messageSyntaxVersion: '^11.0.0',
+      },
+    },
+    rules: {
+      '@intlify/vue-i18n/no-missing-keys': 'error',
+      '@intlify/vue-i18n/no-missing-keys-in-other-locales': 'error',
+      '@intlify/vue-i18n/no-unused-keys': [
+        'error',
+        {
+          src: './app',
+          extensions: ['.ts', '.vue'],
+        },
+      ],
+      '@intlify/vue-i18n/no-dynamic-keys': 'error',
+      '@intlify/vue-i18n/valid-plural-forms': 'error',
+      '@intlify/vue-i18n/key-format-style': ['error', 'camelCase'],
+      '@intlify/vue-i18n/no-duplicate-keys-in-locale': 'error',
+    },
+  },
+  {
+    // Raw text is gated one Output at a time as its copy moves into Messages.
+    files: ['app/components/session/output/Unknown.vue'],
+    rules: {
+      '@intlify/vue-i18n/no-raw-text': [
+        'error',
+        {
+          attributes: {
+            '/.+/': [
+              'aria-label',
+              'placeholder',
+              'title',
+              'alt',
+            ],
+          },
+        },
       ],
     },
   },
