@@ -4,7 +4,9 @@ Every date the Session prints — the banner's "Last login" and the Colophon's
 © year — is formatted with the platform's `Intl`, in the Visitor's language and
 time zone. The prerendered page has no Visitor to ask, so it ships the dates
 in English and UTC, with the build's year. Once the page is mounted, the
-browser is read and the dates are formatted again.
+browser is read and the dates are formatted again. _Amended by
+[ADR-0014](./0014-outputs-read-the-translator-for-their-own-copy.md): the
+language is the Session's Locale, and only the time zone is read after load._
 
 That reverses two of ADR-0008's consequences. The banner is now rewritten on
 the client, which ADR-0008 had rejected, and the © year is the Visitor's
@@ -51,7 +53,9 @@ clock follow the Visitor, at the cost of the Unix `last` look the banner had.
 Year's Eve keeps the old year; no timer is worth that.
 
 **Output components still see no locale** (ADR-0007). `Terminal` formats the
-year and hands the Colophon a finished string.
+year and hands the Colophon a finished string. _Amended by
+[ADR-0014](./0014-outputs-read-the-translator-for-their-own-copy.md): an Output
+can read the Locale through the translator._
 
 **Role periods are out of this record.** `'2022 — now'` is Content, and "now" is
 a word to translate, not a date to format; it moves with the i18n work.

@@ -39,7 +39,10 @@ takes `modelValue`, `state` and `email` and emits `update:modelValue` and
 they print. An Output may import code, such as the shared Enquiry schema
 `Contact` checks its draft against; it still may not import Content or the
 session. Adding a Command means adding an Output with its own props, not
-another consumer of the session.
+another consumer of the session. _Amended by
+[ADR-0014](./0014-outputs-read-the-translator-for-their-own-copy.md): an Output
+may also read the translator for its own Interface copy; Content and the
+session are still off limits._
 
 **The Prompt bar is held to the same rule**, though no Command prints it: it
 takes the Commands, the availability, the prompt as `v-model` and the
@@ -60,7 +63,8 @@ props, which is why the outputs reached 100% coverage at all.
 
 **A test that mounts an output never fakes a session.** There is no session to
 fake: `useSession()` has one caller, and its own tests call it directly rather
-than through a component.
+than through a component. Nor does it fake the translator
+([ADR-0014](./0014-outputs-read-the-translator-for-their-own-copy.md)).
 
 **The login banner is Content too.** It prints `profile.name`, `profile.headline`
 and `profile.availability.label`, so the page says one thing about Pavel's

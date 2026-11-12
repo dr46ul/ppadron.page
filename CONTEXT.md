@@ -67,8 +67,9 @@ _Avoid_: Footer, command bar, nav
 **Command palette**:
 The modal the Prompt bar opens, from its button or ⌘K / Ctrl+K: every Command
 that takes no argument and every meta command, each beside what it does, then
-the theme choice (light, dark, or follow the system). Typing in it narrows the
-list; Enter runs the highlighted one.
+the theme choice (light, dark, or follow the system) and the language choice,
+which switches the Locale. Typing in it narrows the list; Enter runs the
+highlighted one.
 _Avoid_: Menu, launcher, modal, command bar
 
 **Content**:
@@ -81,6 +82,20 @@ _Avoid_: Copy, data, text
 The Session's own voice: "command not found", "sending…", the Help hints.
 It belongs to the component that speaks it and never changes with Content.
 _Avoid_: Content, labels, strings
+
+**Locale**:
+A language the Session is served in, at its own address: English at `/`,
+Spanish at `/es`. The address decides it, never the Visitor's browser, and the
+Visitor changes it from the Command palette or at the prompt. Every Locale has
+the same Commands and the same Roles in the same order, in its own words. A
+Recommendation reads the same in every Locale.
+_Avoid_: Language (in code), region
+
+**Message**:
+One sentence of Interface copy in one Locale, which a component asks the
+translator for by its key and fills in with named values. A Locale's Messages
+are read and edited together, as one translation. Content is never a Message.
+_Avoid_: String, label, text
 
 ### The person
 
