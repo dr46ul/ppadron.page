@@ -44,7 +44,8 @@ holds them as `Intl.DateTimeFormatOptions` shaped like vue-i18n's
 locale unchanged and the calls become `d(value, { key: name, timeZone })`.
 `useDateContext` still supplies the zone, but takes the locale from the
 library's current one instead of the browser, so translated text never sits
-beside dates in another language.
+beside dates in another language. _Since done: the formats are under each
+Locale in `i18n/i18n.config.ts`, and `useDateContext` returns only the zone._
 
 **The locale decides the format.** Field order, separators and a 12- or 24-hour
 clock follow the Visitor, at the cost of the Unix `last` look the banner had.
@@ -58,9 +59,11 @@ year and hands the Colophon a finished string. _Amended by
 can read the Locale through the translator._
 
 **Role periods are out of this record.** `'2022 — now'` is Content, and "now" is
-a word to translate, not a date to format; it moves with the i18n work.
+a word to translate, not a date to format; it moves with the i18n work. _Since
+done: a Role stores machine months, printed through the named formats in UTC,
+and "now" is a Message._
 
-The tests split the same way. `test/unit/utils/date-format.test.ts` pins the
+The tests split the same way. `test/nuxt/date-formats.test.ts` pins the
 exact strings. The composables' tests pin the build's values before mount and
 the browser's after, and `useDateContext`'s pin a hydration without a mismatch. `Terminal`'s tests pin the
 wiring, and `test/e2e/ssr.test.ts` pins the English and UTC the build ships.

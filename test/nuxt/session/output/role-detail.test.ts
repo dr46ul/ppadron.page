@@ -1,9 +1,10 @@
 import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import RoleDetail from '~/components/session/output/RoleDetail.vue'
 import { en, fill } from '../../messages'
 import { roleOf } from '../../text-role'
+import { visitFrom } from '../../visit-from'
 
 /** A Role the real `app/data/experience.ts` cannot supply. */
 function role(overrides: Partial<Role> = {}): Role {
@@ -11,9 +12,8 @@ function role(overrides: Partial<Role> = {}): Role {
     slug: 'kiln-and-ash',
     company: 'Kiln & Ash',
     title: 'Kiln technician',
-    period: '2011 — 2013',
-    exactPeriod: 'Feb 2011 – Sep 2013',
-    since: '2011',
+    from: '2011-02',
+    to: '2013-09',
     summary: 'The short summary only the Experience list prints.',
     tech: ['AtAGlanceOnly'],
     account: ['Fired the first batch.', 'Rebuilt the flue.'],
@@ -32,6 +32,10 @@ function mount(overrides: Partial<Role> = {}) {
 }
 
 describe('role detail output', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('prints the company, the title and the exact period', async () => {
     const component = await mount()
 
@@ -40,10 +44,27 @@ describe('role detail output', () => {
       .toEqual([])
   })
 
-  it('gives the period a machine-readable start date', async () => {
-    const component = await mount({ since: '2011' })
+  it('runs a Role still held to now', async () => {
+    const component = await mount({ from: '2023-06', to: null })
 
-    expect(component.get('time').attributes('datetime')).toBe('2011')
+    expect(component.get('time').text()).toBe(`Jun 2023 – ${en.period.now}`)
+  })
+
+  /**
+   * A month is stored as its first instant in UTC, which west of UTC is still
+   * the month before.
+   */
+  it('prints the stored months for a Visitor west of UTC', async () => {
+    visitFrom('America/Los_Angeles')
+    const component = await mount({ from: '2011-02', to: '2013-09' })
+
+    expect(component.get('time').text()).toBe('Feb 2011 – Sep 2013')
+  })
+
+  it('gives the period a machine-readable start date', async () => {
+    const component = await mount({ from: '2011-02' })
+
+    expect(component.get('time').attributes('datetime')).toBe('2011-02')
   })
 
   it('prints each paragraph of the account as its own paragraph, in order', async () => {

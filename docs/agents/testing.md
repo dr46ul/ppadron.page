@@ -235,9 +235,9 @@ Give the stub every method the shared `afterEach` calls (`clear`, in
 to moves with it. A spy on `Intl.DateTimeFormat.prototype.resolvedOptions`
 does not reach the component in the `nuxt` environment, and the test quietly
 runs in the machine's own zone instead — green on a laptop in one zone, red in
-CI in another. Unstub with `vi.unstubAllEnvs()`. `navigator.languages` does
-stub with `vi.spyOn(navigator, 'languages', 'get')`. Both are in `visitFrom`,
-`test/nuxt/visit-from.ts`.
+CI in another. Unstub with `vi.unstubAllEnvs()`. `visitFrom`, in
+`test/nuxt/visit-from.ts`, does this. The browser's language is never stubbed:
+a date's language is the Session's Locale (ADR-0014).
 
 **`mountSuspended` resolves with the component already mounted**, so anything
 a component holds before `onMounted` is invisible to an assertion made after

@@ -43,13 +43,13 @@ describe('content', () => {
 
   describe('roles', () => {
     it('are ordered most recent first', () => {
-      const starts = roles.map(role => role.since)
+      const starts = roles.map(role => role.from)
 
       expect(starts).toEqual([...starts].sort().reverse())
     })
 
     it('do not share a start', () => {
-      const starts = roles.map(role => role.since)
+      const starts = roles.map(role => role.from)
 
       expect(starts).toEqual([
         ...new Set(starts),

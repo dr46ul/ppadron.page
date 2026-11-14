@@ -27,7 +27,7 @@ changes is that each Locale gets its own set, and the Messages hold none of it.
 ## Consequences
 
 **A missing translation is a compile error.** A Locale's Profile is a
-`Profile` and its Roles are `RoleEntry`s. A field left out fails the type
+`Profile` and its Roles are `Role`s. A field left out fails the type
 check, not the page.
 
 **The Content rules hold for every Locale.** `test/unit/content.test.ts` checks

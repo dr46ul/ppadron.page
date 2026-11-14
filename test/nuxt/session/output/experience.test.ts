@@ -10,9 +10,8 @@ function role(overrides: Partial<Role> = {}): Role {
     slug: 'acme',
     company: 'Acme',
     title: 'Engineer',
-    period: '2022 — now',
-    exactPeriod: 'May 2022 – now',
-    since: '2022',
+    from: '2022-05',
+    to: null,
     summary: 'Built the thing that made the other thing work.',
     tech: ['TypeScript', 'Vue'],
     account: ['Built the thing, then the other thing.'],
@@ -33,7 +32,6 @@ describe('experience output', () => {
       role({
         company: 'Acme',
         title: 'Engineer',
-        period: '2022 — now',
         summary: 'Built the thing that made the other thing work.',
       }),
     ])
@@ -42,7 +40,7 @@ describe('experience output', () => {
     expect([
       'Acme',
       'Engineer',
-      '2022 — now',
+      `2022 — ${en.period.now}`,
       'Built the thing that made the other thing work.',
     ].filter(field => !text.includes(field))).toEqual([])
   })
@@ -72,9 +70,9 @@ describe('experience output', () => {
 
   it('keeps the order it was handed', async () => {
     const component = await mount([
-      role({ company: 'Newest', since: '2022' }),
-      role({ company: 'Middle', since: '2019' }),
-      role({ company: 'Oldest', since: '2016' }),
+      role({ company: 'Newest', from: '2022-01' }),
+      role({ company: 'Middle', from: '2019-01' }),
+      role({ company: 'Oldest', from: '2016-01' }),
     ])
 
     expect(component.findAll('li').map(item => item.text())).toEqual([
@@ -86,9 +84,9 @@ describe('experience output', () => {
 
   it('accents the most recent role and mutes the rest', async () => {
     const component = await mount([
-      role({ since: '2022' }),
-      role({ since: '2019' }),
-      role({ since: '2016' }),
+      role({ from: '2022-01' }),
+      role({ from: '2019-01' }),
+      role({ from: '2016-01' }),
     ])
 
     expect(component.findAll('time').map(time =>
@@ -100,18 +98,26 @@ describe('experience output', () => {
     ])
   })
 
-  it('gives each role a machine-readable start date', async () => {
+  it('prints the years of a role that has ended', async () => {
     const component = await mount([
-      role({ since: '2013', period: '2013 — 2016' }),
+      role({ from: '2013-04', to: '2016-08' }),
     ])
 
-    expect(component.get('time').attributes('datetime')).toBe('2013')
+    expect(component.get('time').text()).toBe('2013 — 2016')
+  })
+
+  it('gives each role a machine-readable start date', async () => {
+    const component = await mount([
+      role({ from: '2013-04', to: '2016-08' }),
+    ])
+
+    expect(component.get('time').attributes('datetime')).toBe('2013-04')
   })
 
   it('numbers the roles for the print cascade', async () => {
     const component = await mount([
-      role({ since: '2022' }),
-      role({ since: '2019' }),
+      role({ from: '2022-01' }),
+      role({ from: '2019-01' }),
     ])
 
     expect(component.findAll('li').map(item => item.attributes('style')))
@@ -121,8 +127,8 @@ describe('experience output', () => {
   describe('a note before a role', () => {
     function note(overrides: Partial<RoleNote> = {}): RoleNote {
       return {
-        period: '2011 — 2014',
-        since: '2011',
+        from: '2011',
+        to: '2014',
         name: 'Freelance',
         title: 'Potter',
         summary: 'Threw bowls for several kilns.',
@@ -135,10 +141,10 @@ describe('experience output', () => {
       const component = await mount([
         role({
           company: 'Newest',
-          since: '2022',
+          from: '2022-01',
           before: note({ name: 'Freelance' }),
         }),
-        role({ company: 'Oldest', since: '2009' }),
+        role({ company: 'Oldest', from: '2009-01' }),
       ])
 
       expect(component.findAll('li').map(item => item.text())).toEqual([
@@ -220,10 +226,10 @@ describe('experience output', () => {
     it('leaves the print cascade numbering to the roles', async () => {
       const component = await mount([
         role({
-          since: '2022',
+          from: '2022-01',
           before: note(),
         }),
-        role({ since: '2019' }),
+        role({ from: '2019-01' }),
       ])
 
       expect(component.findAll('li').map(item => item.attributes('style')))
@@ -250,8 +256,8 @@ describe('experience output', () => {
 
     it('gives every role a button of its own, reporting its slug', async () => {
       const component = await mount([
-        role({ slug: 'kiln-and-ash', company: 'Kiln & Ash', since: '2022' }),
-        role({ slug: 'kelp-and-tar', company: 'Kelp & Tar', since: '2019' }),
+        role({ slug: 'kiln-and-ash', company: 'Kiln & Ash', from: '2022-01' }),
+        role({ slug: 'kelp-and-tar', company: 'Kelp & Tar', from: '2019-01' }),
       ])
 
       await button(component, 'Kelp & Tar').trigger('click', { detail: 1 })

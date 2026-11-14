@@ -85,6 +85,11 @@
       "system": "system"
     }
   },
+  "period": {
+    "months": "{from} – {to}",
+    "now": "now",
+    "years": "{from} — {to}"
+  },
   "promptBar": {
     "commands": "commands",
     "label": "Run a command",

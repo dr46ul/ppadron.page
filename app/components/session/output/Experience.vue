@@ -5,6 +5,8 @@ defineProps<{ roles: Role[] }>()
 
 const emit = defineEmits<{ open: [slug: string] }>()
 
+const period = useRolePeriod()
+
 /**
  * Selecting the name by dragging across it also ends in a click, which is not a
  * request to open. A pointer click has already collapsed any older selection,
@@ -29,18 +31,18 @@ function open(event: MouseEvent, slug: string) {
     <ul class="mt-5 flex flex-col gap-8">
       <template
         v-for="(role, index) in roles"
-        :key="role.since"
+        :key="role.from"
       >
         <li
           :style="{ '--i': index }"
           class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
         >
           <time
-            :datetime="role.since"
+            :datetime="role.from"
             class="text-meta tabular-nums"
             :class="index === 0 ? 'text-accent' : 'text-muted'"
           >
-            {{ role.period }}
+            {{ period.years(role) }}
           </time>
 
           <div>
@@ -70,10 +72,10 @@ function open(event: MouseEvent, slug: string) {
           class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
         >
           <time
-            :datetime="role.before.since"
+            :datetime="role.before.from"
             class="text-muted text-meta tabular-nums"
           >
-            {{ role.before.period }}
+            {{ period.years(role.before) }}
           </time>
           <div>
             <p class="flex flex-wrap items-baseline gap-x-3">
