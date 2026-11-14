@@ -18,9 +18,14 @@
 import type { SessionOutput } from '~/composables/useSession'
 import { useCommandLabel } from '~/composables/useCommandLabel'
 import { commands, metaCommands } from '~/composables/useSession'
-import { roles } from '~/data/experience'
-import { profile } from '~/data/profile'
 import { recommendations } from '~/data/recommendations'
+
+// Terminal is the only component that picks a Locale's Content; the Outputs
+// below receive it already in the right language.
+const { d, locale } = useI18n()
+const content = computed(() => contentFor(locale.value))
+const profile = computed(() => content.value.profile)
+const roles = computed(() => content.value.roles)
 
 // Terminal is the only session consumer: no output component injects it, so
 // there is nothing to provide down the tree. See
@@ -36,7 +41,7 @@ const {
   completion,
   recall,
   enquiry,
-} = useSession(roles.map(role => role.slug))
+} = useSession(roles.value.map(role => role.slug))
 
 // Fails loudly if `help`, `whoami` or the background leaves the command list, rather than
 // printing a name that no longer runs.
@@ -74,7 +79,6 @@ function labelOf(output: SessionOutput | null) {
 const builtAt = useState('built-at', () => Date.now())
 const visitedAt = useVisitedAt(builtAt.value)
 const timeZone = useDateContext()
-const { d } = useI18n()
 
 const lastLogin = computed(() =>
   d(builtAt.value, { key: 'lastLogin', timeZone: timeZone.value }),

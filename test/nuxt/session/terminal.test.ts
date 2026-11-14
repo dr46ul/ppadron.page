@@ -27,8 +27,8 @@ const data = vi.hoisted(() => ({
   ],
 }))
 
-vi.mock('~/data/profile', () => ({ profile: data.profile }))
-vi.mock('~/data/experience', () => ({ roles: data.roles }))
+vi.mock('~/data/en/profile', () => ({ profile: data.profile }))
+vi.mock('~/data/en/experience', () => ({ roles: data.roles }))
 vi.mock('~/data/recommendations', () => ({
   recommendations: data.recommendations,
 }))
