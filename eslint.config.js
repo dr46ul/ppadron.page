@@ -142,6 +142,7 @@ export default antfu(
     files: [
       'app/components/session/CommandPalette.vue',
       'app/components/session/Footer.vue',
+      'app/components/session/KeyCap.vue',
       'app/components/session/PromptBar.vue',
       'app/components/session/output/Background.vue',
       'app/components/session/output/Colophon.vue',

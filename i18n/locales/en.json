@@ -16,6 +16,11 @@
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
   },
+  "keys": {
+    "down": "down arrow",
+    "enter": "enter",
+    "up": "up arrow"
+  },
   "palette": {
     "backdropClose": "close",
     "close": "Close",

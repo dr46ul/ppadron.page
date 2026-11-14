@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import KeyCap from '~/components/session/KeyCap.vue'
+import { en } from '../messages'
 import { missingClasses } from '../missing-classes'
 
 describe('key cap', () => {
@@ -77,6 +78,6 @@ describe('key cap', () => {
       return component.get('.sr-only').text()
     }))
 
-    expect(names).toEqual(['up arrow', 'down arrow', 'enter'])
+    expect(names).toEqual([en.keys.up, en.keys.down, en.keys.enter])
   })
 })
