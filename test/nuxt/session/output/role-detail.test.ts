@@ -15,7 +15,6 @@ function role(overrides: Partial<Role> = {}): Role {
     from: '2011-02',
     to: '2013-09',
     summary: 'The short summary only the Experience list prints.',
-    tech: ['AtAGlanceOnly'],
     account: ['Fired the first batch.', 'Rebuilt the flue.'],
     stack: ['Clay', 'Glaze', 'Cone 10'],
     ...overrides,
@@ -92,7 +91,7 @@ describe('role detail output', () => {
     const component = await mount()
 
     const text = component.text()
-    expect(['AtAGlanceOnly', 'The short summary only', '2011 — 2013'].filter(field => text.includes(field)))
+    expect(['The short summary only', '2011 — 2013'].filter(field => text.includes(field)))
       .toEqual([])
   })
 

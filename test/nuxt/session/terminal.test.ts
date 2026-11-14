@@ -27,8 +27,33 @@ const data = vi.hoisted(() => ({
   ],
 }))
 
-vi.mock('~/data/profile', () => ({ profile: data.profile }))
-vi.mock('~/data/experience', () => ({ roles: data.roles }))
+// Getters, so the Content is read when a Terminal asks for it and a test can
+// change the fixtures before it mounts one. The technology names are the one
+// part of a Role the Locales share, so they come from a module of their own.
+vi.mock('~/data/en/profile', () => ({
+  get profile() {
+    const { stack: _stack, skills: _skills, ...prose } = data.profile
+    return prose
+  },
+}))
+vi.mock('~/data/en/experience', () => ({
+  get roles() {
+    return data.roles.map(({ stack: _stack, ...prose }) => prose)
+  },
+}))
+vi.mock('~/data/technology', () => ({
+  get profileTechnology() {
+    return { stack: data.profile.stack, skills: data.profile.skills }
+  },
+  get roleTechnology() {
+    return Object.fromEntries(
+      data.roles.map(role => [
+        role.slug,
+        { stack: role.stack },
+      ]),
+    )
+  },
+}))
 vi.mock('~/data/recommendations', () => ({
   recommendations: data.recommendations,
 }))
@@ -70,7 +95,6 @@ function roleFixture(): Role {
     from: '1998-03',
     to: '2001-06',
     summary: 'Rebuilt the firing schedule so nothing cracked on the way down.',
-    tech: ['pyrometry'],
     account: ['Spent three winters learning what cooling too fast does to glaze.'],
     stack: ['pyrometry', 'cone packs'],
   }
@@ -605,13 +629,13 @@ describe('terminal', () => {
 
   describe('reading a Role', () => {
     it('hands the Role the Command names to the Role detail output', async () => {
-      const session = await mountTerminal()
       data.roles.push({
         ...roleFixture(),
         slug: 'kelp-and-tar',
         from: '1994-01',
         account: ['Dried kelp on the roof until the tar ran out.'],
       })
+      const session = await mountTerminal()
 
       await session.run('cat ~/experience/kelp-and-tar')
 

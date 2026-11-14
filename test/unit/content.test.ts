@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { roles } from '../../app/data/experience'
-import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
+import { roleTechnology } from '../../app/data/technology'
+import { contents, written } from '../../app/utils/content'
 
 /**
  * The real Content. Every other test mocks it or reads a value back from it, and
@@ -28,7 +28,9 @@ function stringsIn(value: unknown, path: string): Found[] {
   )
 }
 
-describe('content', () => {
+const [reference] = contents()
+
+describe.each(contents())('content in $code', ({ profile, roles }) => {
   it('holds no [bracketed] placeholder', () => {
     const paths = [
       ...stringsIn(profile, 'profile'),
@@ -39,6 +41,16 @@ describe('content', () => {
       .map(({ path }) => path)
 
     expect(paths, `placeholders left in:\n  ${paths.join('\n  ')}`).toEqual([])
+  })
+
+  it('has the same Roles, in the same order, as the first Locale', () => {
+    expect(roles.map(role => role.slug)).toEqual(reference!.roles.map(role => role.slug))
+  })
+
+  it('has the same Role dates as the first Locale', () => {
+    expect(roles.map(role => [role.from, role.to])).toEqual(
+      reference!.roles.map(role => [role.from, role.to]),
+    )
   })
 
   describe('roles', () => {
@@ -73,5 +85,21 @@ describe('content', () => {
 
       expect(invalid).toEqual([])
     })
+  })
+})
+
+describe.each(written())('technology for the Roles of $code', ({ roles }) => {
+  it('is shaped like the Roles it belongs to', () => {
+    const technologyShape = roles.map(({ slug }) => ({
+      slug,
+      before: Boolean(roleTechnology[slug]?.before),
+      history: roleTechnology[slug]?.history?.map(project => project.length),
+    }))
+
+    expect(technologyShape).toEqual(roles.map(role => ({
+      slug: role.slug,
+      before: Boolean(role.before),
+      history: role.history?.map(project => project.phases.length),
+    })))
   })
 })
