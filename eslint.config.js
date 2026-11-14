@@ -144,6 +144,7 @@ export default antfu(
       'app/components/session/output/Colophon.vue',
       'app/components/session/output/Experience.vue',
       'app/components/session/output/Help.vue',
+      'app/components/session/output/Recommendations.vue',
       'app/components/session/output/RoleDetail.vue',
       'app/components/session/output/Unknown.vue',
     ],

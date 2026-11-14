@@ -2,6 +2,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Recommendations from '~/components/session/output/Recommendations.vue'
+import { en, fill } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function recommendation(
@@ -137,7 +138,7 @@ describe('recommendations output', () => {
         const component = await three()
 
         expect(await moved(component, 1)).toEqual([
-          'Also on file',
+          en.recommendations.alsoOnFile,
           'First',
           'row: Second',
           'Third',
@@ -343,7 +344,7 @@ describe('recommendations output', () => {
       const component = await two()
 
       expect(component.get('ul').element.previousElementSibling?.textContent?.trim())
-        .toBe('Also on file')
+        .toBe(en.recommendations.alsoOnFile)
     })
 
     it('gives each row its name, title, company and the length of its quote', async () => {
@@ -354,13 +355,28 @@ describe('recommendations output', () => {
         name: row.get('[data-name]').text(),
         role: row.get('[data-role]').text(),
         length: row.get('[data-length]').text(),
-      }).toEqual({ name: 'Second', role: 'Lead UI Developer, Kiln & Ash', length: '5 words' })
+      }).toEqual({
+        name: 'Second',
+        role: 'Lead UI Developer, Kiln & Ash',
+        length: en.recommendations.words.split(' | ')[1]!.replace('{n}', '5'),
+      })
+    })
+
+    it('counts a one-word quote in the singular', async () => {
+      const component = await mount([
+        recommendation(),
+        recommendation({
+          quote: ['Superb.'],
+        }),
+      ])
+
+      expect(component.get('li [data-length]').text()).toBe(en.recommendations.words.split(' | ')[0]!.replace('{n}', '1'))
     })
 
     it('says what a row does to a screen reader, ahead of what it shows', async () => {
       const component = await two()
 
-      expect(component.get('li button').text()).toMatch(/^Read\s+Second/)
+      expect(component.get('li button').text()).toMatch(new RegExp(`^${fill(en.recommendations.read, { name: 'Second' })}`))
     })
 
     it('shows the keys that walk it, kept out of the accessibility tree', async () => {
@@ -369,7 +385,7 @@ describe('recommendations output', () => {
 
       expect({
         hidden: hint.attributes('aria-hidden'),
-        words: ['move', 'read'].filter(word => !hint.text().includes(word)),
+        words: [en.recommendations.keyMove, en.recommendations.keyRead].filter(word => !hint.text().includes(word)),
       }).toEqual({ hidden: 'true', words: [] })
     })
 
@@ -381,7 +397,7 @@ describe('recommendations output', () => {
       expect({
         list: component.find('ul').exists(),
         keys: component.find('[data-keys]').exists(),
-        heading: component.text().includes('Also on file'),
+        heading: component.text().includes(en.recommendations.alsoOnFile),
       }).toEqual({ list: false, keys: false, heading: false })
     })
   })
@@ -430,7 +446,7 @@ describe('recommendations output', () => {
       text: component.text(),
       items: component.findAll('li').length,
     }).toEqual({
-      text: expect.stringContaining('Verbatim from LinkedIn. Colleagues and managers, not clients.'),
+      text: expect.stringContaining(en.recommendations.provenance),
       items: 0,
     })
   })
@@ -472,9 +488,9 @@ describe('recommendations output', () => {
       expect({
         name: roleOf(component, '[data-name]', 'Second'),
         role: roleOf(component, '[data-role]', 'Lead UI Developer'),
-        length: roleOf(component, '[data-length]', 'words'),
-        heading: roleOf(component, 'p', 'Also on file'),
-        keys: roleOf(component, '[data-keys]', 'move'),
+        length: roleOf(component, '[data-length]', 'word'),
+        heading: roleOf(component, 'p', en.recommendations.alsoOnFile),
+        keys: roleOf(component, '[data-keys]', en.recommendations.keyMove),
       }).toEqual({
         name: undefined,
         role: 'text-subtle',
@@ -489,7 +505,7 @@ describe('recommendations output', () => {
         recommendation(),
       ])
 
-      expect(roleOf(component, 'p', 'Verbatim from LinkedIn')).toBe('text-subtle')
+      expect(roleOf(component, 'p', en.recommendations.provenance)).toBe('text-subtle')
     })
   })
 })

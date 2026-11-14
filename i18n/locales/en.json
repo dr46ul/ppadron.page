@@ -13,6 +13,16 @@
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
   },
+  "recommendations": {
+    "alsoOnFile": "Also on file",
+    "credit": " — {title}, {company}",
+    "keyMove": "move",
+    "keyRead": "read",
+    "provenance": "Verbatim from LinkedIn. Colleagues and managers, not clients.",
+    "read": "Read {name}",
+    "role": "{title}, {company}",
+    "words": "{n} word | {n} words"
+  },
   "roleDetail": {
     "techStack": "Tech stack",
     "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}"
