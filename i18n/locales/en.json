@@ -1,4 +1,8 @@
 {
+  "background": {
+    "education": "Education",
+    "skills": "Skills"
+  },
   "colophon": {
     "lede": "No projects gallery, so this page is the work sample: a statically prerendered Nuxt site with one serverless function behind the form, and the whole of it is readable."
   },
