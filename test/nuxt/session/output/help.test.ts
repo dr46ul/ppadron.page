@@ -61,7 +61,7 @@ describe('help output', () => {
 
     expect(component.findAll('li').map(item => item.text())).toEqual([
       expect.stringContaining('cat ~/vault'),
-      expect.stringContaining(en.commands.clear),
+      expect.stringContaining(en.metaCommands.clear),
     ])
   })
 
@@ -150,7 +150,7 @@ describe('help output', () => {
 
       expect({
         label: roleOf(component, 'span', en.commands.colophon),
-        metaLabel: roleOf(component, 'span', en.commands.reset),
+        metaLabel: roleOf(component, 'span', en.metaCommands.reset),
         command: roleOf(component, 'span', 'cat ~/vault'),
         metaCommand: roleOf(component, 'span', 'reset'),
       }).toEqual({

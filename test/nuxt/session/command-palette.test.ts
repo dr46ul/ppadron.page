@@ -466,7 +466,7 @@ describe('command palette', () => {
       const component = await mount()
 
       expect(options(component).map(option => option.find('[data-label]').text()))
-        .toEqual([en.commands.whoami, en.commands.experience, en.commands.clear])
+        .toEqual([en.commands.whoami, en.commands.experience, en.metaCommands.clear])
     })
   })
 })

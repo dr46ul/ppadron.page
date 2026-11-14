@@ -14,14 +14,11 @@
   },
   "commands": {
     "background": "the longer story",
-    "clear": "empty the scrollback",
     "colophon": "how this page is built",
     "contact": "send me a message",
     "experience": "the work itself",
     "help": "this list",
     "recommendations": "what colleagues say",
-    "reset": "back to how the page loaded",
-    "theme": "light, dark, or follow the system",
     "whoami": "who I am"
   },
   "contact": {
@@ -61,6 +58,11 @@
     "down": "down arrow",
     "enter": "enter",
     "up": "up arrow"
+  },
+  "metaCommands": {
+    "clear": "empty the scrollback",
+    "reset": "back to how the page loaded",
+    "theme": "light, dark, or follow the system"
   },
   "palette": {
     "backdropClose": "close",

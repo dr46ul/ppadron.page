@@ -19,9 +19,9 @@ export function useCommandLabel() {
   }) satisfies Record<CommandOutput, string>)
 
   const meta = computed(() => ({
-    reset: t('commands.reset'),
-    clear: t('commands.clear'),
-    theme: t('commands.theme'),
+    reset: t('metaCommands.reset'),
+    clear: t('metaCommands.clear'),
+    theme: t('metaCommands.theme'),
   }) satisfies Record<MetaCommand['cmd'], string>)
 
   return (command: SessionCommand | MetaCommand) =>

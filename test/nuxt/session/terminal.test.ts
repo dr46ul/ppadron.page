@@ -407,7 +407,7 @@ describe('terminal', () => {
       const help = session.entries().at(-1)!.text()
       expect([
         ...commands.map(command => en.commands[command.output]),
-        ...metaCommands.map(command => en.commands[command.cmd]),
+        ...metaCommands.map(command => en.metaCommands[command.cmd]),
       ].filter(label => !help.includes(label))).toEqual([])
     })
 
@@ -521,7 +521,7 @@ describe('terminal', () => {
       await session.output('sudo rm -rf /').find('button').trigger('click')
       await session.settle()
 
-      expect(session.entries().at(-1)!.text()).toContain(en.commands.clear)
+      expect(session.entries().at(-1)!.text()).toContain(en.metaCommands.clear)
     })
   })
 
@@ -1091,7 +1091,7 @@ describe('terminal', () => {
         footer: footer().text(),
         banner: banner().text(),
       }).toEqual({
-        footer: expect.stringContaining('© 2027'),
+        footer: expect.stringContaining(fill(en.footer.copyright, { year: '2027', name: 'Wilhelmina Ashgrove' })),
         banner: expect.stringContaining(fill(en.banner.lastLogin, { date: 'Sat 14 Mar, 09:05:07 GMT', tty: 'ttys002' })),
       })
     })
@@ -1101,7 +1101,7 @@ describe('terminal', () => {
       visitFrom(['ar-EG'], 'Asia/Tokyo')
       const { footer } = await mountTerminal()
 
-      expect(footer().text()).toContain('© ٢٠٢٧')
+      expect(footer().text()).toContain(fill(en.footer.copyright, { year: '٢٠٢٧', name: 'Wilhelmina Ashgrove' }))
     })
   })
 
