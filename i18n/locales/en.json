@@ -50,6 +50,10 @@
   "footer": {
     "copyright": "© {year} {name}"
   },
+  "head": {
+    "description": "Pavel Padron's portfolio",
+    "title": "Pavel Padron — Frontend Engineer"
+  },
   "help": {
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."

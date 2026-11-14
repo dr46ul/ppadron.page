@@ -23,10 +23,6 @@ export default defineNuxtConfig({
       script: [
         { innerHTML: themeScript, tagPosition: 'head' },
       ],
-      title: 'Pavel Padron — Frontend Engineer',
-      meta: [
-        { name: 'description', content: 'Pavel Padron\'s portfolio' },
-      ],
       // `sizes` on the ICO is what lets Chrome pick the SVG over it; browsers
       // without SVG favicons, Safari among them, fall back to the ICO.
       link: [
@@ -63,6 +59,7 @@ export default defineNuxtConfig({
   // The URL decides the Locale and the browser's language is never read, so
   // detection is off. See docs/adr/0013-each-locale-is-a-prerendered-page.md.
   i18n: {
+    baseUrl: 'https://ppadron.page',
     defaultLocale: 'en',
     locales: [
       { code: 'en', language: 'en', file: 'en.json' },

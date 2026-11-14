@@ -64,6 +64,9 @@ describe('home page', () => {
     return page.querySelector(`meta[name="${name}"]`)?.getAttribute('content')
   }
 
+  function property(name: string) {
+    return page.querySelector(`meta[property="${name}"]`)?.getAttribute('content')
+  }
   /**
    * The transcript block one command printed, found by the command it echoes
    * rather than by its `data-entry` id — the ids are just TOUR's order, and
@@ -106,8 +109,36 @@ describe('home page', () => {
     expect(inline.map(script => script.textContent)).toContain(themeScript)
   })
 
-  it('sets the description meta tag', () => {
-    expect(meta('description')).toBe('Pavel Padron\'s portfolio')
+  it('sets the description meta tag from the Message', () => {
+    expect(meta('description')).toBe(en.head.description)
+  })
+  it('names the canonical link after the site\'s base URL', () => {
+    expect(
+      page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+    ).toBe('https://ppadron.page')
+  })
+  it('names the Locale in og:locale', () => {
+    expect(property('og:locale')).toBe('en')
+  })
+  it('repeats the title and description in the og tags', () => {
+    expect({
+      title: property('og:title'),
+      description: property('og:description'),
+    }).toEqual({
+      title: en.head.title,
+      description: en.head.description,
+    })
+  })
+  it('names the page\'s own URL in og:url', () => {
+    expect(property('og:url')).toBe('https://ppadron.page')
+  })
+  it('lists only English among the hreflang alternates', () => {
+    expect(
+      [
+        ...page.querySelectorAll('link[rel="alternate"][hreflang]'),
+      ]
+        .map(link => link.getAttribute('hreflang')),
+    ).toEqual(['x-default', 'en'])
   })
 
   it('sets the charset to utf-8', () => {
@@ -121,7 +152,7 @@ describe('home page', () => {
   })
 
   it('renders the document title', () => {
-    expect(page.title).toBe('Pavel Padron — Frontend Engineer')
+    expect(page.title).toBe(en.head.title)
   })
 
   function icons() {
