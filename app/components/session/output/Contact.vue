@@ -43,14 +43,19 @@ function field(key: EnquiryField) {
   })
 }
 
+const { n, t } = useI18n()
+
 const sending = computed(() => props.state === 'sending')
 const sent = computed(() => props.state === 'sent')
 const locked = computed(() => sending.value || sent.value)
 
-const LABELS: Partial<Record<EnquiryState, string>> = {
-  sending: 'sending…',
-  sent: 'sent',
-}
+/** Keyed by the state, with every Message key written out as a literal. */
+const labels = computed(() => ({
+  idle: t('contact.send'),
+  sending: t('contact.sending'),
+  sent: t('contact.sent'),
+  failed: t('contact.send'),
+}) satisfies Record<EnquiryState, string>)
 
 /**
  * Not `disabled` on the button: disabling the element that holds focus drops
@@ -70,13 +75,18 @@ const body = field('message')
  * Visitor has to fix, so each field has one complaint and the caps share one.
  */
 function complaint(key: EnquiryField, rule: EnquiryRule) {
-  if (rule === 'too-long')
-    return `Keep it to ${LIMITS[key]} characters; the rest can follow by email.`
+  if (rule === 'too-long') {
+    return t('contact.complaintTooLong', {
+      limit: n(LIMITS[key]),
+    })
+  }
 
   return {
-    name: 'Tell me who you are.',
-    email: 'I need an address I can reply to.',
-    message: `A little more, please — at least ${MESSAGE_MIN} characters.`,
+    name: t('contact.complaintName'),
+    email: t('contact.complaintAddress'),
+    message: t('contact.complaintMessage', {
+      min: n(MESSAGE_MIN),
+    }),
   }[key]
 }
 
@@ -103,8 +113,7 @@ watchPostEffect(() => {
 <template>
   <div>
     <p class="text-prose text-muted mb-5 max-w-prose">
-      Tell me what you are building and what is in the way. I answer every
-      message myself.
+      {{ $t('contact.lede') }}
     </p>
 
     <form class="max-w-xl" @submit.prevent="submit" @click.stop>
@@ -114,11 +123,11 @@ watchPostEffect(() => {
            and copy what went. -->
       <fieldset class="flex flex-col gap-4">
         <legend class="sr-only">
-          Send an enquiry
+          {{ $t('contact.legend') }}
         </legend>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-meta">from:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">{{ $t('contact.fromLabel') }}</span>
           <input
             ref="name"
             v-model="from"
@@ -129,12 +138,12 @@ watchPostEffect(() => {
             required
             :disabled="sending"
             :readonly="sent"
-            placeholder="your name"
+            :placeholder="$t('contact.namePlaceholder')"
           >
         </label>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-meta">reply-to:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">{{ $t('contact.replyToLabel') }}</span>
           <!-- Not `type="email"`: its grammar refuses addresses the delivery
                accepts, such as `josé@…`, in the browser's wording rather than
                this form's. `inputmode` keeps the address keyboard. -->
@@ -151,12 +160,12 @@ watchPostEffect(() => {
             required
             :disabled="sending"
             :readonly="sent"
-            placeholder="you@company.com"
+            :placeholder="$t('contact.emailPlaceholder')"
           >
         </label>
 
         <label class="flex items-baseline gap-3">
-          <span class="text-accent w-24 shrink-0 text-meta">body:</span>
+          <span class="text-accent w-24 shrink-0 text-meta">{{ $t('contact.bodyLabel') }}</span>
           <textarea
             ref="message"
             v-model="body"
@@ -165,7 +174,7 @@ watchPostEffect(() => {
             required
             :disabled="sending"
             :readonly="sent"
-            placeholder="what are you building, and what is in the way?"
+            :placeholder="$t('contact.messagePlaceholder')"
           />
         </label>
 
@@ -176,11 +185,11 @@ watchPostEffect(() => {
             :aria-disabled="locked || undefined"
             class="btn btn-outline btn-accent btn-sm px-5 text-meta font-normal tracking-[0.15em] uppercase"
           >
-            {{ LABELS[state] ?? 'send' }}
+            {{ labels[state] }}
           </button>
           <!-- ADR-0003 makes this line literally true. If persistence is ever
                added, this copy changes in the same commit. -->
-          <span class="text-subtle text-meta">stored nowhere else</span>
+          <span class="text-subtle text-meta">{{ $t('contact.retention') }}</span>
         </div>
       </fieldset>
 
@@ -189,16 +198,18 @@ watchPostEffect(() => {
         role="status"
         class="text-success text-meta mt-4 sm:pl-[6.75rem]"
       >
-        Sent. It is in my inbox and I will reply to the address you gave.
+        {{ $t('contact.sentNotice') }}
       </p>
       <p
         v-if="state === 'failed'"
         role="alert"
         class="text-error text-meta mt-4 sm:pl-[6.75rem]"
       >
-        That did not send, and nothing was saved. Email me at
-        <span class="text-accent">{{ email }}</span>
-        and the message reaches me all the same.
+        <i18n-t keypath="contact.failed" scope="global">
+          <template #email>
+            <span class="text-accent">{{ email }}</span>
+          </template>
+        </i18n-t>
       </p>
     </form>
   </div>

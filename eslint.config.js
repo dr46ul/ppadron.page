@@ -146,6 +146,7 @@ export default antfu(
       'app/components/session/PromptBar.vue',
       'app/components/session/output/Background.vue',
       'app/components/session/output/Colophon.vue',
+      'app/components/session/output/Contact.vue',
       'app/components/session/output/Experience.vue',
       'app/components/session/output/Help.vue',
       'app/components/session/output/Recommendations.vue',
