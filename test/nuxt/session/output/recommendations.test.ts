@@ -373,6 +373,17 @@ describe('recommendations output', () => {
       expect(component.get('li [data-length]').text()).toBe(plural(en.recommendations.words, 1))
     })
 
+    it('counts a quote with no words in the plural, at nought', async () => {
+      const component = await mount([
+        recommendation(),
+        recommendation({
+          quote: [' '],
+        }),
+      ])
+
+      expect(component.get('li [data-length]').text()).toBe(plural(en.recommendations.words, 0))
+    })
+
     it('counts a two-word quote in the plural', async () => {
       const count = 2
       const component = await mount([
