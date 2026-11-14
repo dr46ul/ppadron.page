@@ -16,6 +16,11 @@
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
   },
+  "promptBar": {
+    "commands": "commands",
+    "label": "Run a command",
+    "placeholder": "type a command, or open the list"
+  },
   "recommendations": {
     "alsoOnFile": "Also on file",
     "credit": " — {title}, {company}",
