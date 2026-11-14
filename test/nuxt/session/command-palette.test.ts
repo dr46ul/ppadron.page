@@ -1,7 +1,7 @@
 import type { ThemeChoice } from '#shared/theme'
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import CommandPalette from '~/components/session/CommandPalette.vue'
 import { en, fill } from '../messages'
 
@@ -427,6 +427,35 @@ describe('command palette', () => {
   })
 
   describe('the list', () => {
+    describe('when a group\'s label changes', () => {
+      const i18n = () => useNuxtApp().$i18n
+      const relabelled = { groupCommands: 'Kiln', groupSession: 'Hearth' }
+
+      afterEach(() => {
+        i18n().mergeLocaleMessage('en', {
+          palette: { groupCommands: en.palette.groupCommands, groupSession: en.palette.groupSession },
+        })
+      })
+
+      it('keeps the group\'s id, so what labels it by id still finds it', async () => {
+        const component = await mount()
+        const ids = () => component.findAll('[role="group"][aria-labelledby]')
+          .map(group => group.attributes('aria-labelledby'))
+        const before = ids()
+
+        i18n().mergeLocaleMessage('en', { palette: relabelled })
+        await nextTick()
+
+        expect({
+          ids: ids(),
+          labels: ids().map(id => component.get(`[id="${id}"]`).text()),
+        }).toEqual({
+          ids: before,
+          labels: [relabelled.groupCommands, relabelled.groupSession],
+        })
+      })
+    })
+
     it('lists every command it is handed, then every meta command but the theme', async () => {
       const component = await mount()
 

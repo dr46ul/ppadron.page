@@ -26,7 +26,7 @@ function rows() {
 }
 
 function wordsIn(recommendation: Recommendation) {
-  return recommendation.quote.join(' ').trim().split(/\s+/).length
+  return recommendation.quote.join(' ').match(/\S+/g)?.length ?? 0
 }
 
 /**

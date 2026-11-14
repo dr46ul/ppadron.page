@@ -15,6 +15,20 @@ function command(overrides: Partial<SessionCommand> = {}): SessionCommand {
   }
 }
 
+/**
+ * A paragraph's text with each element it holds written as `[tag:text]`, so the
+ * order of words and elements reads as one string beside the Message.
+ */
+function markElements(paragraph: Element) {
+  return [...paragraph.childNodes]
+    .map(node => node instanceof Element
+      ? `[${node.tagName.toLowerCase()}:${node.textContent?.trim()}]`
+      : node.textContent)
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function mount(commands: SessionCommand[], metaCommands: MetaCommand[] = []) {
   return mountSuspended(Help, {
     props: { commands, metaCommands },
@@ -103,6 +117,25 @@ describe('help output', () => {
     const component = await mount([], [])
 
     expect(component.findAll('kbd').map(key => key.text())).toEqual(['Tab', 'up arrow', 'down arrow'])
+  })
+
+  it('sets each key cap and plain word inside its hint where the Message puts it', async () => {
+    const component = await mount([], [])
+
+    expect(markElements(component.findAll('p')[1]!.element)).toEqual(fill(en.help.hint, {
+      tab: '[kbd:Tab]',
+      up: `[kbd:${en.keys.up}]`,
+      down: `[kbd:${en.keys.down}]`,
+      experience: '[span:experience]',
+      contact: '[span:contact]',
+    }))
+  })
+
+  it('sets the Role form inside its gloss where the Message puts it', async () => {
+    const component = await mount([], [])
+
+    expect(markElements(component.findAll('p')[0]!.element))
+      .toEqual(fill(en.help.roleForm, { form: '[code:cat ~/experience/<role>]' }))
   })
 
   it('documents the form that opens one Role, whatever Commands it is handed', async () => {
