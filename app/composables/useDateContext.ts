@@ -1,18 +1,15 @@
 /**
- * The Visitor's language and time zone, the only place either is read for a
- * date. The prerendered page has no Visitor, so until it is mounted this is
- * the build's English and UTC; read any earlier, the browser's answer would
- * hydrate over different HTML.
+ * The Visitor's time zone, the only place it is read for a date. The language
+ * is the Session's Locale, never the browser's (ADR-0014). The prerendered page
+ * has no Visitor, so until it is mounted this is the build's UTC; read any
+ * earlier, the browser's answer would hydrate over different HTML.
  */
 export function useDateContext() {
-  const context = ref(buildDateContext)
+  const timeZone = ref('UTC')
 
   onMounted(() => {
-    context.value = {
-      locale: pickLocale(navigator.languages),
-      timeZone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
-    }
+    timeZone.value = new Intl.DateTimeFormat().resolvedOptions().timeZone
   })
 
-  return readonly(context)
+  return readonly(timeZone)
 }

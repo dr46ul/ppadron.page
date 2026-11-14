@@ -17,10 +17,9 @@ export interface RoleProject {
 }
 
 export interface RoleNote {
-  /** Years only, the way a Role's `period` is, since the two share a column. */
-  period: string
-  /** Machine-readable start, for <time datetime>. */
-  since: string
+  /** Years only: the note shares the Experience list's column of years. */
+  from: Year
+  to: Year
   /** Stands where a Role has its company, for time with no single employer. */
   name: string
   title: string
@@ -35,12 +34,10 @@ export interface Role {
   company: string
   /** Pavel's title there. Shown small — the summary carries the weight. */
   title: string
-  /** Years only, because the Experience list's column is sized for that. */
-  period: string
-  /** The range with months, printed by Role detail. */
-  exactPeriod: string
-  /** Machine-readable start, for ordering and <time datetime>. */
-  since: string
+  /** Roles are listed in descending `from`. */
+  from: MonthDate
+  /** `null` while Pavel still holds the Role. */
+  to: MonthDate | null
   /** Leads with what was built, never with what he was employed as. */
   summary: string
   /** A few names for scanning the list. The full list is `stack`. */
@@ -63,61 +60,18 @@ type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
  */
 export type Year = `${'19' | '20'}${Digit}${Digit}`
 
-export type Month
-  = | 'Jan' | 'Feb' | 'Mar' | 'Apr' | 'May' | 'Jun'
-    | 'Jul' | 'Aug' | 'Sep' | 'Oct' | 'Nov' | 'Dec'
+export type MonthNumber = `0${Exclude<Digit, '0'>}` | '10' | '11' | '12'
 
-export type MonthYear = `${Month} ${Year}`
+/** A month as ISO 8601 writes it, `2023-06`: never words, which belong to a Locale. */
+export type MonthDate = `${Year}-${MonthNumber}`
 
-/** A note as it is written: its dates, with every printed form left to `defineRole`. */
-export interface RoleNoteEntry extends Omit<RoleNote, 'period' | 'since'> {
-  from: Year
-  to: Year
-}
-
-/** A Role as it is written: its dates, with every printed form left to `defineRole`. */
-export interface RoleEntry extends Omit<Role, 'period' | 'exactPeriod' | 'since' | 'before'> {
-  from: MonthYear
-  /** `now` while Pavel still holds the Role. */
-  to: MonthYear | 'now'
-  before?: RoleNoteEntry
-}
-
-function yearOf(date: MonthYear) {
-  return date.slice(-4)
-}
-
-function defineNote({ from, to, ...note }: RoleNoteEntry): RoleNote {
-  return { ...note, period: `${from} — ${to}`, since: from }
-}
-
-/**
- * Every printed form of a Role's dates is built here from `from` and `to`, so
- * none is typed by hand to disagree with another. The year ranges take an em
- * dash and the month ranges an en dash on purpose: the Experience column and
- * Role detail have always been set that way.
- */
-export function defineRole({ from, to, before, ...role }: RoleEntry): Role {
-  return {
-    ...role,
-    period: `${yearOf(from)} — ${to === 'now'
-      ? 'now'
-      : yearOf(to)}`,
-    exactPeriod: `${from} – ${to}`,
-    since: yearOf(from),
-    ...(before && {
-      before: defineNote(before),
-    }),
-  }
-}
-
-const entries: RoleEntry[] = [
+export const roles: Role[] = [
   {
     slug: 'nordhealth',
     company: 'Nordhealth',
     title: 'Lead Frontend Developer',
-    from: 'Jun 2023',
-    to: 'now',
+    from: '2023-06',
+    to: null,
     summary:
       'Migrating Nordhealth\'s Provet, its most important app, from a legacy monolith to a new Nuxt app, and now leading the frontend work across the company\'s teams.',
     tech: [
@@ -147,8 +101,8 @@ const entries: RoleEntry[] = [
     slug: 'playfood',
     company: 'Playfood',
     title: 'Senior Frontend Web Developer',
-    from: 'Apr 2022',
-    to: 'Jan 2023',
+    from: '2022-04',
+    to: '2023-01',
     summary:
       'Built multi-language support and multi-city presence for a startup\'s Vue/Nuxt platform, refactored its Vuex state, and made UI/UX improvements in a redesign of its cart and checkout.',
     tech: [
@@ -199,8 +153,8 @@ const entries: RoleEntry[] = [
     slug: 'rogue-fitness',
     company: 'Rogue Fitness',
     title: 'Middle/Senior Frontend Developer',
-    from: 'Nov 2014',
-    to: 'Mar 2022',
+    from: '2014-11',
+    to: '2022-03',
     before: {
       from: '2011',
       to: '2014',
@@ -360,8 +314,8 @@ const entries: RoleEntry[] = [
     slug: 'procyon-soluciones',
     company: 'Procyon Soluciones',
     title: 'Senior Software Engineer / Team Manager',
-    from: 'Jan 2009',
-    to: 'Dec 2010',
+    from: '2009-01',
+    to: '2010-12',
     summary:
       'Led a project in a fast-paced environment, on top of senior engineering work in a team of young programmers, as Project Manager and Team Leader for a company based in Spain.',
     tech: [
@@ -399,8 +353,8 @@ const entries: RoleEntry[] = [
     slug: 'havasoft',
     company: 'Havasoft',
     title: 'Software Engineer',
-    from: 'Apr 2007',
-    to: 'Dec 2008',
+    from: '2007-04',
+    to: '2008-12',
     summary:
       'Built software for a client\'s daily tasks in C# and .NET, as team leader and main developer on the project. The client said the end result exceeded their expectations.',
     tech: ['C#', '.NET Framework', 'MSSQL'],
@@ -425,8 +379,8 @@ const entries: RoleEntry[] = [
     slug: 'gea-villa-clara',
     company: 'GEA Villa Clara',
     title: 'Network Administrator',
-    from: 'Sep 2005',
-    to: 'Mar 2007',
+    from: '2005-09',
+    to: '2007-03',
     summary:
       'Designed the company\'s first intranet and, with the TeicoSoft team, rolled it out across five floors in over six months: new servers, an ADSL line and more than 50 offices equipped.',
     tech: [
@@ -465,5 +419,3 @@ const entries: RoleEntry[] = [
     ],
   },
 ]
-
-export const roles: Role[] = entries.map(entry => defineRole(entry))

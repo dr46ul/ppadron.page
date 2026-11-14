@@ -13,6 +13,8 @@ defineProps<{
 
 /** The Command that lists the Roles: an identifier, so no Locale touches it. */
 const listCommand = 'ls ~/experience'
+
+const period = useRolePeriod()
 </script>
 
 <template>
@@ -26,10 +28,10 @@ const listCommand = 'ls ~/experience'
       </span>
     </p>
     <time
-      :datetime="role.since"
+      :datetime="role.from"
       class="text-muted mt-1 block text-meta tabular-nums"
     >
-      {{ role.exactPeriod }}
+      {{ period.months(role) }}
     </time>
 
     <div class="mt-4 flex max-w-prose flex-col gap-3">

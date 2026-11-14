@@ -67,9 +67,8 @@ function roleFixture(): Role {
     slug: 'kiln-and-ash',
     company: 'Kiln & Ash',
     title: 'Kiln technician',
-    period: '1998 — 2001',
-    exactPeriod: 'Mar 1998 – Jun 2001',
-    since: '1998',
+    from: '1998-03',
+    to: '2001-06',
     summary: 'Rebuilt the firing schedule so nothing cracked on the way down.',
     tech: ['pyrometry'],
     account: ['Spent three winters learning what cooling too fast does to glaze.'],
@@ -165,7 +164,7 @@ describe('terminal', () => {
     vi.useFakeTimers({
       now: new Date('2026-03-14T09:05:07Z'),
     })
-    visitFrom(['en-GB'], 'Europe/London')
+    visitFrom('Europe/London')
 
     Object.assign(data.profile, profileFixture())
     data.roles.splice(0, data.roles.length, roleFixture())
@@ -193,12 +192,12 @@ describe('terminal', () => {
       ].filter(line => !text.includes(line))).toEqual([])
     })
 
-    it('stamps the session with the time it was built, as the Visitor tells time', async () => {
-      visitFrom(['de-DE', 'en'], 'Europe/Berlin')
+    it('stamps the session with the time it was built, in the Session\'s Locale and the Visitor\'s time zone', async () => {
+      visitFrom('Europe/Berlin')
       const { banner } = await mountTerminal()
 
       expect(banner().text()).toContain(
-        fill(en.banner.lastLogin, { date: 'Sa., 14. März, 10:05:07 MEZ', tty: 'ttys002' }),
+        fill(en.banner.lastLogin, { date: 'Sat, Mar 14, 10:05:07 AM GMT+1', tty: 'ttys002' }),
       )
     })
 
@@ -601,7 +600,7 @@ describe('terminal', () => {
       data.roles.push({
         ...roleFixture(),
         slug: 'kelp-and-tar',
-        since: '1994',
+        from: '1994-01',
         account: ['Dried kelp on the roof until the tar ran out.'],
       })
 
@@ -888,7 +887,7 @@ describe('terminal', () => {
       const { banner } = await mountTerminal()
 
       expect({
-        login: roleOf(banner(), 'p', fill(en.banner.lastLogin, { date: 'Sat 14 Mar, 09:05:07 GMT', tty: 'ttys002' })),
+        login: roleOf(banner(), 'p', fill(en.banner.lastLogin, { date: 'Sat, Mar 14, 09:05:07 AM GMT', tty: 'ttys002' })),
         byline: roleOf(banner(), 'span', fill(en.banner.byline, { name: 'Wilhelmina Ashgrove', headline: 'Systems plumber' })),
         hint: roleOf(banner(), 'span', en.banner.printed),
         domain: roleOf(banner(), 'span', 'ppadron.page'),
@@ -1092,16 +1091,16 @@ describe('terminal', () => {
         banner: banner().text(),
       }).toEqual({
         footer: expect.stringContaining(fill(en.footer.copyright, { year: '2027', name: 'Wilhelmina Ashgrove' })),
-        banner: expect.stringContaining(fill(en.banner.lastLogin, { date: 'Sat 14 Mar, 09:05:07 GMT', tty: 'ttys002' })),
+        banner: expect.stringContaining(fill(en.banner.lastLogin, { date: 'Sat, Mar 14, 09:05:07 AM GMT', tty: 'ttys002' })),
       })
     })
 
-    it('dates the notice in the Visitor\'s own time zone and digits', async () => {
+    it('dates the notice in the Visitor\'s own time zone', async () => {
       vi.setSystemTime(new Date('2026-12-31T23:30:00Z'))
-      visitFrom(['ar-EG'], 'Asia/Tokyo')
+      visitFrom('Asia/Tokyo')
       const { footer } = await mountTerminal()
 
-      expect(footer().text()).toContain(fill(en.footer.copyright, { year: '٢٠٢٧', name: 'Wilhelmina Ashgrove' }))
+      expect(footer().text()).toContain(fill(en.footer.copyright, { year: '2027', name: 'Wilhelmina Ashgrove' }))
     })
   })
 

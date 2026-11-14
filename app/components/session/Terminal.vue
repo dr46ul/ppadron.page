@@ -72,14 +72,15 @@ function labelOf(output: SessionOutput | null) {
  */
 const builtAt = useState('built-at', () => Date.now())
 const visitedAt = useVisitedAt(builtAt.value)
-const dateContext = useDateContext()
+const timeZone = useDateContext()
+const { d } = useI18n()
 
 const lastLogin = computed(() =>
-  formatDate(builtAt.value, 'lastLogin', dateContext.value),
+  d(builtAt.value, { key: 'lastLogin', timeZone: timeZone.value }),
 )
 
 /** The Visitor's year, not the build's, so the notice is never out of date between deploys. */
-const year = computed(() => formatDate(visitedAt.value, 'year', dateContext.value))
+const year = computed(() => d(visitedAt.value, { key: 'year', timeZone: timeZone.value }))
 
 /**
  * Clicking the dead space puts the caret back, the way a terminal does. Not

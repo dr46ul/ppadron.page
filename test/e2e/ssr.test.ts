@@ -7,7 +7,6 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { roles } from '../../app/data/experience'
 import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
-import { formatDate } from '../../app/utils/date-format'
 import en from '../../i18n/locales/en.json'
 import { themeScript } from '../../shared/theme'
 
@@ -146,8 +145,12 @@ describe('home page', () => {
       expect(entry('whoami')?.textContent).toContain(profile.headline)
     })
 
-    it('prints the Roles in the experience block', () => {
-      expect(entry('ls ~/experience')?.textContent).toContain(roles[0]!.period)
+    it('prints the Roles in the experience block, their years in English', () => {
+      const { from, to } = roles[0]!
+
+      expect(entry('ls ~/experience')?.textContent).toContain(
+        `${from.slice(0, 4)} — ${to?.slice(0, 4) ?? en.period.now}`,
+      )
     })
 
     /**
@@ -198,7 +201,16 @@ describe('home page', () => {
     it('prints the banner for the build, in English and UTC', () => {
       expect(page.querySelector('[data-banner]')?.textContent).toContain(
         en.banner.lastLogin
-          .replace('{date}', formatDate(builtAt, 'lastLogin', { locale: 'en', timeZone: 'UTC' }))
+          .replace('{date}', new Intl.DateTimeFormat('en', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short',
+            timeZone: 'UTC',
+          }).format(builtAt))
           .replace('{tty}', 'ttys002'),
       )
     })
