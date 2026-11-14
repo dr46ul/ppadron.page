@@ -156,7 +156,7 @@ describe('contact output', () => {
   it('shows an address as the reply-to placeholder, with its at sign intact', async () => {
     const component = await mount()
 
-    expect(component.get('[name="email"]').attributes('placeholder')).toBe('you@company.com')
+    expect(component.get('[name="email"]').attributes('placeholder')).toBe(en.contact.emailPlaceholder.replace('{\'@\'}', '@'))
   })
 
   it('says so and takes no more typing while it is sending', async () => {

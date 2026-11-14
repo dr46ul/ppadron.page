@@ -68,7 +68,7 @@ const groups = computed(() => {
     {
       id: 'session',
       label: t('palette.groupSession'),
-      commands: matching(props.metaCommands.filter(command => command.cmd !== 'theme')),
+      commands: matching(props.metaCommands.filter(command => command.cmd !== themeCommand)),
       offset: commands.length,
     },
   ]

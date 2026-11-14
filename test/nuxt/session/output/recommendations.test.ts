@@ -2,7 +2,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Recommendations from '~/components/session/output/Recommendations.vue'
-import { en, fill } from '../../messages'
+import { en, fill, plural } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function recommendation(
@@ -358,7 +358,7 @@ describe('recommendations output', () => {
       }).toEqual({
         name: 'Second',
         role: 'Lead UI Developer, Kiln & Ash',
-        length: en.recommendations.words.split(' | ')[1]!.replace('{n}', '5'),
+        length: plural(en.recommendations.words, 5),
       })
     })
 
@@ -370,7 +370,21 @@ describe('recommendations output', () => {
         }),
       ])
 
-      expect(component.get('li [data-length]').text()).toBe(en.recommendations.words.split(' | ')[0]!.replace('{n}', '1'))
+      expect(component.get('li [data-length]').text()).toBe(plural(en.recommendations.words, 1))
+    })
+
+    it('counts a two-word quote in the plural', async () => {
+      const count = 2
+      const component = await mount([
+        recommendation(),
+        recommendation({
+          quote: [
+            Array.from({ length: count }).fill('word').join(' '),
+          ],
+        }),
+      ])
+
+      expect(component.get('li [data-length]').text()).toBe(plural(en.recommendations.words, count))
     })
 
     it('says what a row does to a screen reader, ahead of what it shows', async () => {
@@ -488,7 +502,7 @@ describe('recommendations output', () => {
       expect({
         name: roleOf(component, '[data-name]', 'Second'),
         role: roleOf(component, '[data-role]', 'Lead UI Developer'),
-        length: roleOf(component, '[data-length]', 'word'),
+        length: roleOf(component, '[data-length]', plural(en.recommendations.words, 5).replace('5 ', '')),
         heading: roleOf(component, 'p', en.recommendations.alsoOnFile),
         keys: roleOf(component, '[data-keys]', en.recommendations.keyMove),
       }).toEqual({

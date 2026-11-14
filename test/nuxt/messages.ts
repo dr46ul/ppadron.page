@@ -8,6 +8,16 @@ import enFile from '~~/i18n/locales/en.json?raw'
  */
 export const en: typeof enJson = JSON.parse(enFile)
 
+/** The form of a two-form plural Message the Visitor reads for a count. */
+export function plural(message: string, count: number) {
+  const forms = message.split(' | ')
+  return fill(forms[count === 1
+    ? 0
+    : 1]!, {
+    n: String(count),
+  })
+}
+
 /** A Message with its named parameters filled in, as the visitor reads it. */
 export function fill(message: string, params: Record<string, string>) {
   return message.replace(/\{(\w+)\}/g, (_, name: string) => params[name] ?? '')

@@ -152,6 +152,7 @@ export default antfu(
       'app/components/session/output/Recommendations.vue',
       'app/components/session/output/RoleDetail.vue',
       'app/components/session/output/Unknown.vue',
+      'app/components/session/output/Whoami.vue',
     ],
     rules: {
       '@intlify/vue-i18n/no-raw-text': [

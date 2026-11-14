@@ -81,13 +81,13 @@ function complaint(key: EnquiryField, rule: EnquiryRule) {
     })
   }
 
-  return {
+  return ({
     name: t('contact.complaintName'),
     email: t('contact.complaintAddress'),
     message: t('contact.complaintMessage', {
       min: n(MESSAGE_MIN),
     }),
-  }[key]
+  } satisfies Record<EnquiryField, string>)[key]
 }
 
 const controls = {

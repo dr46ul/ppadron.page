@@ -91,8 +91,8 @@ describe('help output', () => {
       items: 0,
       text: expect.stringContaining(fill(en.help.hint, {
         tab: 'Tab',
-        up: 'up arrow',
-        down: 'down arrow',
+        up: en.keys.up,
+        down: en.keys.down,
         experience: 'experience',
         contact: 'contact',
       })),
@@ -149,7 +149,7 @@ describe('help output', () => {
       ])
 
       expect({
-        hint: roleOf(component, 'p', 'walk the history'),
+        hint: roleOf(component, 'p', en.help.hint.split('{down}')[1]!.split('·')[0]!.trim()),
         // The two plain words are the point of the sentence, so they read above
         // the sentence carrying them.
         experience: roleOf(component, 'span', 'experience'),

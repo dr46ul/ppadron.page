@@ -15,8 +15,8 @@
     "emailPlaceholder": "you{'@'}company.com",
     "failed": "That did not send, and nothing was saved. Email me at {email} and the message reaches me all the same.",
     "fromLabel": "from:",
-    "legend": "Send an enquiry",
     "lede": "Tell me what you are building and what is in the way. I answer every message myself.",
+    "legend": "Send an enquiry",
     "messagePlaceholder": "what are you building, and what is in the way?",
     "namePlaceholder": "your name",
     "replyToLabel": "reply-to:",
@@ -78,8 +78,8 @@
     "words": "{n} word | {n} words"
   },
   "roleDetail": {
-    "techStack": "Tech stack",
-    "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}"
+    "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}",
+    "techStack": "Tech stack"
   },
   "unknown": {
     "notFound": "{cmd}: command not found — try {help}"
