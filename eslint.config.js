@@ -140,6 +140,7 @@ export default antfu(
   {
     // Raw text is gated one component at a time as its copy moves into Messages.
     files: [
+      'app/components/session/CommandPalette.vue',
       'app/components/session/Footer.vue',
       'app/components/session/PromptBar.vue',
       'app/components/session/output/Background.vue',
@@ -158,8 +159,10 @@ export default antfu(
           ignoreText: [
             '→',
             '·',
+            '/',
             '$',
             'K',
+            'esc',
             'Tab',
             'GitHub',
             'LinkedIn',

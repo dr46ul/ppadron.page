@@ -3,6 +3,7 @@ import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import CommandPalette from '~/components/session/CommandPalette.vue'
+import { en, fill } from '../messages'
 
 /**
  * Commands the real Content cannot supply, so nothing here can go green off the
@@ -103,7 +104,7 @@ describe('command palette', () => {
       expect({
         label: field.attributes('aria-label'),
         controls: component.find(`#${field.attributes('aria-controls')}`).attributes('role'),
-      }).toEqual({ label: 'Find a command', controls: 'listbox' })
+      }).toEqual({ label: en.palette.search, controls: 'listbox' })
     })
 
     it('narrows the list to commands whose name holds what was typed, whatever its case', async () => {
@@ -128,7 +129,7 @@ describe('command palette', () => {
 
       await find(component).setValue(typed)
 
-      expect(component.find('[role="group"][aria-label="Theme"]').exists()).toBe(true)
+      expect(component.find(`[role="group"][aria-label="${en.palette.theme}"]`).exists()).toBe(true)
     })
 
     it('drops the theme row once the query cannot be the theme', async () => {
@@ -136,7 +137,7 @@ describe('command palette', () => {
 
       await find(component).setValue('re')
 
-      expect(component.find('[role="group"][aria-label="Theme"]').exists()).toBe(false)
+      expect(component.find(`[role="group"][aria-label="${en.palette.theme}"]`).exists()).toBe(false)
     })
 
     it('says so when nothing matches', async () => {
@@ -147,7 +148,7 @@ describe('command palette', () => {
       expect({
         options: options(component).length,
         said: component.find('[data-none]').text(),
-      }).toEqual({ options: 0, said: 'Nothing matches.' })
+      }).toEqual({ options: 0, said: en.palette.nothing })
     })
 
     it('starts every opening with nothing typed', async () => {
@@ -265,7 +266,7 @@ describe('command palette', () => {
 
       await find(component).setValue('kiln --hot')
 
-      expect(component.find('[data-none]').text()).toBe('Enter runs kiln --hot.')
+      expect(component.find('[data-none]').text()).toBe(fill(en.palette.runTyped, { typed: 'kiln --hot' }))
     })
 
     it('runs nothing on Enter when nothing matches and the session does not know it', async () => {
@@ -299,14 +300,14 @@ describe('command palette', () => {
 
   describe('the theme', () => {
     function themeButtons(component: Mounted) {
-      return component.find('[role="group"][aria-label="Theme"]').findAll('button')
+      return component.find(`[role="group"][aria-label="${en.palette.theme}"]`).findAll('button')
     }
 
     it('offers light, dark and the system as one labelled group', async () => {
       const component = await mount()
 
       expect(themeButtons(component).map(button => button.text().trim()))
-        .toEqual(['light', 'dark', 'system'])
+        .toEqual([en.palette.themeChoice.light, en.palette.themeChoice.dark, en.palette.themeChoice.system])
     })
 
     it('marks the choice in use', async () => {
@@ -338,7 +339,7 @@ describe('command palette', () => {
     it('closes from its esc key', async () => {
       const component = await mount()
 
-      await component.find('button[aria-label="Close"]').trigger('click')
+      await component.find(`button[aria-label="${en.palette.close}"]`).trigger('click')
 
       expect(component.emitted('update:open')).toEqual([
         [false],
@@ -371,7 +372,7 @@ describe('command palette', () => {
     it('shows the close button\'s hover accent on its key cap, which sets its own colour', async () => {
       const component = await mount()
 
-      expect(component.get('button[aria-label="Close"] kbd').classes()).toContain('group-hover:text-accent')
+      expect(component.get(`button[aria-label="${en.palette.close}"] kbd`).classes()).toContain('group-hover:text-accent')
     })
 
     it('is the library\'s modal, its panel the box', async () => {

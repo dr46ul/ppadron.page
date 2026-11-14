@@ -28,6 +28,18 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
 const id = useId()
 
+const { t } = useI18n()
+
+/** Keyed by the choice, with every Message key written out as a literal. */
+const themeLabels = computed(() => ({
+  light: t('palette.themeChoice.light'),
+  dark: t('palette.themeChoice.dark'),
+  system: t('palette.themeChoice.system'),
+}) satisfies Record<ThemeChoice, string>)
+
+/** The meta command's name: an identifier, so no Locale touches it. */
+const themeCommand = 'theme'
+
 const query = ref('')
 
 const highlight = ref(0)
@@ -47,9 +59,15 @@ const typedRuns = computed(() => props.recognises(query.value.trim()))
 const groups = computed(() => {
   const commands = matching(props.commands)
   return [
-    { name: 'Commands', commands, offset: 0 },
     {
-      name: 'Session',
+      id: 'commands',
+      label: t('palette.groupCommands'),
+      commands,
+      offset: 0,
+    },
+    {
+      id: 'session',
+      label: t('palette.groupSession'),
       commands: matching(props.metaCommands.filter(command => command.cmd !== 'theme')),
       offset: commands.length,
     },
@@ -105,7 +123,7 @@ onMounted(() => {
 <template>
   <dialog
     ref="dialog"
-    aria-label="Commands"
+    :aria-label="$t('palette.dialog')"
     class="modal bg-base-100/70 backdrop-blur-[2px]"
     @close="open = false"
     @click.stop
@@ -121,7 +139,7 @@ onMounted(() => {
         <input
           v-model="query"
           role="combobox"
-          aria-label="Find a command"
+          :aria-label="$t('palette.search')"
           aria-autocomplete="list"
           aria-expanded="true"
           :aria-controls="`${id}-list`"
@@ -132,7 +150,7 @@ onMounted(() => {
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder="find a command"
+          :placeholder="$t('palette.searchPlaceholder')"
           @keydown.down.prevent="move(1)"
           @keydown.up.prevent="move(-1)"
           @keydown.enter.prevent="runHighlighted"
@@ -140,7 +158,7 @@ onMounted(() => {
         <!-- The library's kbd sets its own colour, so the cap needs its own hover. -->
         <button
           type="button"
-          aria-label="Close"
+          :aria-label="$t('palette.close')"
           class="group text-muted hover:text-accent shrink-0 self-center"
           @click="open = false"
         >
@@ -153,20 +171,20 @@ onMounted(() => {
       <div
         :id="`${id}-list`"
         role="listbox"
-        aria-label="Commands"
+        :aria-label="$t('palette.list')"
         class="min-h-0 flex-1 overflow-y-auto py-2"
       >
-        <template v-for="group in groups" :key="group.name">
+        <template v-for="group in groups" :key="group.id">
           <div
             v-if="group.commands.length"
             role="group"
-            :aria-labelledby="`${id}-${group.name}`"
+            :aria-labelledby="`${id}-${group.id}`"
           >
             <p
-              :id="`${id}-${group.name}`"
+              :id="`${id}-${group.id}`"
               class="text-subtle text-label px-4 pt-2 pb-1 tracking-[0.2em] uppercase"
             >
-              {{ group.name }}
+              {{ group.label }}
             </p>
             <div
               v-for="(command, index) in group.commands"
@@ -191,10 +209,14 @@ onMounted(() => {
 
         <p v-if="!options.length" data-none class="text-subtle text-meta px-4 py-2">
           <template v-if="typedRuns">
-            Enter runs <span class="text-accent">{{ query.trim() }}</span>.
+            <i18n-t keypath="palette.runTyped" scope="global">
+              <template #typed>
+                <span class="text-accent">{{ query.trim() }}</span>
+              </template>
+            </i18n-t>
           </template>
           <template v-else>
-            Nothing matches.
+            {{ $t('palette.nothing') }}
           </template>
         </p>
       </div>
@@ -204,10 +226,10 @@ onMounted(() => {
       <div
         v-if="themeShown"
         role="group"
-        aria-label="Theme"
+        :aria-label="$t('palette.theme')"
         class="border-base-300 text-meta flex items-baseline gap-3 border-t px-4 py-2.5"
       >
-        <span class="text-machine shrink-0">theme</span>
+        <span class="text-machine shrink-0">{{ themeCommand }}</span>
         <span aria-hidden="true" class="bg-base-300 h-px min-w-3 flex-1 self-center" />
         <span class="flex shrink-0 items-baseline gap-0.5">
           <template v-for="(choice, index) in THEME_CHOICES" :key="choice">
@@ -219,7 +241,7 @@ onMounted(() => {
               :aria-pressed="theme === choice"
               @click="theme = choice"
             >
-              {{ choice }}
+              {{ themeLabels[choice] }}
             </button>
           </template>
         </span>
@@ -232,13 +254,13 @@ onMounted(() => {
       >
         <SessionKeyCap glyph="up" />
         <SessionKeyCap glyph="down" />
-        <span class="ml-1">move</span>
+        <span class="ml-1">{{ $t('palette.keyMove') }}</span>
         <span class="mx-1">·</span>
         <SessionKeyCap glyph="enter" />
-        <span class="ml-1">run</span>
+        <span class="ml-1">{{ $t('palette.keyRun') }}</span>
         <span class="mx-1">·</span>
         <SessionKeyCap>esc</SessionKeyCap>
-        <span class="ml-1">close</span>
+        <span class="ml-1">{{ $t('palette.keyClose') }}</span>
       </p>
     </div>
 
@@ -246,7 +268,7 @@ onMounted(() => {
          reader, so this click target stays out of both. -->
     <form method="dialog" class="modal-backdrop">
       <button tabindex="-1" aria-hidden="true">
-        close
+        {{ $t('palette.backdropClose') }}
       </button>
     </form>
   </dialog>

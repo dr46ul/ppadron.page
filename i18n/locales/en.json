@@ -16,6 +16,27 @@
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
   },
+  "palette": {
+    "backdropClose": "close",
+    "close": "Close",
+    "dialog": "Commands",
+    "groupCommands": "Commands",
+    "groupSession": "Session",
+    "keyClose": "close",
+    "keyMove": "move",
+    "keyRun": "run",
+    "list": "Commands",
+    "nothing": "Nothing matches.",
+    "runTyped": "Enter runs {typed}.",
+    "search": "Find a command",
+    "searchPlaceholder": "find a command",
+    "theme": "Theme",
+    "themeChoice": {
+      "dark": "dark",
+      "light": "light",
+      "system": "system"
+    }
+  },
   "promptBar": {
     "commands": "commands",
     "label": "Run a command",
