@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 import type { Profile } from '~/data/profile'
 
-defineProps<{ profile: Profile }>()
+defineProps<{
+  profile: Profile
+  /** The Command that prints the longer story; a name, so it is never translated. */
+  backgroundCommand: string
+}>()
+
+/** The session decides what the background means; this only reports the ask. */
+const emit = defineEmits<{ background: [] }>()
 </script>
 
 <template>
@@ -25,6 +32,19 @@ defineProps<{ profile: Profile }>()
       class="text-subtle mt-3 max-w-prose text-meta"
     >
       {{ profile.aside }}
+    </p>
+    <p class="text-subtle mt-3 max-w-prose text-meta">
+      <i18n-t keypath="whoami.more" scope="global">
+        <template #background>
+          <button
+            type="button"
+            class="link link-accent"
+            @click.stop="emit('background')"
+          >
+            {{ backgroundCommand }}
+          </button>
+        </template>
+      </i18n-t>
     </p>
   </div>
 </template>

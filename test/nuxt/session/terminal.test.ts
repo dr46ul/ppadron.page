@@ -522,6 +522,15 @@ describe('terminal', () => {
 
       expect(session.entries().at(-1)!.text()).toContain(en.metaCommands.clear)
     })
+
+    it('runs the background when the Whoami output asks for it', async () => {
+      const session = await mountTerminal()
+
+      await session.output('whoami').find('button').trigger('click')
+      await session.settle()
+
+      expect(session.entries().at(-1)!.text()).toContain('cat ~/about')
+    })
   })
 
   describe('how it prints a block', () => {
