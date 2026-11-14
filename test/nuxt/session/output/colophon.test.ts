@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Colophon from '~/components/session/output/Colophon.vue'
+import { en } from '../../messages'
 import { missingClasses } from '../../missing-classes'
 import { roleOf } from '../../text-role'
 
@@ -114,7 +115,7 @@ describe('colophon output', () => {
     }).toEqual({
       listed: 3,
       empty: 2,
-      emptyText: expect.stringContaining('this page is the work sample'),
+      emptyText: expect.stringContaining(en.colophon.lede),
     })
   })
 
@@ -164,7 +165,7 @@ describe('colophon output', () => {
       const component = await mount()
 
       expect({
-        lede: roleOf(component, 'p', 'No projects gallery'),
+        lede: roleOf(component, 'p', en.colophon.lede),
         stack: roleOf(component, 'p', 'fortran · cobol'),
       }).toEqual({ lede: 'text-body', stack: 'text-subtle' })
     })

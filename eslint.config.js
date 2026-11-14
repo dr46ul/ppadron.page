@@ -139,11 +139,16 @@ export default antfu(
   },
   {
     // Raw text is gated one Output at a time as its copy moves into Messages.
-    files: ['app/components/session/output/Unknown.vue'],
+    files: [
+      'app/components/session/output/Colophon.vue',
+      'app/components/session/output/Unknown.vue',
+    ],
     rules: {
       '@intlify/vue-i18n/no-raw-text': [
         'error',
         {
+          // Glyphs and names are identifiers, not copy; nothing else belongs here.
+          ignoreText: ['→'],
           attributes: {
             '/.+/': [
               'aria-label',

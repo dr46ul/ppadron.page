@@ -17,9 +17,7 @@ const repoLabel = computed(() =>
 <template>
   <div>
     <p class="text-prose text-body max-w-prose">
-      No projects gallery, so this page is the work sample: a statically
-      prerendered Nuxt site with one serverless function behind the form, and
-      the whole of it is readable.
+      {{ $t('colophon.lede') }}
     </p>
     <p>
       <a
