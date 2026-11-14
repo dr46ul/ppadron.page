@@ -32,7 +32,6 @@ export function contents() {
 
       return {
         ...role,
-        tech: technology.tech,
         stack: technology.stack,
         before: role.before && { ...role.before, tech: technology.before! },
         history: role.history?.map((project, projectIndex) => ({

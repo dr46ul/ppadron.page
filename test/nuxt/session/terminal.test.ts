@@ -38,7 +38,7 @@ vi.mock('~/data/en/profile', () => ({
 }))
 vi.mock('~/data/en/experience', () => ({
   get roles() {
-    return data.roles.map(({ tech: _tech, stack: _stack, ...prose }) => prose)
+    return data.roles.map(({ stack: _stack, ...prose }) => prose)
   },
 }))
 vi.mock('~/data/technology', () => ({
@@ -49,7 +49,7 @@ vi.mock('~/data/technology', () => ({
     return Object.fromEntries(
       data.roles.map(role => [
         role.slug,
-        { tech: role.tech, stack: role.stack },
+        { stack: role.stack },
       ]),
     )
   },
@@ -95,7 +95,6 @@ function roleFixture(): Role {
     from: '1998-03',
     to: '2001-06',
     summary: 'Rebuilt the firing schedule so nothing cracked on the way down.',
-    tech: ['pyrometry'],
     account: ['Spent three winters learning what cooling too fast does to glaze.'],
     stack: ['pyrometry', 'cone packs'],
   }

@@ -5,8 +5,7 @@ import type { Profile } from './profile'
  * rather than in each Locale's Content. A Role's entry is found by its slug.
  */
 export interface RoleTechnology {
-  /** A few names for scanning the list. The full list is `stack`. */
-  tech: string[]
+  /** The Role's full list, the names that matter most first: the Experience list prints only its head. */
   stack: string[]
   /** The tech of the Role's `before` note. */
   before?: string[]
@@ -16,41 +15,27 @@ export interface RoleTechnology {
 
 export const roleTechnology: Record<string, RoleTechnology> = {
   'nordhealth': {
-    tech: [
-      'Nuxt',
-      'TypeScript',
-      'Tailwind',
-      'TanStack Query',
-      'JSON:API',
-    ],
     stack: [
       'Nuxt',
       'TypeScript',
-      'CSS3',
       'Tailwind',
       'TanStack Query',
-      'TanStack Table',
       'JSON:API',
+      'CSS3',
+      'TanStack Table',
     ],
   },
   'playfood': {
-    tech: [
+    stack: [
       'Vue',
       'Nuxt',
       'Vuex',
       'TypeScript',
       'SCSS',
-    ],
-    stack: [
-      'Vue',
-      'Vuex',
       'VueRouter',
-      'Nuxt',
-      'TypeScript',
       'JavaScript',
       'HTML5',
       'CSS3',
-      'SCSS',
       'Responsive Web Design',
       'JSON',
       'WebSockets',
@@ -69,22 +54,18 @@ export const roleTechnology: Record<string, RoleTechnology> = {
     ],
   },
   'rogue-fitness': {
-    tech: [
+    stack: [
       'Vue',
       'Magento',
       'Node.js',
       'Ionic',
       'React Native',
-    ],
-    stack: [
-      'Vue',
       'JavaScript',
       'HTML5',
       'CSS3',
       'SCSS',
       'JSON',
       'eCommerce',
-      'Magento',
       'RESTful API',
       'REST',
       'Frontend',
@@ -96,16 +77,13 @@ export const roleTechnology: Record<string, RoleTechnology> = {
       'Postman',
       'CI/CD',
       'Jenkins',
-      'Node JS',
       'Express JS',
       'Microservices',
       'Mobile App Development',
-      'Ionic',
       'Angular JS',
       'Cordova',
       'React JS',
       'Firebase',
-      'React Native',
       'WordPress',
       'Scrum/Agile',
       'InVision',
@@ -190,25 +168,18 @@ export const roleTechnology: Record<string, RoleTechnology> = {
     ],
   },
   'procyon-soluciones': {
-    tech: [
+    stack: [
       'ASP.NET',
       'C#',
       'Java',
       'J2EE',
       'jQuery',
-    ],
-    stack: [
       'Team Manager',
       'Project Leader',
       'Object-Oriented Programming',
-      'ASP.NET',
-      'C#',
       '.NET Framework',
-      'Java',
-      'J2EE',
       'JBoss',
       'JavaScript',
-      'jQuery',
       'CSS',
       'HTML',
       'JSON',
@@ -218,14 +189,9 @@ export const roleTechnology: Record<string, RoleTechnology> = {
     ],
   },
   'havasoft': {
-    tech: [
-      'C#',
-      '.NET Framework',
-      'MSSQL',
-    ],
     stack: [
-      '.NET Framework',
       'C#',
+      '.NET Framework',
       'MSSQL',
       'SQL Reports',
       'Object-Oriented Programming',
@@ -236,14 +202,12 @@ export const roleTechnology: Record<string, RoleTechnology> = {
     ],
   },
   'gea-villa-clara': {
-    tech: [
+    stack: [
       'LAN',
       'TCP/IP',
       'DNS',
       'Linux',
       'Windows Server',
-    ],
-    stack: [
       'Network Administrator',
       'Setup Network',
       'Network Segments',
@@ -251,13 +215,8 @@ export const roleTechnology: Record<string, RoleTechnology> = {
       'Network Monitoring & Diagnosis',
       'Failure-Free Network',
       'Software & Driver Installation',
-      'LAN',
-      'TCP/IP',
-      'DNS',
       'DHCP',
       'Nessus',
-      'Linux',
-      'Windows Server',
     ],
   },
 }

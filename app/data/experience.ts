@@ -40,8 +40,6 @@ export interface Role {
   to: MonthDate | null
   /** Leads with what was built, never with what he was employed as. */
   summary: string
-  /** A few names for scanning the list. The full list is `stack`. */
-  tech: string[]
   account: string[]
   /**
    * An entry the Experience list prints under this Role, for time before it
@@ -56,7 +54,7 @@ export interface Role {
  * What a Locale writes for a Role: everything but the technology names, which
  * are the same in every Locale and live in `technology.ts`.
  */
-export interface RoleProse extends Omit<Role, 'tech' | 'stack' | 'before' | 'history'> {
+export interface RoleProse extends Omit<Role, 'stack' | 'before' | 'history'> {
   before?: Omit<RoleNote, 'tech'>
   history?: {
     name: string

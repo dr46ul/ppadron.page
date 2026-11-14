@@ -13,7 +13,6 @@ function role(overrides: Partial<Role> = {}): Role {
     from: '2022-05',
     to: null,
     summary: 'Built the thing that made the other thing work.',
-    tech: ['TypeScript', 'Vue'],
     account: ['Built the thing, then the other thing.'],
     stack: ['TypeScript', 'Vue', 'Vitest'],
     ...overrides,
@@ -45,19 +44,45 @@ describe('experience output', () => {
     ].filter(field => !text.includes(field))).toEqual([])
   })
 
-  it('joins the tech of a role with a middle dot', async () => {
+  it('joins the head of a role\'s stack with a middle dot', async () => {
     const component = await mount([
       role({
-        tech: ['TypeScript', 'Vue', 'Nuxt'],
+        stack: [
+          'TypeScript',
+          'Vue',
+          'Nuxt',
+          'Vitest',
+          'Tailwind',
+          'daisyUI',
+          'pnpm',
+        ],
       }),
     ])
 
-    expect(component.text()).toContain('TypeScript · Vue · Nuxt')
+    expect(component.text()).toContain('TypeScript · Vue · Nuxt · Vitest · Tailwind')
   })
 
-  it('prints a role whose tech list is empty', async () => {
+  it('leaves the rest of the stack to the Role detail', async () => {
     const component = await mount([
-      role({ company: 'Acme', tech: [] }),
+      role({
+        stack: [
+          'TypeScript',
+          'Vue',
+          'Nuxt',
+          'Vitest',
+          'Tailwind',
+          'daisyUI',
+          'pnpm',
+        ],
+      }),
+    ])
+
+    expect(['daisyUI', 'pnpm'].filter(name => component.text().includes(name))).toEqual([])
+  })
+
+  it('prints a role whose stack is empty', async () => {
+    const component = await mount([
+      role({ company: 'Acme', stack: [] }),
     ])
 
     const text = component.text()
@@ -349,7 +374,6 @@ describe('experience output', () => {
         role({
           title: 'Kiln technician',
           summary: 'Built the thing that made the other thing work.',
-          tech: ['TypeScript', 'Vue'],
         }),
       ])
 

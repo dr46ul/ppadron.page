@@ -7,6 +7,9 @@ const emit = defineEmits<{ open: [slug: string] }>()
 
 const period = useRolePeriod()
 
+/** The list is for scanning, so it prints the head of a Role's stack, which is ordered with the names that matter first. */
+const glanceCount = 5
+
 /**
  * Selecting the name by dragging across it also ends in a click, which is not a
  * request to open. A pointer click has already collapsed any older selection,
@@ -63,7 +66,7 @@ function open(event: MouseEvent, slug: string) {
               {{ role.summary }}
             </p>
             <p class="text-subtle mt-1 text-meta">
-              {{ role.tech.join(' · ') }}
+              {{ role.stack.slice(0, glanceCount).join(' · ') }}
             </p>
           </div>
         </li>

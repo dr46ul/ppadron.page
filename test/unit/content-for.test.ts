@@ -11,9 +11,9 @@ describe('contentFor', () => {
     expect(contentFor('xx').code).toBe('en')
   })
 
-  it('joins the shared technology names onto each Role', () => {
-    expect(contentFor('en').roles.map(role => [role.tech, role.stack])).toEqual(
-      contentFor('en').roles.map(role => [roleTechnology[role.slug]!.tech, roleTechnology[role.slug]!.stack]),
+  it('joins the shared stack onto each Role', () => {
+    expect(contentFor('en').roles.map(role => role.stack)).toEqual(
+      contentFor('en').roles.map(role => roleTechnology[role.slug]!.stack),
     )
   })
 
