@@ -138,29 +138,14 @@ export default antfu(
     },
   },
   {
-    // Raw text is gated one component at a time as its copy moves into Messages.
-    files: [
-      'app/error.vue',
-      'app/components/session/CommandPalette.vue',
-      'app/components/session/Footer.vue',
-      'app/components/session/KeyCap.vue',
-      'app/components/session/PromptBar.vue',
-      'app/components/session/output/Background.vue',
-      'app/components/session/output/Colophon.vue',
-      'app/components/session/output/Contact.vue',
-      'app/components/session/output/Experience.vue',
-      'app/components/session/output/Help.vue',
-      'app/components/session/output/Recommendations.vue',
-      'app/components/session/output/RoleDetail.vue',
-      'app/components/session/output/Unknown.vue',
-      'app/components/session/output/Whoami.vue',
-    ],
+    files: ['app/**/*.vue'],
     rules: {
       '@intlify/vue-i18n/no-raw-text': [
         'error',
         {
           // Glyphs and names are identifiers, not copy; nothing else belongs here.
           ignoreText: [
+            'ppadron.page',
             '→',
             '·',
             '/',

@@ -8,6 +8,7 @@
 import type { ThemeChoice } from '#shared/theme'
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { THEME_CHOICES } from '#shared/theme'
+import { useCommandLabel } from '~/composables/useCommandLabel'
 
 const props = defineProps<{
   commands: SessionCommand[]
@@ -30,6 +31,8 @@ const id = useId()
 
 const { t } = useI18n()
 
+const labelOf = useCommandLabel()
+
 /** Keyed by the choice, with every Message key written out as a literal. */
 const themeLabels = computed(() => ({
   light: t('palette.themeChoice.light'),
@@ -46,7 +49,7 @@ const highlight = ref(0)
 
 const needle = computed(() => query.value.trim().toLowerCase())
 
-function matching<T extends MetaCommand>(list: T[]) {
+function matching<T extends SessionCommand | MetaCommand>(list: T[]) {
   return list.filter(command => command.cmd.includes(needle.value))
 }
 
@@ -74,7 +77,7 @@ const groups = computed(() => {
   ]
 })
 
-const options = computed(() => groups.value.flatMap(group => group.commands))
+const options = computed(() => groups.value.flatMap<SessionCommand | MetaCommand>(group => group.commands))
 
 watch(query, () => highlight.value = 0)
 
@@ -202,7 +205,7 @@ onMounted(() => {
                 :class="highlight === group.offset + index && 'text-accent'"
               >{{ command.cmd }}</span>
               <span aria-hidden="true" class="bg-base-300 h-px min-w-3 flex-1 self-center" />
-              <span data-label class="text-subtle text-meta truncate">{{ command.label }}</span>
+              <span data-label class="text-subtle text-meta truncate">{{ labelOf(command) }}</span>
             </div>
           </div>
         </template>

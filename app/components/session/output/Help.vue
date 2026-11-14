@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
+import { useCommandLabel } from '~/composables/useCommandLabel'
 
 defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
+
+const labelOf = useCommandLabel()
 
 /** Commands and words the prompt accepts: identifiers, so no Locale touches them. */
 const roleForm = 'cat ~/experience/<role>'
@@ -18,7 +21,7 @@ const plainWords = { experience: 'experience', contact: 'contact' }
         class="grid max-w-md gap-x-4 sm:grid-cols-[13rem_1fr]"
       >
         <span class="text-accent">{{ command.cmd }}</span>
-        <span class="text-subtle">{{ command.label }}</span>
+        <span class="text-subtle">{{ labelOf(command) }}</span>
       </li>
       <li
         v-for="(command, index) in metaCommands"
@@ -27,7 +30,7 @@ const plainWords = { experience: 'experience', contact: 'contact' }
         class="grid max-w-md gap-x-4 sm:grid-cols-[13rem_1fr]"
       >
         <span class="text-accent">{{ command.cmd }}</span>
-        <span class="text-subtle">{{ command.label }}</span>
+        <span class="text-subtle">{{ labelOf(command) }}</span>
       </li>
     </ul>
 

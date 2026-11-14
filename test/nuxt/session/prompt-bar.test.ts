@@ -17,19 +17,17 @@ const commands: SessionCommand[] = [
   {
     cmd: 'cat ~/vault',
     output: 'whoami',
-    label: 'the sealed thing',
     think: 0,
   },
   {
     cmd: 'ls ~/kiln',
     output: 'experience',
-    label: 'what was fired',
     think: 0,
   },
 ]
 
 const metaCommands: MetaCommand[] = [
-  { cmd: 'sweep', label: 'empty the hearth' },
+  { cmd: 'clear' },
 ]
 
 function recognises(typed: string) {

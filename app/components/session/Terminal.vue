@@ -16,6 +16,7 @@
  * always been. See docs/adr/0004-the-site-is-a-terminal-session.md.
  */
 import type { SessionOutput } from '~/composables/useSession'
+import { useCommandLabel } from '~/composables/useCommandLabel'
 import { commands, metaCommands } from '~/composables/useSession'
 import { roles } from '~/data/experience'
 import { profile } from '~/data/profile'
@@ -37,9 +38,13 @@ const {
   enquiry,
 } = useSession(roles.map(role => role.slug))
 
-// Fails loudly if `help` leaves the command list, rather than printing a name
-// that no longer runs.
+// Fails loudly if `help` or `whoami` leaves the command list, rather than
+// printing a name that no longer runs.
 const helpCommand = commands.find(command => command.output === 'help')!.cmd
+const whoamiCommand = commands.find(command => command.output === 'whoami')!.cmd
+
+/** The terminal the banner says the Visitor logged in on: an identifier, so no Locale touches it. */
+const tty = 'ttys002'
 
 const promptBar = useTemplateRef('promptBar')
 
@@ -51,9 +56,12 @@ const themeChoice = computed({
   set: theme.set,
 })
 
+const commandLabel = useCommandLabel()
+
 /** What a block's command says it does, printed over the block itself. */
 function labelOf(output: SessionOutput | null) {
-  return commands.find(command => command.output === output)?.label
+  const command = commands.find(listed => listed.output === output)
+  return command && commandLabel(command)
 }
 
 /**
@@ -100,7 +108,7 @@ function focusPrompt(event: MouseEvent) {
       href="#prompt"
       class="border-accent text-accent bg-base-100 sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:border focus:px-4 focus:py-2"
     >
-      Skip to the prompt
+      {{ $t('session.skip') }}
     </a>
 
     <main class="session-gutter flex-1 py-10">
@@ -111,12 +119,12 @@ function focusPrompt(event: MouseEvent) {
         class="border-base-300 mb-[4.5rem] border-b pb-6"
       >
         <p class="text-subtle">
-          Last login: {{ lastLogin }} on ttys002
+          {{ $t('banner.lastLogin', { date: lastLogin, tty }) }}
         </p>
         <p class="mt-3">
           <span class="font-semibold">ppadron.page</span>
           <span class="text-subtle">
-            — {{ profile.name }}, {{ profile.headline }}</span>
+            {{ $t('banner.byline', { name: profile.name, headline: profile.headline }) }}</span>
         </p>
         <!-- Whether Pavel is open is the Profile's to say, and so is how it is
              worded; `open` decides only whether the line is accented. -->
@@ -131,8 +139,8 @@ function focusPrompt(event: MouseEvent) {
                stop, so the separator is this component's to supply. -->
           <span class="text-subtle">
             · {{ entries.length > 0
-              ? 'Everything below is already printed — read on, or run a command.'
-              : 'Run a command.' }}
+              ? $t('banner.printed')
+              : $t('banner.empty') }}
           </span>
         </p>
       </div>
@@ -140,13 +148,18 @@ function focusPrompt(event: MouseEvent) {
       <!-- Plain text in reading order rather than a live region: `clear` is
            the Visitor's own action and focus stays on the prompt. -->
       <p v-if="entries.length === 0" data-empty-hint class="text-subtle">
-        Scrollback cleared. Run <span class="text-accent">help</span> for what
-        there is, or <span class="text-accent">whoami</span> to start.
+        <i18n-t keypath="transcript.cleared" scope="global">
+          <template #help>
+            <span class="text-accent">{{ helpCommand }}</span>
+          </template>
+          <template #whoami>
+            <span class="text-accent">{{ whoamiCommand }}</span>
+          </template>
+        </i18n-t>
       </p>
 
-      <p v-if="trimmed > 0" class="text-subtle text-meta mb-10">
-        [ {{ trimmed }} earlier {{ trimmed === 1 ? 'block' : 'blocks' }} dropped
-        — scrollback is {{ scrollback }} ]
+      <p v-if="trimmed > 0" data-dropped class="text-subtle text-meta mb-10">
+        {{ $t('transcript.dropped', { n: trimmed, scrollback }, trimmed) }}
       </p>
 
       <div>
@@ -174,7 +187,7 @@ function focusPrompt(event: MouseEvent) {
           <!-- The beat between the command and its output. -->
           <p v-if="entry.output === null" class="mt-5">
             <span aria-hidden="true" class="caret session-busy" />
-            <span class="sr-only" role="status">Working…</span>
+            <span class="sr-only" role="status">{{ $t('transcript.working') }}</span>
           </p>
 
           <div
