@@ -2,6 +2,7 @@ import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Help from '~/components/session/output/Help.vue'
+import { en, fill } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function command(overrides: Partial<SessionCommand> = {}): SessionCommand {
@@ -88,10 +89,13 @@ describe('help output', () => {
       text: component.text().replace(/\s+/g, ' '),
     }).toEqual({
       items: 0,
-      text: expect.stringContaining(
-        'Tab completes · up arrow down arrow walk the history · plain words work too '
-        + '(experience, contact).',
-      ),
+      text: expect.stringContaining(fill(en.help.hint, {
+        tab: 'Tab',
+        up: en.keys.up,
+        down: en.keys.down,
+        experience: 'experience',
+        contact: 'contact',
+      })),
     })
   })
 
@@ -109,7 +113,7 @@ describe('help output', () => {
       text: component.text(),
     }).toEqual({
       items: 0,
-      text: expect.stringContaining('cat ~/experience/<role>'),
+      text: expect.stringContaining(fill(en.help.roleForm, { form: 'cat ~/experience/<role>' })),
     })
   })
 
@@ -145,7 +149,7 @@ describe('help output', () => {
       ])
 
       expect({
-        hint: roleOf(component, 'p', 'Tab completes'),
+        hint: roleOf(component, 'p', en.help.hint.split('{down}')[1]!.split('·')[0]!.trim()),
         // The two plain words are the point of the sentence, so they read above
         // the sentence carrying them.
         experience: roleOf(component, 'span', 'experience'),
@@ -159,7 +163,7 @@ describe('help output', () => {
       ])
 
       expect({
-        gloss: roleOf(component, 'p', 'one role in full'),
+        gloss: roleOf(component, 'p', fill(en.help.roleForm, { form: 'cat ~/experience/<role>' })),
         form: roleOf(component, 'code', 'cat ~/experience/<role>'),
       }).toEqual({ gloss: 'text-subtle', form: undefined })
     })

@@ -18,7 +18,7 @@ defineProps<{ profile: Profile }>()
 
     <template v-if="profile.skills.length > 0">
       <p class="text-muted mt-5 text-meta">
-        Skills
+        {{ $t('background.skills') }}
       </p>
       <p class="text-subtle mt-1 text-meta">
         {{ profile.skills.join(' · ') }}
@@ -26,7 +26,7 @@ defineProps<{ profile: Profile }>()
     </template>
 
     <p class="text-muted mt-5 text-meta">
-      Education
+      {{ $t('background.education') }}
     </p>
     <p class="text-body mt-1">
       {{ profile.education.degree }}

@@ -6,13 +6,22 @@
  * is trimmed to its letters so they sit in the middle rather than leaning high.
  */
 defineProps<{ glyph?: keyof typeof KEYS }>()
+
+const { t } = useI18n()
+
+/** Spoken names, with every Message key written out as a literal. */
+const names = computed(() => ({
+  up: t('keys.up'),
+  down: t('keys.down'),
+  enter: t('keys.enter'),
+}) satisfies Record<keyof typeof KEYS, string>)
 </script>
 
 <script lang="ts">
 const KEYS = {
-  up: { name: 'up arrow', path: 'M8 13V3M4 7l4-4 4 4' },
-  down: { name: 'down arrow', path: 'M8 3v10M4 9l4 4 4-4' },
-  enter: { name: 'enter', path: 'M13 3v6H3M6 6 3 9l3 3' },
+  up: { path: 'M8 13V3M4 7l4-4 4 4' },
+  down: { path: 'M8 3v10M4 9l4 4 4-4' },
+  enter: { path: 'M13 3v6H3M6 6 3 9l3 3' },
 }
 </script>
 
@@ -20,7 +29,7 @@ const KEYS = {
   <kbd class="kbd kbd-sm border-b" :class="glyph && 'px-0'">
     <template v-if="glyph">
       <svg aria-hidden="true" viewBox="0 0 16 16"><path :d="KEYS[glyph].path" /></svg>
-      <span class="sr-only">{{ KEYS[glyph].name }}</span>
+      <span class="sr-only">{{ names[glyph] }}</span>
     </template>
     <span v-else class="centre-on-letters"><slot /></span>
   </kbd>

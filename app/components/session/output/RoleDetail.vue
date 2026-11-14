@@ -10,6 +10,9 @@ defineProps<{
    */
   role?: Role
 }>()
+
+/** The Command that lists the Roles: an identifier, so no Locale touches it. */
+const listCommand = 'ls ~/experience'
 </script>
 
 <template>
@@ -59,7 +62,7 @@ defineProps<{
 
     <template v-if="role.stack.length > 0">
       <p class="text-muted mt-5 text-meta">
-        Tech stack
+        {{ $t('roleDetail.techStack') }}
       </p>
       <p class="text-subtle mt-1 text-meta">
         {{ role.stack.join(' · ') }}
@@ -71,7 +74,13 @@ defineProps<{
     v-else
     class="text-error text-meta"
   >
-    cat: ~/experience/{{ roleName }}: No such file or directory — try
-    <span class="text-accent">ls ~/experience</span>
+    <i18n-t keypath="roleDetail.notFound" scope="global">
+      <template #role>
+        {{ roleName }}
+      </template>
+      <template #list>
+        <span class="text-accent">{{ listCommand }}</span>
+      </template>
+    </i18n-t>
   </p>
 </template>

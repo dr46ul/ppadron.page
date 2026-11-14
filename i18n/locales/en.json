@@ -1,4 +1,86 @@
 {
+  "background": {
+    "education": "Education",
+    "skills": "Skills"
+  },
+  "colophon": {
+    "lede": "No projects gallery, so this page is the work sample: a statically prerendered Nuxt site with one serverless function behind the form, and the whole of it is readable."
+  },
+  "contact": {
+    "bodyLabel": "body:",
+    "complaintAddress": "I need an address I can reply to.",
+    "complaintMessage": "A little more, please — at least {min} characters.",
+    "complaintName": "Tell me who you are.",
+    "complaintTooLong": "Keep it to {limit} characters; the rest can follow by email.",
+    "emailPlaceholder": "you{'@'}company.com",
+    "failed": "That did not send, and nothing was saved. Email me at {email} and the message reaches me all the same.",
+    "fromLabel": "from:",
+    "lede": "Tell me what you are building and what is in the way. I answer every message myself.",
+    "legend": "Send an enquiry",
+    "messagePlaceholder": "what are you building, and what is in the way?",
+    "namePlaceholder": "your name",
+    "replyToLabel": "reply-to:",
+    "retention": "stored nowhere else",
+    "send": "send",
+    "sending": "sending…",
+    "sent": "sent",
+    "sentNotice": "Sent. It is in my inbox and I will reply to the address you gave."
+  },
+  "experience": {
+    "ndaNote": "Freelance client work is under NDA, so there is no projects gallery. This is the work itself."
+  },
+  "footer": {
+    "copyright": "© {year} {name}"
+  },
+  "help": {
+    "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
+    "roleForm": "{form} prints one role in full."
+  },
+  "keys": {
+    "down": "down arrow",
+    "enter": "enter",
+    "up": "up arrow"
+  },
+  "palette": {
+    "backdropClose": "close",
+    "close": "Close",
+    "dialog": "Commands",
+    "groupCommands": "Commands",
+    "groupSession": "Session",
+    "keyClose": "close",
+    "keyMove": "move",
+    "keyRun": "run",
+    "list": "Commands",
+    "nothing": "Nothing matches.",
+    "runTyped": "Enter runs {typed}.",
+    "search": "Find a command",
+    "searchPlaceholder": "find a command",
+    "theme": "Theme",
+    "themeChoice": {
+      "dark": "dark",
+      "light": "light",
+      "system": "system"
+    }
+  },
+  "promptBar": {
+    "commands": "commands",
+    "label": "Run a command",
+    "placeholder": "type a command, or open the list"
+  },
+  "recommendations": {
+    "alsoOnFile": "Also on file",
+    "credit": " — {title}, {company}",
+    "keyMove": "move",
+    "keyRead": "read",
+    "provenance": "Verbatim from LinkedIn. Colleagues and managers, not clients.",
+    "read": "Read {name}",
+    "role": "{title}, {company}",
+    "words": "{n} word | {n} words"
+  },
+  "roleDetail": {
+    "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}",
+    "techStack": "Tech stack"
+  },
   "unknown": {
     "notFound": "{cmd}: command not found — try {help}"
   }

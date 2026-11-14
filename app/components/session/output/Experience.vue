@@ -23,8 +23,7 @@ function open(event: MouseEvent, slug: string) {
     <!-- ADR-0001: there is no Work section, and a visitor arriving at a
          developer's site will notice. Say why rather than let them wonder. -->
     <p class="text-subtle max-w-prose text-meta">
-      Freelance client work is under NDA, so there is no projects gallery. This
-      is the work itself.
+      {{ $t('experience.ndaNote') }}
     </p>
 
     <ul class="mt-5 flex flex-col gap-8">

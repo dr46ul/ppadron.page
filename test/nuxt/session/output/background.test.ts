@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Background from '~/components/session/output/Background.vue'
+import { en } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /** A Profile the real `app/data/profile.ts` cannot supply. */
@@ -121,8 +122,8 @@ describe('background output', () => {
       const without = await mount({ skills: [] })
 
       expect({
-        labelledWithSkills: withSkills.text().includes('Skills'),
-        labelledWithout: without.text().includes('Skills'),
+        labelledWithSkills: withSkills.text().includes(en.background.skills),
+        labelledWithout: without.text().includes(en.background.skills),
         educationWithout: without.text().includes('Licence in Hydraulics'),
       }).toEqual({ labelledWithSkills: true, labelledWithout: false, educationWithout: true })
     })
@@ -135,8 +136,8 @@ describe('background output', () => {
       expect({
         story: roleOf(component, 'p', 'Learned plumbing'),
         degree: roleOf(component, 'p', 'Licence in Hydraulics'),
-        skillsLabel: roleOf(component, 'p', 'Skills'),
-        educationLabel: roleOf(component, 'p', 'Education'),
+        skillsLabel: roleOf(component, 'p', en.background.skills),
+        educationLabel: roleOf(component, 'p', en.background.education),
         skills: roleOf(component, 'p', 'soldering'),
         faculty: roleOf(component, 'p', 'Faculty of Water'),
         university: roleOf(component, 'p', 'University of Reykjavík'),

@@ -3,6 +3,7 @@ import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import Contact from '~/components/session/output/Contact.vue'
+import { en, fill } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /**
@@ -44,12 +45,14 @@ function complaint(component: Awaited<ReturnType<typeof mount>>, name: string) {
   return component.find<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`).element.validationMessage
 }
 
-const WHO = 'Tell me who you are.'
-const ADDRESS = 'I need an address I can reply to.'
-const MORE = 'A little more, please — at least 20 characters.'
+const WHO = en.contact.complaintName
+const ADDRESS = en.contact.complaintAddress
+const MORE = fill(en.contact.complaintMessage, { min: '20' })
 
 function cap(characters: number) {
-  return `Keep it to ${characters} characters; the rest can follow by email.`
+  return fill(en.contact.complaintTooLong, {
+    limit: characters.toLocaleString('en-US'),
+  })
 }
 
 describe('contact output', () => {
@@ -128,7 +131,7 @@ describe('contact output', () => {
       button: component.find('button[type="submit"]').text(),
       status: component.find('[role="status"]').exists(),
       alert: component.find('[role="alert"]').exists(),
-    }).toEqual({ button: 'send', status: false, alert: false })
+    }).toEqual({ button: en.contact.send, status: false, alert: false })
   })
 
   it('draws the send button as the library\'s small outlined accent button, never its disabled one', async () => {
@@ -150,6 +153,12 @@ describe('contact output', () => {
       ])
   })
 
+  it('shows an address as the reply-to placeholder, with its at sign intact', async () => {
+    const component = await mount()
+
+    expect(component.get('[name="email"]').attributes('placeholder')).toBe(en.contact.emailPlaceholder.replace('{\'@\'}', '@'))
+  })
+
   it('says so and takes no more typing while it is sending', async () => {
     const component = await mount({ state: 'sending' })
 
@@ -157,7 +166,7 @@ describe('contact output', () => {
       button: component.find('button[type="submit"]').text(),
       disabled: ['name', 'email', 'message'].map(name => component.find(`[name="${name}"]`).attributes('disabled') !== undefined),
     }).toEqual({
-      button: 'sending…',
+      button: en.contact.sending,
       disabled: [true, true, true],
     })
   })
@@ -203,7 +212,7 @@ describe('contact output', () => {
         text: button.text(),
         disabled: button.attributes('disabled'),
         ariaDisabled: button.attributes('aria-disabled'),
-      }).toEqual({ text: 'sent', disabled: undefined, ariaDisabled: 'true' })
+      }).toEqual({ text: en.contact.sent, disabled: undefined, ariaDisabled: 'true' })
     })
 
     it('does not ask the session to send it again', async () => {
@@ -256,7 +265,7 @@ describe('contact output', () => {
       fieldsetDisabled: component.find('fieldset').attributes('disabled'),
       alert: component.find('[role="alert"]').exists(),
     }).toEqual({
-      status: expect.stringContaining('It is in my inbox'),
+      status: expect.stringContaining(en.contact.sentNotice),
       fieldsetDisabled: undefined,
       alert: false,
     })
@@ -270,7 +279,9 @@ describe('contact output', () => {
     const alert = component.find('[role="alert"]')
 
     expect({
-      missingFromAlert: ['nothing was saved', 'pavel@example.test'].filter(line => !alert.text().includes(line)),
+      missingFromAlert: [
+        fill(en.contact.failed, { email: 'pavel@example.test' }),
+      ].filter(line => !alert.text().replace(/\s+/g, ' ').includes(line)),
       fieldsetDisabled: component.find('fieldset').attributes('disabled'),
       status: component.find('[role="status"]').exists(),
     }).toEqual({
@@ -402,8 +413,8 @@ describe('contact output', () => {
       const component = await mount()
 
       expect({
-        lede: roleOf(component, 'p', 'Tell me what you are building'),
-        retention: roleOf(component, 'span', 'stored nowhere else'),
+        lede: roleOf(component, 'p', en.contact.lede),
+        retention: roleOf(component, 'span', en.contact.retention),
       }).toEqual({ lede: 'text-muted', retention: 'text-subtle' })
     })
   })

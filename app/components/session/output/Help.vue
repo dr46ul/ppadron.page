@@ -2,6 +2,10 @@
 import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 
 defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
+
+/** Commands and words the prompt accepts: identifiers, so no Locale touches them. */
+const roleForm = 'cat ~/experience/<role>'
+const plainWords = { experience: 'experience', contact: 'contact' }
 </script>
 
 <template>
@@ -30,16 +34,31 @@ defineProps<{ commands: SessionCommand[], metaCommands: MetaCommand[] }>()
     <!-- Interface copy, not a prop: the form does not change when Pavel's Roles
          do, and `commands` is what the palette lists, which it must stay out of. -->
     <p class="text-subtle mt-4 text-meta">
-      <code class="text-accent">cat ~/experience/&lt;role&gt;</code>
-      prints one role in full.
+      <i18n-t keypath="help.roleForm" scope="global">
+        <template #form>
+          <code class="text-accent">{{ roleForm }}</code>
+        </template>
+      </i18n-t>
     </p>
 
     <p class="text-subtle mt-1 text-meta">
-      <SessionKeyCap>Tab</SessionKeyCap> completes ·
-      <SessionKeyCap glyph="up" /> <SessionKeyCap glyph="down" /> walk the history ·
-      plain words work too
-      (<span class="text-muted">experience</span>,
-      <span class="text-muted">contact</span>).
+      <i18n-t keypath="help.hint" scope="global">
+        <template #tab>
+          <SessionKeyCap>Tab</SessionKeyCap>
+        </template>
+        <template #up>
+          <SessionKeyCap glyph="up" />
+        </template>
+        <template #down>
+          <SessionKeyCap glyph="down" />
+        </template>
+        <template #experience>
+          <span class="text-muted">{{ plainWords.experience }}</span>
+        </template>
+        <template #contact>
+          <span class="text-muted">{{ plainWords.contact }}</span>
+        </template>
+      </i18n-t>
     </p>
   </div>
 </template>

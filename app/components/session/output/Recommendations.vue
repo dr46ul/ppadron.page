@@ -110,7 +110,7 @@ function move(event: KeyboardEvent) {
     <!-- CONTEXT.md: say plainly where these come from, rather than letting a
          visitor infer client references. -->
     <p class="text-subtle max-w-prose text-meta">
-      Verbatim from LinkedIn. Colleagues and managers, not clients.
+      {{ $t('recommendations.provenance') }}
     </p>
 
     <!-- Keyed, so a swap mounts it afresh and its lines print in again. -->
@@ -139,13 +139,13 @@ function move(event: KeyboardEvent) {
         <span
           data-credit
           :style="{ '--p': lead.quote.length }"
-        > — {{ lead.title }}, {{ lead.company }}</span>
+        >{{ $t('recommendations.credit', { title: lead.title, company: lead.company }) }}</span>
       </p>
     </div>
 
     <div v-if="rest.length > 0" class="mt-10 max-w-prose">
       <p data-flip="heading" class="text-subtle text-label tracking-[0.2em] uppercase">
-        Also on file
+        {{ $t('recommendations.alsoOnFile') }}
       </p>
 
       <ul ref="list" class="mt-2" @keydown="move">
@@ -166,18 +166,19 @@ function move(event: KeyboardEvent) {
           >
             <span aria-hidden="true" class="recommendation-mark text-subtle group-hover:text-accent group-focus-visible:text-accent" />
             <span class="min-w-0">
-              <span class="sr-only">Read </span>
+              <span class="sr-only">{{ $t('recommendations.read', { name: recommendations[index]!.name }) }}</span>
               <span
                 data-name
+                aria-hidden="true"
                 :data-flip="`name:${index}`"
                 class="text-prose group-hover:text-accent inline-block origin-top-left"
               >{{ recommendations[index]!.name }}</span>
               <span data-role class="text-subtle text-meta block">
-                {{ recommendations[index]!.title }}, {{ recommendations[index]!.company }}
+                {{ $t('recommendations.role', { title: recommendations[index]!.title, company: recommendations[index]!.company }) }}
               </span>
             </span>
             <span data-length class="text-subtle text-label whitespace-nowrap tabular-nums">
-              {{ wordsIn(recommendations[index]!) }} words
+              {{ $t('recommendations.words', { n: wordsIn(recommendations[index]!) }, wordsIn(recommendations[index]!)) }}
             </span>
           </button>
         </li>
@@ -192,10 +193,10 @@ function move(event: KeyboardEvent) {
       >
         <SessionKeyCap glyph="up" />
         <SessionKeyCap glyph="down" />
-        <span class="ml-1">move</span>
+        <span class="ml-1">{{ $t('recommendations.keyMove') }}</span>
         <span class="mx-1">·</span>
         <SessionKeyCap glyph="enter" />
-        <span class="ml-1">read</span>
+        <span class="ml-1">{{ $t('recommendations.keyRead') }}</span>
       </p>
     </div>
   </div>

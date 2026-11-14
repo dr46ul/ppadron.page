@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import CommandPalette from '~/components/session/CommandPalette.vue'
 import PromptBar from '~/components/session/PromptBar.vue'
+import { en } from '../messages'
 import { missingClasses } from '../missing-classes'
 
 /**
@@ -132,7 +133,7 @@ describe('prompt bar', () => {
       expect({
         text: commandsButton(component).find('[data-word]').text(),
         popup: commandsButton(component).attributes('aria-haspopup'),
-      }).toEqual({ text: 'commands', popup: 'dialog' })
+      }).toEqual({ text: en.promptBar.commands, popup: 'dialog' })
     })
 
     it('is the library\'s small outlined accent button, resting quieter', async () => {
@@ -318,8 +319,14 @@ describe('prompt bar', () => {
       const component = await mount()
 
       expect(prompt(component).attributes('placeholder')).toBe(
-        'type a command, or open the list',
+        en.promptBar.placeholder,
       )
+    })
+
+    it('names the prompt for a screen reader', async () => {
+      const component = await mount()
+
+      expect(component.get('label[for="prompt"]').text()).toBe(en.promptBar.label)
     })
 
     it('marks the prompt caret so its focus state can be styled off the input', async () => {

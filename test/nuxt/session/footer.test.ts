@@ -2,6 +2,7 @@ import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Footer from '~/components/session/Footer.vue'
+import { en, fill } from '../messages'
 import { missingClasses } from '../missing-classes'
 import { roleOf } from '../text-role'
 
@@ -57,7 +58,7 @@ describe('session footer', () => {
   it('signs the notice with the name it is handed', async () => {
     const component = await mount({ name: 'Dagny Vole' })
 
-    expect(component.find('p').text()).toBe('© 2031 Dagny Vole')
+    expect(component.find('p').text()).toBe(fill(en.footer.copyright, { year: '2031', name: 'Dagny Vole' }))
   })
 
   it('links to both profiles it is handed, and not to the repo', async () => {
@@ -91,13 +92,13 @@ describe('session footer', () => {
       (await mount({}, '2031')).text(),
       (await mount({}, '2032')).text(),
     ]).toEqual([
-      expect.stringContaining('© 2031'),
-      expect.stringContaining('© 2032'),
+      expect.stringContaining(fill(en.footer.copyright, { year: '2031', name: 'Wilhelmina Ashgrove' })),
+      expect.stringContaining(fill(en.footer.copyright, { year: '2032', name: 'Wilhelmina Ashgrove' })),
     ])
   })
 
   it('prints the year in the digits it is handed', async () => {
-    expect((await mount({}, '٢٠٢٦')).text()).toContain('© ٢٠٢٦')
+    expect((await mount({}, '٢٠٢٦')).text()).toContain(fill(en.footer.copyright, { year: '٢٠٢٦', name: 'Wilhelmina Ashgrove' }))
   })
 
   it('prints nothing but the Profile it is handed', async () => {

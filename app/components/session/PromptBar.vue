@@ -108,7 +108,7 @@ defineExpose({
       class="session-gutter flex items-baseline gap-2 py-3"
       @submit.prevent="emit('run', typed)"
     >
-      <label class="sr-only" for="prompt">Run a command</label>
+      <label class="sr-only" for="prompt">{{ $t('promptBar.label') }}</label>
       <span aria-hidden="true" class="text-accent shrink-0 select-none">$</span>
       <!-- 16px at every width: iOS Safari zooms the page on focusing a smaller
            input and does not zoom back out. On a phone the commands button
@@ -124,7 +124,7 @@ defineExpose({
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder="type a command, or open the list"
+          :placeholder="$t('promptBar.placeholder')"
           @keydown.tab="onTab"
           @keydown.up.prevent="emit('recall', 1)"
           @keydown.down.prevent="emit('recall', -1)"
@@ -160,7 +160,7 @@ defineExpose({
         >
           <path d="M3 4h10M3 8h10M3 12h10" />
         </svg>
-        <span data-word class="centre-on-letters">commands</span>
+        <span data-word class="centre-on-letters">{{ $t('promptBar.commands') }}</span>
         <span aria-hidden="true" class="flex gap-1 pointer-coarse:hidden">
           <SessionKeyCap data-modifier>{{ modifier }}</SessionKeyCap>
           <SessionKeyCap>K</SessionKeyCap>
