@@ -1,7 +1,8 @@
 import type { Profile } from '~/data/profile'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import Whoami from '~/components/session/output/Whoami.vue'
+import { en } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /**
@@ -36,10 +37,11 @@ function profile(overrides: Partial<Profile> = {}): Profile {
   }
 }
 
-function mount(overrides: Partial<Profile> = {}) {
+function mount(overrides: Partial<Profile> = {}, backgroundCommand = 'cat ~/about') {
   return mountSuspended(Whoami, {
     props: {
       profile: profile(overrides),
+      backgroundCommand,
     },
   })
 }
@@ -102,6 +104,7 @@ describe('whoami output', () => {
       'Systems plumber · Reykjavík',
       'Unblocks the pipes nobody else will crawl into.',
       'Works with teams whose build takes longer than their standup.',
+      en.whoami.more.replace('{background}', 'cat ~/about'),
     ])
   })
 
@@ -125,7 +128,7 @@ describe('whoami output', () => {
       lines: component.findAll('h1, p').length,
     }).toEqual({
       text: expect.stringContaining('Keeps bees, badly.'),
-      lines: 5,
+      lines: 6,
     })
   })
 
@@ -146,6 +149,30 @@ describe('whoami output', () => {
     const text = component.text()
     expect(['Pavel Padron', 'Frontend engineer'].filter(fact => text.includes(fact)))
       .toEqual([])
+  })
+
+  it('offers the background command it is handed', async () => {
+    const component = await mount({}, 'read-me')
+
+    expect(component.get('button').text()).toBe('read-me')
+  })
+
+  it('asks for the background rather than running it', async () => {
+    const component = await mount()
+
+    await component.get('button').trigger('click')
+
+    expect(component.emitted('background')).toHaveLength(1)
+  })
+
+  it('keeps the background click from reaching the session behind it', async () => {
+    const component = await mount()
+    const behind = vi.fn()
+    component.element.parentElement!.addEventListener('click', behind)
+
+    await component.get('button').trigger('click')
+
+    expect(behind).not.toHaveBeenCalled()
   })
 
   it('holds no placeholder markers of its own', async () => {

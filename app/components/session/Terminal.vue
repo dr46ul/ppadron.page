@@ -38,10 +38,11 @@ const {
   enquiry,
 } = useSession(roles.map(role => role.slug))
 
-// Fails loudly if `help` or `whoami` leaves the command list, rather than
+// Fails loudly if `help`, `whoami` or the background leaves the command list, rather than
 // printing a name that no longer runs.
 const helpCommand = commands.find(command => command.output === 'help')!.cmd
 const whoamiCommand = commands.find(command => command.output === 'whoami')!.cmd
+const backgroundCommand = commands.find(command => command.output === 'background')!.cmd
 
 /** The terminal the banner says the Visitor logged in on: an identifier, so no Locale touches it. */
 const tty = 'ttys002'
@@ -199,6 +200,8 @@ function focusPrompt(event: MouseEvent) {
             <SessionOutputWhoami
               v-if="entry.output === 'whoami'"
               :profile
+              :background-command
+              @background="exec(backgroundCommand)"
             />
             <SessionOutputExperience
               v-else-if="entry.output === 'experience'"
