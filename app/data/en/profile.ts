@@ -1,13 +1,11 @@
-import type { Profile } from '../profile'
+import type { ProfileProse } from '../profile'
 
-export const profile: Profile = {
+export const profile: ProfileProse = {
   name: 'Pavel Padron',
   headline: 'Frontend engineer',
-  tagline:
-    'I get frontend projects unstuck: from legacy to shipping, and easy to change after.',
+  tagline: 'I get frontend projects unstuck: from legacy to shipping, and easy to change after.',
   location: 'Minsk, Belarus',
-  intro:
-    '20+ years building for the web, now leading the frontend migration of a flagship product at Nordhealth. I build new products from scratch and carry legacy ones forward, so they ship and stay easy to change.',
+  intro: '20+ years building for the web, now leading the frontend migration of a flagship product at Nordhealth. I build new products from scratch and carry legacy ones forward, so they ship and stay easy to change.',
   email: 'me@ppadron.page',
   availability: {
     open: true,
@@ -18,15 +16,6 @@ export const profile: Profile = {
     linkedin: 'https://www.linkedin.com/in/pavel-padron/',
     repo: 'https://github.com/dr46ul/ppadron.page',
   },
-  stack: [
-    'vue',
-    'nuxt',
-    'typescript',
-    'tailwind',
-    'daisyui',
-    'vitest',
-    'vercel',
-  ],
   background: [
     'Hello there!',
     'My name is Pavel Padron and I\'m a passionate web developer born in Cuba and based in Minsk, Belarus, since 2011.',
@@ -35,19 +24,6 @@ export const profile: Profile = {
     'At some point in my career I have also done some back-end development and project management. I try to constantly learn and experiment with new technologies and techniques to stay up to date with the latest trends in the industry.',
     'When I\'m not coding, you can find me spending time with my family, exploring the city, trying new foods, or playing the Diablo video game. I believe that a balanced lifestyle is key to being happy and productive, both in and outside of work. Moreover, I\'ve been playing with AI tools to generate images/artwork and I find it quite interesting and relaxing.',
     'If you\'re looking for a passionate and experienced web developer and problem solver who works independently, I\'d love to chat with you! Let\'s work together to show your ideas to the world.',
-  ],
-  skills: [
-    'Nuxt 3',
-    'Vue 3',
-    'TypeScript',
-    'ES6+',
-    'JavaScript',
-    'REST API',
-    'HTML5',
-    'CSS3',
-    'SCSS',
-    'Git/GitHub',
-    'Figma',
   ],
   education: {
     degree: 'Bachelor\'s degree in Computer Science',

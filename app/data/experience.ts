@@ -52,6 +52,18 @@ export interface Role {
   stack: string[]
 }
 
+/**
+ * What a Locale writes for a Role: everything but the technology names, which
+ * are the same in every Locale and live in `technology.ts`.
+ */
+export interface RoleProse extends Omit<Role, 'tech' | 'stack' | 'before' | 'history'> {
+  before?: Omit<RoleNote, 'tech'>
+  history?: {
+    name: string
+    phases: Omit<RolePhase, 'tech'>[]
+  }[]
+}
+
 type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
 /**

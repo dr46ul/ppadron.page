@@ -45,3 +45,9 @@ export interface Profile {
   skills: string[]
   education: Education
 }
+
+/**
+ * What a Locale writes: the Profile less the technology names, which are the
+ * same in every Locale and live in `technology.ts`.
+ */
+export type ProfileProse = Omit<Profile, 'stack' | 'skills'>
