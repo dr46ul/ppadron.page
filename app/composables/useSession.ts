@@ -18,12 +18,13 @@ export type SessionOutput
     | 'role-detail'
     | 'unknown'
 
+/** What a listed Command prints. Role detail and Unknown are not run by name. */
+export type CommandOutput = Exclude<SessionOutput, 'role-detail' | 'unknown'>
+
 export interface SessionCommand {
   /** The canonical spelling, as it is echoed and as the palette lists it. */
   cmd: string
-  output: SessionOutput
-  /** What the palette and the `help` listing say it does. */
-  label: string
+  output: CommandOutput
   /**
    * How long the machine appears to spend on it. A constant delay is the tell
    * that there is no machine behind the prompt: `help` is a built-in and
@@ -52,57 +53,49 @@ export const commands: SessionCommand[] = [
   {
     cmd: 'whoami',
     output: 'whoami',
-    label: 'who I am',
     think: 260,
   },
   {
     cmd: 'cat ~/about',
     output: 'background',
-    label: 'the longer story',
     think: 440,
   },
   {
     cmd: 'ls ~/experience',
     output: 'experience',
-    label: 'the work itself',
     think: 380,
   },
   {
     cmd: 'cat ~/recommendations',
     output: 'recommendations',
-    label: 'what colleagues say',
     think: 540,
   },
   {
     cmd: 'mail pavel',
     output: 'contact',
-    label: 'send me a message',
     think: 660,
   },
   {
     cmd: 'cat ~/colophon',
     output: 'colophon',
-    label: 'how this page is built',
     think: 480,
   },
   {
     cmd: 'help',
     output: 'help',
-    label: 'this list',
     think: 180,
   },
 ]
 
 /** Commands that act on the session itself rather than printing anything. */
 export interface MetaCommand {
-  cmd: string
-  label: string
+  cmd: 'reset' | 'clear' | 'theme'
 }
 
 export const metaCommands: MetaCommand[] = [
-  { cmd: 'reset', label: 'back to how the page loaded' },
-  { cmd: 'clear', label: 'empty the scrollback' },
-  { cmd: 'theme', label: 'light, dark, or follow the system' },
+  { cmd: 'reset' },
+  { cmd: 'clear' },
+  { cmd: 'theme' },
 ]
 
 /**
@@ -147,7 +140,7 @@ const ROLE_DETAIL = {
   path: 'cat ~/experience/',
   output: 'role-detail',
   think: 480,
-} satisfies Pick<SessionCommand, 'output' | 'think'> & { path: string }
+} satisfies Pick<SessionCommand, 'think'> & { path: string, output: SessionOutput }
 
 function rolePath(slug: string) {
   return ROLE_DETAIL.path + slug

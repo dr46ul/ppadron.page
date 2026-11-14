@@ -2,31 +2,16 @@ import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Help from '~/components/session/output/Help.vue'
-import { en, fill } from '../../messages'
+import { en, fill, markElements } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function command(overrides: Partial<SessionCommand> = {}): SessionCommand {
   return {
     cmd: 'whoami',
     output: 'whoami',
-    label: 'who I am',
     think: 260,
     ...overrides,
   }
-}
-
-/**
- * A paragraph's text with each element it holds written as `[tag:text]`, so the
- * order of words and elements reads as one string beside the Message.
- */
-function markElements(paragraph: Element) {
-  return [...paragraph.childNodes]
-    .map(node => node instanceof Element
-      ? `[${node.tagName.toLowerCase()}:${node.textContent?.trim()}]`
-      : node.textContent)
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 function mount(commands: SessionCommand[], metaCommands: MetaCommand[] = []) {
@@ -36,15 +21,15 @@ function mount(commands: SessionCommand[], metaCommands: MetaCommand[] = []) {
 }
 
 describe('help output', () => {
-  it('lists each command it is handed with what it does', async () => {
+  it('lists each command it is handed with what its Output does', async () => {
     const component = await mount([
-      command({ cmd: 'cat ~/vault', label: 'the sealed thing' }),
+      command({ cmd: 'cat ~/vault', output: 'colophon' }),
     ])
 
     const text = component.text()
     expect({
       command: text.includes('cat ~/vault'),
-      label: text.includes('the sealed thing'),
+      label: text.includes(en.commands.colophon),
       // Nothing it was not handed: the real command list must not leak in.
       realCommand: text.includes('ls ~/experience'),
     }).toEqual({ command: true, label: true, realCommand: false })
@@ -67,16 +52,16 @@ describe('help output', () => {
   it('lists the meta commands after the commands that print', async () => {
     const component = await mount(
       [
-        command({ cmd: 'cat ~/vault', label: 'the sealed thing' }),
+        command({ cmd: 'cat ~/vault' }),
       ],
       [
-        { cmd: 'wipe', label: 'start over' },
+        { cmd: 'clear' },
       ],
     )
 
     expect(component.findAll('li').map(item => item.text())).toEqual([
       expect.stringContaining('cat ~/vault'),
-      expect.stringMatching(/wipe[\s\S]*start over/),
+      expect.stringContaining(en.commands.clear),
     ])
   })
 
@@ -87,7 +72,7 @@ describe('help output', () => {
         command({ cmd: 'two' }),
       ],
       [
-        { cmd: 'wipe', label: 'start over' },
+        { cmd: 'clear' },
       ],
     )
 
@@ -116,7 +101,7 @@ describe('help output', () => {
   it('draws Tab and both arrows in its closing hint as key caps, read by name', async () => {
     const component = await mount([], [])
 
-    expect(component.findAll('kbd').map(key => key.text())).toEqual(['Tab', 'up arrow', 'down arrow'])
+    expect(component.findAll('kbd').map(key => key.text())).toEqual(['Tab', en.keys.up, en.keys.down])
   })
 
   it('sets each key cap and plain word inside its hint where the Message puts it', async () => {
@@ -156,16 +141,16 @@ describe('help output', () => {
       // that a commands-only mount never renders.
       const component = await mount(
         [
-          command({ cmd: 'cat ~/vault', label: 'the sealed thing' }),
+          command({ cmd: 'cat ~/vault', output: 'colophon' }),
         ],
         [
-          { cmd: 'reset', label: 'start the session over' },
+          { cmd: 'reset' },
         ],
       )
 
       expect({
-        label: roleOf(component, 'span', 'the sealed thing'),
-        metaLabel: roleOf(component, 'span', 'start the session over'),
+        label: roleOf(component, 'span', en.commands.colophon),
+        metaLabel: roleOf(component, 'span', en.commands.reset),
         command: roleOf(component, 'span', 'cat ~/vault'),
         metaCommand: roleOf(component, 'span', 'reset'),
       }).toEqual({

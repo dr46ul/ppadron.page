@@ -7,26 +7,25 @@ import { en, fill } from '../messages'
 
 /**
  * Commands the real Content cannot supply, so nothing here can go green off the
- * component's own markup or the real command list.
+ * component's own markup or the real command list. A meta command's name is
+ * what its label is found by, so those two are real.
  */
 const commands: SessionCommand[] = [
   {
     cmd: 'cat ~/vault',
     output: 'whoami',
-    label: 'the sealed thing',
     think: 0,
   },
   {
     cmd: 'ls ~/kiln',
     output: 'experience',
-    label: 'what was fired',
     think: 0,
   },
 ]
 
 const metaCommands: MetaCommand[] = [
-  { cmd: 'sweep', label: 'empty the hearth' },
-  { cmd: 'theme', label: 'choose the glaze' },
+  { cmd: 'clear' },
+  { cmd: 'theme' },
 ]
 
 /** What the session would run, standing in for its own rules. */
@@ -119,7 +118,7 @@ describe('command palette', () => {
     it('never matches on what a command does', async () => {
       const component = await mount()
 
-      await find(component).setValue('fired')
+      await find(component).setValue(en.commands.experience)
 
       expect(options(component).length).toBe(0)
     })
@@ -205,7 +204,7 @@ describe('command palette', () => {
       const component = await mount()
       await press(component, 'ArrowDown')
 
-      await find(component).setValue('l')
+      await find(component).setValue('~')
 
       expect(highlighted(component)).toEqual(['true', 'false'])
     })
@@ -289,7 +288,7 @@ describe('command palette', () => {
       })
         .toEqual({
           run: [
-            ['sweep'],
+            ['clear'],
           ],
           open: [
             [false],
@@ -460,14 +459,14 @@ describe('command palette', () => {
       const component = await mount()
 
       expect(options(component).map(option => option.find('[data-cmd]').text()))
-        .toEqual(['cat ~/vault', 'ls ~/kiln', 'sweep'])
+        .toEqual(['cat ~/vault', 'ls ~/kiln', 'clear'])
     })
 
     it('says what each one does', async () => {
       const component = await mount()
 
       expect(options(component).map(option => option.find('[data-label]').text()))
-        .toEqual(['the sealed thing', 'what was fired', 'empty the hearth'])
+        .toEqual([en.commands.whoami, en.commands.experience, en.commands.clear])
     })
   })
 })

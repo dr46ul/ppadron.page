@@ -3,8 +3,26 @@
     "education": "Education",
     "skills": "Skills"
   },
+  "banner": {
+    "byline": "— {name}, {headline}",
+    "empty": "Run a command.",
+    "lastLogin": "Last login: {date} on {tty}",
+    "printed": "Everything below is already printed — read on, or run a command."
+  },
   "colophon": {
     "lede": "No projects gallery, so this page is the work sample: a statically prerendered Nuxt site with one serverless function behind the form, and the whole of it is readable."
+  },
+  "commands": {
+    "background": "the longer story",
+    "clear": "empty the scrollback",
+    "colophon": "how this page is built",
+    "contact": "send me a message",
+    "experience": "the work itself",
+    "help": "this list",
+    "recommendations": "what colleagues say",
+    "reset": "back to how the page loaded",
+    "theme": "light, dark, or follow the system",
+    "whoami": "who I am"
   },
   "contact": {
     "bodyLabel": "body:",
@@ -83,6 +101,14 @@
   "roleDetail": {
     "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}",
     "techStack": "Tech stack"
+  },
+  "session": {
+    "skip": "Skip to the prompt"
+  },
+  "transcript": {
+    "cleared": "Scrollback cleared. Run {help} for what there is, or {whoami} to start.",
+    "dropped": "[ {n} earlier block dropped — scrollback is {scrollback} ] | [ {n} earlier blocks dropped — scrollback is {scrollback} ]",
+    "working": "Working…"
   },
   "unknown": {
     "notFound": "{cmd}: command not found — try {help}"

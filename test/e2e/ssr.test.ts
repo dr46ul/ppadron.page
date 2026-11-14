@@ -8,6 +8,7 @@ import { roles } from '../../app/data/experience'
 import { profile } from '../../app/data/profile'
 import { recommendations } from '../../app/data/recommendations'
 import { formatDate } from '../../app/utils/date-format'
+import en from '../../i18n/locales/en.json'
 import { themeScript } from '../../shared/theme'
 
 /**
@@ -196,13 +197,17 @@ describe('home page', () => {
 
     it('prints the banner for the build, in English and UTC', () => {
       expect(page.querySelector('[data-banner]')?.textContent).toContain(
-        `Last login: ${formatDate(builtAt, 'lastLogin', { locale: 'en', timeZone: 'UTC' })} on ttys002`,
+        en.banner.lastLogin
+          .replace('{date}', formatDate(builtAt, 'lastLogin', { locale: 'en', timeZone: 'UTC' }))
+          .replace('{tty}', 'ttys002'),
       )
     })
 
     it('prints the build\'s year in the notice', () => {
       expect(page.querySelector('footer')?.textContent).toContain(
-        `© ${new Date(builtAt).getUTCFullYear()}`,
+        en.footer.copyright
+          .replace('{year}', String(new Date(builtAt).getUTCFullYear()))
+          .replace('{name}', profile.name),
       )
     })
   })

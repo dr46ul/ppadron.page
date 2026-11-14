@@ -5,6 +5,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { arrived, emails, useContactRoute } from '../contact-route'
+import { en, fill, markElements, plural } from '../messages'
 import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
@@ -197,7 +198,7 @@ describe('terminal', () => {
       const { banner } = await mountTerminal()
 
       expect(banner().text()).toContain(
-        'Last login: Sa., 14. März, 10:05:07 MEZ on ttys002',
+        fill(en.banner.lastLogin, { date: 'Sa., 14. März, 10:05:07 MEZ', tty: 'ttys002' }),
       )
     })
 
@@ -225,7 +226,16 @@ describe('terminal', () => {
       await session.pick('clear').trigger('click')
       await session.component.vm.$nextTick()
 
-      expect(session.banner().text()).not.toContain('already printed')
+      expect(session.banner().text()).not.toContain(en.banner.printed)
+    })
+
+    it('asks for a Command once clear leaves nothing below', async () => {
+      const session = await mountTerminal()
+
+      await session.pick('clear').trigger('click')
+      await session.component.vm.$nextTick()
+
+      expect(session.banner().text()).toContain(`· ${en.banner.empty}`)
     })
   })
 
@@ -245,8 +255,8 @@ describe('terminal', () => {
       await session.pick('clear').trigger('click')
       await session.component.vm.$nextTick()
 
-      expect(['help', 'whoami'].filter(cmd => !hint(session).text().includes(cmd)))
-        .toEqual([])
+      expect(markElements(hint(session).element))
+        .toBe(fill(en.transcript.cleared, { help: '[span:help]', whoami: '[span:whoami]' }))
     })
 
     it('goes once the next Command prints', async () => {
@@ -297,7 +307,7 @@ describe('terminal', () => {
       // The label is Content and may not end in a full stop, so the banner
       // cannot let it run straight into the sentence that follows.
       expect(banner().text()).toContain(
-        'Free from the equinox · Everything below is already printed',
+        `Free from the equinox · ${en.banner.printed}`,
       )
     })
 
@@ -394,12 +404,11 @@ describe('terminal', () => {
       await session.pick('help').trigger('click')
       await session.settle()
 
-      const help = session.entries().at(-1)!
-      for (const command of [
-        ...commands,
-        ...metaCommands,
-      ])
-        expect(help.text()).toContain(command.label)
+      const help = session.entries().at(-1)!.text()
+      expect([
+        ...commands.map(command => en.commands[command.output]),
+        ...metaCommands.map(command => en.commands[command.cmd]),
+      ].filter(label => !help.includes(label))).toEqual([])
     })
 
     it('hands the shared draft to the Contact output', async () => {
@@ -430,7 +439,7 @@ describe('terminal', () => {
         status: contact.find('[role="status"]').text(),
         alert: contact.find('[role="alert"]').exists(),
       }).toEqual({
-        status: expect.stringContaining('Sent.'),
+        status: en.contact.sentNotice,
         alert: false,
       })
     })
@@ -501,7 +510,7 @@ describe('terminal', () => {
       await session.run('sudo rm -rf /')
 
       expect(session.output('sudo rm -rf /').text()).toContain(
-        'command not found',
+        fill(en.unknown.notFound, { cmd: 'sudo rm -rf /', help: 'help' }),
       )
     })
 
@@ -512,7 +521,7 @@ describe('terminal', () => {
       await session.output('sudo rm -rf /').find('button').trigger('click')
       await session.settle()
 
-      expect(session.entries().at(-1)!.text()).toContain('empty the scrollback')
+      expect(session.entries().at(-1)!.text()).toContain(en.commands.clear)
     })
   })
 
@@ -536,7 +545,7 @@ describe('terminal', () => {
         whileThinking,
         busyOnceDone: session.entries().at(-1)!.find('.session-busy').exists(),
       }).toEqual({
-        whileThinking: { busy: true, status: 'Working…' },
+        whileThinking: { busy: true, status: en.transcript.working },
         busyOnceDone: false,
       })
     })
@@ -565,24 +574,24 @@ describe('terminal', () => {
         await session.settle()
       }
 
-      const once = session.component.text()
+      const once = session.component.get('[data-dropped]').text()
 
       await session.pick('whoami').trigger('click')
       await session.settle()
 
       expect({
         once,
-        twice: session.component.text(),
+        twice: session.component.get('[data-dropped]').text(),
       }).toEqual({
-        once: expect.stringMatching(/1 earlier block dropped[\s\S]*scrollback is 14/),
-        twice: expect.stringContaining('2 earlier blocks dropped'),
+        once: plural(en.transcript.dropped, 1, { scrollback: '14' }),
+        twice: plural(en.transcript.dropped, 2, { scrollback: '14' }),
       })
     })
 
     it('says nothing about the scrollback until it drops something', async () => {
       const { component } = await mountTerminal()
 
-      expect(component.text()).not.toMatch(/earlier blocks? dropped/)
+      expect(component.find('[data-dropped]').exists()).toBe(false)
     })
   })
 
@@ -621,8 +630,8 @@ describe('terminal', () => {
 
       const text = session.output('cat ~/experience/Nowhere-Inc').text()
       expect({
-        noSuchFile: text.includes('~/experience/Nowhere-Inc: No such file or directory'),
-        notFound: text.includes('command not found'),
+        noSuchFile: text.includes(fill(en.roleDetail.notFound, { role: 'Nowhere-Inc', list: 'ls ~/experience' })),
+        notFound: text.includes(fill(en.unknown.notFound, { cmd: 'cat ~/experience/Nowhere-Inc', help: 'help' })),
       }).toEqual({ noSuchFile: true, notFound: false })
     })
 
@@ -714,7 +723,7 @@ describe('terminal', () => {
       await session.pick('help').trigger('click')
       await session.settle()
 
-      expect(session.entries().at(-1)!.text()).toContain('this list')
+      expect(session.entries().at(-1)!.text()).toContain(en.commands.help)
     })
 
     it('runs what the visitor types at it', async () => {
@@ -722,7 +731,7 @@ describe('terminal', () => {
 
       await session.run('help')
 
-      expect(session.output('help').text()).toContain('this list')
+      expect(session.output('help').text()).toContain(en.commands.help)
     })
 
     it('runs a Command typed in full in the palette that it lists no row for', async () => {
@@ -879,9 +888,9 @@ describe('terminal', () => {
       const { banner } = await mountTerminal()
 
       expect({
-        login: roleOf(banner(), 'p', 'Last login'),
-        byline: roleOf(banner(), 'span', 'Wilhelmina Ashgrove, Systems plumber'),
-        hint: roleOf(banner(), 'span', 'Everything below is already printed'),
+        login: roleOf(banner(), 'p', fill(en.banner.lastLogin, { date: 'Sat 14 Mar, 09:05:07 GMT', tty: 'ttys002' })),
+        byline: roleOf(banner(), 'span', fill(en.banner.byline, { name: 'Wilhelmina Ashgrove', headline: 'Systems plumber' })),
+        hint: roleOf(banner(), 'span', en.banner.printed),
         domain: roleOf(banner(), 'span', 'ppadron.page'),
       }).toEqual({
         login: 'text-subtle',
@@ -899,7 +908,7 @@ describe('terminal', () => {
         await session.settle()
       }
 
-      expect(roleOf(session.component, 'p', 'earlier block dropped')).toBe('text-subtle')
+      expect(roleOf(session.component, 'p', plural(en.transcript.dropped, 1, { scrollback: '14' }))).toBe('text-subtle')
     })
   })
 
@@ -915,7 +924,7 @@ describe('terminal', () => {
     type Session = Awaited<ReturnType<typeof mountTerminal>>
 
     function themeRow(session: Session) {
-      return session.component.find('[role="group"][aria-label="Theme"]')
+      return session.component.find(`[role="group"][aria-label="${en.palette.theme}"]`)
     }
 
     function pressed(session: Session) {
@@ -945,7 +954,7 @@ describe('terminal', () => {
       const session = await mountTerminal()
       await session.component.vm.$nextTick()
 
-      expect(pressed(session)).toEqual(['system'])
+      expect(pressed(session)).toEqual([en.palette.themeChoice.system])
     })
 
     it('shows a theme chosen on an earlier visit once mounted', async () => {
@@ -954,14 +963,14 @@ describe('terminal', () => {
       const session = await mountTerminal()
       await session.component.vm.$nextTick()
 
-      expect(pressed(session)).toEqual(['light'])
+      expect(pressed(session)).toEqual([en.palette.themeChoice.light])
     })
 
     it('repaints the page from the palette', async () => {
       systemPrefers('dark')
       const session = await mountTerminal()
 
-      await choose(session, 'light')
+      await choose(session, en.palette.themeChoice.light)
 
       expect({
         theme: html.dataset.theme,
@@ -969,7 +978,7 @@ describe('terminal', () => {
       })
         .toEqual({
           theme: 'teletype',
-          pressed: ['light'],
+          pressed: [en.palette.themeChoice.light],
         })
     })
 
@@ -979,7 +988,7 @@ describe('terminal', () => {
       const session = await mountTerminal()
       await session.component.vm.$nextTick()
 
-      await choose(session, 'system')
+      await choose(session, en.palette.themeChoice.system)
 
       expect({
         theme: html.dataset.theme,
@@ -987,7 +996,7 @@ describe('terminal', () => {
       })
         .toEqual({
           theme: undefined,
-          pressed: ['system'],
+          pressed: [en.palette.themeChoice.system],
         })
     })
 
@@ -1003,7 +1012,7 @@ describe('terminal', () => {
       })
         .toEqual({
           theme: 'terminal',
-          pressed: ['dark'],
+          pressed: [en.palette.themeChoice.dark],
         })
     })
   })
@@ -1016,7 +1025,7 @@ describe('terminal', () => {
     it('says what the command does', async () => {
       const { output } = await mountTerminal()
 
-      expect(label(output('ls ~/experience')).text()).toBe('the work itself')
+      expect(label(output('ls ~/experience')).text()).toBe(en.commands.experience)
     })
 
     it('says what an alias resolved to', async () => {
@@ -1024,7 +1033,7 @@ describe('terminal', () => {
 
       await session.run('work')
 
-      expect(label(session.output('work')).text()).toBe('the work itself')
+      expect(label(session.output('work')).text()).toBe(en.commands.experience)
     })
 
     it('says nothing over a command that does not exist', async () => {
@@ -1038,7 +1047,7 @@ describe('terminal', () => {
     it('keeps the label out of the line the command is echoed on', async () => {
       const { output } = await mountTerminal()
 
-      expect(output('ls ~/experience').find('p').text()).not.toContain('the work itself')
+      expect(output('ls ~/experience').find('p').text()).not.toContain(en.commands.experience)
     })
   })
 
@@ -1083,7 +1092,7 @@ describe('terminal', () => {
         banner: banner().text(),
       }).toEqual({
         footer: expect.stringContaining('© 2027'),
-        banner: expect.stringContaining('Last login: Sat 14 Mar, 09:05:07 GMT'),
+        banner: expect.stringContaining(fill(en.banner.lastLogin, { date: 'Sat 14 Mar, 09:05:07 GMT', tty: 'ttys002' })),
       })
     })
 
@@ -1132,7 +1141,7 @@ describe('terminal', () => {
       expect({
         text: skip.text(),
         inMain: component.find('main').find('a[href="#prompt"]').exists(),
-      }).toEqual({ text: 'Skip to the prompt', inMain: false })
+      }).toEqual({ text: en.session.skip, inMain: false })
     })
 
     it('titles the page with the name Whoami prints', async () => {
