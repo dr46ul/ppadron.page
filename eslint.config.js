@@ -138,8 +138,9 @@ export default antfu(
     },
   },
   {
-    // Raw text is gated one Output at a time as its copy moves into Messages.
+    // Raw text is gated one component at a time as its copy moves into Messages.
     files: [
+      'app/components/session/Footer.vue',
       'app/components/session/output/Background.vue',
       'app/components/session/output/Colophon.vue',
       'app/components/session/output/Experience.vue',
@@ -153,7 +154,7 @@ export default antfu(
         'error',
         {
           // Glyphs and names are identifiers, not copy; nothing else belongs here.
-          ignoreText: ['→', '·', 'Tab'],
+          ignoreText: ['→', '·', 'Tab', 'GitHub', 'LinkedIn'],
           attributes: {
             '/.+/': [
               'aria-label',

@@ -9,6 +9,9 @@
   "experience": {
     "ndaNote": "Freelance client work is under NDA, so there is no projects gallery. This is the work itself."
   },
+  "footer": {
+    "copyright": "© {year} {name}"
+  },
   "help": {
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
