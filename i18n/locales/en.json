@@ -26,6 +26,9 @@
     "sent": "sent",
     "sentNotice": "Sent. It is in my inbox and I will reply to the address you gave."
   },
+  "error": {
+    "home": "Go back home"
+  },
   "experience": {
     "ndaNote": "Freelance client work is under NDA, so there is no projects gallery. This is the work itself."
   },

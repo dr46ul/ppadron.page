@@ -140,6 +140,7 @@ export default antfu(
   {
     // Raw text is gated one component at a time as its copy moves into Messages.
     files: [
+      'app/error.vue',
       'app/components/session/CommandPalette.vue',
       'app/components/session/Footer.vue',
       'app/components/session/KeyCap.vue',
