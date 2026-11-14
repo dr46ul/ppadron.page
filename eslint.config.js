@@ -142,7 +142,9 @@ export default antfu(
     files: [
       'app/components/session/output/Background.vue',
       'app/components/session/output/Colophon.vue',
+      'app/components/session/output/Experience.vue',
       'app/components/session/output/Help.vue',
+      'app/components/session/output/RoleDetail.vue',
       'app/components/session/output/Unknown.vue',
     ],
     rules: {

@@ -2,6 +2,7 @@ import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import RoleDetail from '~/components/session/output/RoleDetail.vue'
+import { en, fill } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /** A Role the real `app/data/experience.ts` cannot supply. */
@@ -204,9 +205,9 @@ describe('role detail output', () => {
       const without = await mount({ stack: [] })
 
       expect({
-        labelledWithStack: withStack.text().includes('Tech stack'),
+        labelledWithStack: withStack.text().includes(en.roleDetail.techStack),
         companyWithout: without.text().includes('Kiln & Ash'),
-        labelledWithout: without.text().includes('Tech stack'),
+        labelledWithout: without.text().includes(en.roleDetail.techStack),
       }).toEqual({ labelledWithStack: true, companyWithout: true, labelledWithout: false })
     })
   })
@@ -222,7 +223,7 @@ describe('role detail output', () => {
       const component = await mountMissing('ghost-corp')
 
       expect(component.text()).toContain(
-        'cat: ~/experience/ghost-corp: No such file or directory',
+        fill(en.roleDetail.notFound, { role: 'ghost-corp', list: 'ls ~/experience' }),
       )
     })
 
@@ -238,7 +239,7 @@ describe('role detail output', () => {
       expect({
         error: component.classes().includes('text-error'),
         period: component.find('time').exists(),
-        stack: component.text().includes('Tech stack'),
+        stack: component.text().includes(en.roleDetail.techStack),
       }).toEqual({ error: true, period: false, stack: false })
     })
 
@@ -246,7 +247,10 @@ describe('role detail output', () => {
       const component = await mount()
 
       const text = component.text()
-      expect(['No such file', 'ls ~/experience'].filter(line => text.includes(line))).toEqual([])
+      expect([
+        fill(en.roleDetail.notFound, { role: 'ghost-corp', list: 'ls ~/experience' }),
+        'ls ~/experience',
+      ].filter(line => text.includes(line))).toEqual([])
     })
   })
 

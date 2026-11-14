@@ -6,9 +6,16 @@
   "colophon": {
     "lede": "No projects gallery, so this page is the work sample: a statically prerendered Nuxt site with one serverless function behind the form, and the whole of it is readable."
   },
+  "experience": {
+    "ndaNote": "Freelance client work is under NDA, so there is no projects gallery. This is the work itself."
+  },
   "help": {
     "hint": "{tab} completes · {up} {down} walk the history · plain words work too ({experience}, {contact}).",
     "roleForm": "{form} prints one role in full."
+  },
+  "roleDetail": {
+    "techStack": "Tech stack",
+    "notFound": "cat: ~/experience/{role}: No such file or directory — try {list}"
   },
   "unknown": {
     "notFound": "{cmd}: command not found — try {help}"

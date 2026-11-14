@@ -2,6 +2,7 @@ import type { Role, RoleNote } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Experience from '~/components/session/output/Experience.vue'
+import { en } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function role(overrides: Partial<Role> = {}): Role {
@@ -237,9 +238,7 @@ describe('experience output', () => {
       text: component.text(),
       items: component.findAll('li').length,
     }).toEqual({
-      text: expect.stringContaining(
-        'Freelance client work is under NDA, so there is no projects gallery.',
-      ),
+      text: expect.stringContaining(en.experience.ndaNote),
       items: 0,
     })
   })
