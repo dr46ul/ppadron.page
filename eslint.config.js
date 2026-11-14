@@ -142,6 +142,7 @@ export default antfu(
     files: [
       'app/components/session/output/Background.vue',
       'app/components/session/output/Colophon.vue',
+      'app/components/session/output/Help.vue',
       'app/components/session/output/Unknown.vue',
     ],
     rules: {
@@ -149,7 +150,7 @@ export default antfu(
         'error',
         {
           // Glyphs and names are identifiers, not copy; nothing else belongs here.
-          ignoreText: ['→', '·'],
+          ignoreText: ['→', '·', 'Tab'],
           attributes: {
             '/.+/': [
               'aria-label',

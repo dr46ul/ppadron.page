@@ -7,3 +7,8 @@ import enFile from '~~/i18n/locales/en.json?raw'
  * because the module compiles a plain JSON import.
  */
 export const en: typeof enJson = JSON.parse(enFile)
+
+/** A Message with its named parameters filled in, as the visitor reads it. */
+export function fill(message: string, params: Record<string, string>) {
+  return message.replace(/\{(\w+)\}/g, (_, name: string) => params[name] ?? '')
+}
