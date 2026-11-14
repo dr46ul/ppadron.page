@@ -11,9 +11,19 @@ shellEmulator: true
 trustPolicyExcludePrune: true
 
 overrides:
-  # Only @intlify/eslint-plugin-vue-i18n asks for glob 10, which is vulnerable
-  # (GHSA-3g3m-2fjr-6pw4) and has no patched 10.x. The plugin runs at lint time.
-  '@intlify/eslint-plugin-vue-i18n>glob': ^14.0.2
+  # Every glob before 14.0.2 is vulnerable (GHSA-3g3m-2fjr-6pw4) and the older
+  # majors have no patch. Only lint, test and the Nitro build ask for glob, so
+  # the major bump is proved by `pnpm lint` and the e2e test that builds the app.
+  glob@>=9.0.0 <14.0.2: ^14.0.2
+  # @eslint/markdown reaches KaTeX 0.16 through micromark-extension-math, which
+  # caps it below the patched 0.18.2 (GHSA-238p-pmpm-9mq7). Lint-time only.
+  micromark-extension-math>katex: ^0.18.2
+  # Same as glob: minimatch 7 up to 11.0.1 is vulnerable (GHSA-g3hv-75wg-m249)
+  # with no patch on the older majors, and only tooling asks for it.
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1
+  # oxfmt pins tinypool 2.1.0 exactly (GHSA-85c8-ppgw-ccpr), and
+  # eslint-plugin-format has no release that moves past that oxfmt.
+  oxfmt>tinypool: ^2.1.2
 
 allowBuilds:
   '@parcel/watcher': false
