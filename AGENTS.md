@@ -22,8 +22,8 @@ House rules the generated code has to satisfy live as one file each under `.agen
 
 ### Testing
 
-Test-first, always: every new component, page, composable or util starts as a failing test, and "covered" means every branch plus the edge cases, with the coverage gate as the floor (100% lines, functions, statements and branches). Three Vitest projects, split by directory: `test/unit` (node), `test/nuxt` (Nuxt runtime), `test/e2e` (built server). Layout, scrolling and focus, which no project can see, are checked with `pnpm look "<command>"`. See `docs/agents/testing.md`.
+Test-first, always: every new component, page, composable or util starts as a failing test, and "covered" means every branch plus the edge cases, with the coverage gate as the floor (100% lines, functions, statements and branches). Three Vitest projects, split by directory: `test/unit` (node), `test/nuxt` (Nuxt runtime), `test/e2e` (built server). Layout, scrolling and focus, which no project can see, are checked with `pnpm look ["<command>"] [--selector <css>] [--freeze <ms>]`, extended rather than worked around with a throwaway script. See `docs/agents/testing.md`.
 
 ### Worktrees
 
-Every git worktree goes under `.worktrees/<name>/` at the repo root, never `.claude/worktrees/` or anywhere else. Claude Code is held to this by the hooks in `.claude/settings.json`. See `docs/agents/worktrees.md`.
+Every git worktree goes under `.worktrees/<name>/` at the repo root, never `.claude/worktrees/` or anywhere else. The main checkout often holds Pavel's uncommitted work, so a task starts in a worktree of its own. Claude Code is held to both by the hooks in `.claude/settings.json`. See `docs/agents/worktrees.md`.
