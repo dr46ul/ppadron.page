@@ -8,6 +8,8 @@
  *   pnpm look "cat ~/recommendations" --width 390 --height 844 --scheme light
  *   pnpm look "whoami" --keys "Meta+k,c,a,ArrowDown"
  *   pnpm look --selector footer --freeze 0
+ *   pnpm look --path /es --keys "Meta+k"
+ *   pnpm look help --keys "Meta+k,l,a,n,g,Space,e,s,Enter"
  *
  * happy-dom lays nothing out, so this is how a change to layout, scrolling,
  * focus or colour gets seen (docs/agents/testing.md). It drives the dev server
@@ -29,6 +31,8 @@ const { values, positionals } = parseArgs({
     width: { type: 'string', default: '1100' },
     height: { type: 'string', default: '800' },
     scheme: { type: 'string', default: 'dark' },
+    // Each Locale is a page of its own, at its own path.
+    path: { type: 'string', default: '/' },
     // Pressed in order once the Command has printed, comma-separated in
     // Playwright's spelling, for what only the keyboard opens or moves.
     keys: { type: 'string', default: '' },
@@ -101,7 +105,15 @@ try {
   page.on('console', message => message.type() === 'error' && errors.push(message.text()))
   page.on('pageerror', error => errors.push(error.message))
 
-  await page.goto(url, { waitUntil: 'networkidle' })
+  await page.goto(new URL(values.path, url).href, { waitUntil: 'networkidle' })
+
+  // What the page asks the server for once it has loaded, such as a payload a
+  // client-side navigation fetches.
+  const fetched = []
+  page.on('request', (request) => {
+    if (['fetch', 'xhr', 'document'].includes(request.resourceType()))
+      fetched.push(new URL(request.url()).pathname)
+  })
   if (command)
     await run(page, command)
 
@@ -138,6 +150,7 @@ try {
       ...(block && { blockTop: block.top, blockHeight: block.height }),
       ...(selector && { selected: box(document.querySelector(selector)) ?? 'no match' }),
       window: `${window.innerWidth}×${window.innerHeight}`,
+      location: location.pathname,
       atFoot: Math.ceil(window.scrollY + window.innerHeight) >= document.body.scrollHeight - 1,
       focus: document.activeElement?.id
         || document.activeElement?.getAttribute('aria-label')
@@ -148,8 +161,10 @@ try {
 
   console.log(JSON.stringify({
     server: url,
+    path: values.path,
     command: command || undefined,
     ...report,
+    fetchedAfterLoad: fetched,
     consoleErrors: errors,
     screenshot: values.out,
   }, null, 2))
