@@ -52,9 +52,9 @@ export default defineNuxtConfig({
 
   experimental: {
     // An extracted `_payload.json` serves client-side navigation between
-    // prerendered pages, and nothing navigates between the two Locales' pages.
-    // Left on, hydration waits on a fetch that adds nothing the inline payload
-    // already holds.
+    // prerendered pages. The only navigation is a language switch, which keeps
+    // the page mounted and fetches no data (`app/pages/index.vue`). Left on,
+    // hydration waits on a fetch that adds nothing the inline payload holds.
     payloadExtraction: false,
   },
 
@@ -63,9 +63,21 @@ export default defineNuxtConfig({
   i18n: {
     baseUrl: 'https://ppadron.page',
     defaultLocale: 'en',
+    // Each `name` is the language in its own words, so a Visitor who cannot
+    // read the page they are on can still find theirs in the palette.
     locales: [
-      { code: 'en', language: 'en', file: 'en.json' },
-      { code: 'es', language: 'es', file: 'es.json' },
+      {
+        code: 'en',
+        language: 'en',
+        name: 'English',
+        file: 'en.json',
+      },
+      {
+        code: 'es',
+        language: 'es',
+        name: 'Español',
+        file: 'es.json',
+      },
     ],
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,

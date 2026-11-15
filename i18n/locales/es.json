@@ -65,6 +65,7 @@
   },
   "metaCommands": {
     "clear": "vaciar la pantalla",
+    "lang": "el idioma de esta página",
     "reset": "volver a la página tal como cargó",
     "theme": "claro, oscuro o el del sistema"
   },
@@ -77,6 +78,7 @@
     "keyClose": "cerrar",
     "keyMove": "mover",
     "keyRun": "ejecutar",
+    "language": "Idioma",
     "list": "Comandos",
     "nothing": "No hay coincidencias.",
     "runTyped": "Intro ejecuta {typed}.",

@@ -65,6 +65,7 @@
   },
   "metaCommands": {
     "clear": "empty the scrollback",
+    "lang": "the language this page is in",
     "reset": "back to how the page loaded",
     "theme": "light, dark, or follow the system"
   },
@@ -77,6 +78,7 @@
     "keyClose": "close",
     "keyMove": "move",
     "keyRun": "run",
+    "language": "Language",
     "list": "Commands",
     "nothing": "Nothing matches.",
     "runTyped": "Enter runs {typed}.",

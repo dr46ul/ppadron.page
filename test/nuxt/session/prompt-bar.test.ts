@@ -38,6 +38,7 @@ function mount(props: {
   modelValue?: string
   completion?: string
   theme?: ThemeChoice
+  locale?: string
 } = {}) {
   return mountSuspended(PromptBar, {
     attachTo: document.body,
@@ -47,6 +48,7 @@ function mount(props: {
       recognises,
       modelValue: '',
       theme: 'system',
+      locale: 'en',
       ...props,
     },
   })
@@ -274,6 +276,22 @@ describe('prompt bar', () => {
 
       expect(component.emitted('update:theme')).toEqual([
         ['light'],
+      ])
+    })
+
+    it('shows it the Locale in use', async () => {
+      const component = await mount({ locale: 'es' })
+
+      expect(palette(component).props('locale')).toBe('es')
+    })
+
+    it('reports a Locale chosen in it', async () => {
+      const component = await mount()
+
+      palette(component).vm.$emit('update:locale', 'es')
+
+      expect(component.emitted('update:locale')).toEqual([
+        ['es'],
       ])
     })
   })
