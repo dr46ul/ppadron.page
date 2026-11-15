@@ -2,7 +2,7 @@ import type { MetaCommand, SessionCommand } from '~/composables/useSession'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import Help from '~/components/session/output/Help.vue'
-import { en, fill, markElements } from '../../messages'
+import { byLocale, en, fill, inEachLocale, markElements } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function command(overrides: Partial<SessionCommand> = {}): SessionCommand {
@@ -121,6 +121,22 @@ describe('help output', () => {
 
     expect(markElements(component.findAll('p')[0]!.element))
       .toEqual(fill(en.help.roleForm, { form: '[code:cat ~/experience/<role>]' }))
+  })
+
+  it('keeps each element of its hint and gloss where each Locale\'s Message puts it', async () => {
+    const component = await mount([], [])
+
+    expect(await inEachLocale(() => component.findAll('p').map(paragraph => markElements(paragraph.element))))
+      .toEqual(byLocale(messages => [
+        fill(messages.help.roleForm, { form: '[code:cat ~/experience/<role>]' }),
+        fill(messages.help.hint, {
+          tab: '[kbd:Tab]',
+          up: `[kbd:${messages.keys.up}]`,
+          down: `[kbd:${messages.keys.down}]`,
+          experience: '[span:experience]',
+          contact: '[span:contact]',
+        }),
+      ]))
   })
 
   it('documents the form that opens one Role, whatever Commands it is handed', async () => {

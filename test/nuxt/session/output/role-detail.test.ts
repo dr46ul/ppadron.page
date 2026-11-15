@@ -2,7 +2,7 @@ import type { Role } from '~/data/experience'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import RoleDetail from '~/components/session/output/RoleDetail.vue'
-import { en, fill } from '../../messages'
+import { byLocale, en, es, fill, inEachLocale } from '../../messages'
 import { roleOf } from '../../text-role'
 import { visitFrom } from '../../visit-from'
 
@@ -47,6 +47,18 @@ describe('role detail output', () => {
     const component = await mount({ from: '2023-06', to: null })
 
     expect(component.get('time').text()).toBe(`Jun 2023 – ${en.period.now}`)
+  })
+
+  it('writes the period with each Locale\'s month names and its word for now', async () => {
+    const components = await Promise.all([
+      mount({ from: '2011-02', to: '2013-09' }),
+      mount({ from: '2011-02', to: null }),
+    ])
+
+    expect(await inEachLocale(() => components.map(component => component.get('time').text()))).toEqual({
+      en: ['Feb 2011 – Sep 2013', `Feb 2011 – ${en.period.now}`],
+      es: ['feb 2011 – sept 2013', `feb 2011 – ${es.period.now}`],
+    })
   })
 
   /**
@@ -245,6 +257,15 @@ describe('role detail output', () => {
       expect(component.text()).toContain(
         fill(en.roleDetail.notFound, { role: 'ghost-corp', list: 'ls ~/experience' }),
       )
+    })
+
+    it('says so in each Locale, with the path and the list Command as typed', async () => {
+      const component = await mountMissing('ghost-corp')
+
+      expect(await inEachLocale(() => component.text()))
+        .toEqual(byLocale(messages => expect.stringContaining(
+          fill(messages.roleDetail.notFound, { role: 'ghost-corp', list: 'ls ~/experience' }),
+        )))
     })
 
     it('points at the list of Roles', async () => {

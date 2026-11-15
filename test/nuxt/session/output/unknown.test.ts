@@ -1,7 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import Unknown from '~/components/session/output/Unknown.vue'
-import { en } from '../../messages'
+import { byLocale, en, fill, inEachLocale, markElements } from '../../messages'
 
 /**
  * A command the real list cannot supply, so the assertion cannot go green off
@@ -20,6 +20,13 @@ describe('unknown output', () => {
     expect(component.text()).toBe(
       en.unknown.notFound.replace('{cmd}', 'xyzzy --twice').replace('{help}', 'help'),
     )
+  })
+
+  it('sets the Command and the help button where each Locale\'s Message puts them', async () => {
+    const component = await mount('xyzzy')
+
+    expect(await inEachLocale(() => markElements(component.get('p').element)))
+      .toEqual(byLocale(messages => fill(messages.unknown.notFound, { cmd: 'xyzzy', help: '[button:help]' })))
   })
 
   it('offers the help command it is handed', async () => {
