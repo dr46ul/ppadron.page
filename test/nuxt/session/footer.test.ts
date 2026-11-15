@@ -61,6 +61,15 @@ describe('session footer', () => {
     expect(component.find('p').text()).toBe(fill(en.footer.copyright, { year: '2031', name: 'Dagny Vole' }))
   })
 
+  it('opens the notice with the site\'s mark, which screen readers skip', async () => {
+    const first = (await mount({})).find('p').element.firstElementChild
+
+    expect({
+      tag: first?.tagName.toLowerCase(),
+      hidden: first?.getAttribute('aria-hidden'),
+    }).toEqual({ tag: 'svg', hidden: 'true' })
+  })
+
   it('links to both profiles it is handed, and not to the repo', async () => {
     const component = await mount()
 

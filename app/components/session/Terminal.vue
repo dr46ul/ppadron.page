@@ -122,33 +122,36 @@ function focusPrompt(event: MouseEvent) {
            it says who this is, which an emptied page would otherwise not. -->
       <div
         data-banner
-        class="border-base-300 mb-[4.5rem] border-b pb-6"
+        class="border-base-300 mb-[4.5rem] flex flex-col items-start gap-4 border-b pb-6 sm:flex-row sm:items-center"
       >
-        <p class="text-subtle">
-          {{ $t('banner.lastLogin', { date: lastLogin, tty }) }}
-        </p>
-        <p class="mt-3">
-          <span class="font-semibold">ppadron.page</span>
-          <span class="text-subtle">
-            {{ $t('banner.byline', { name: profile.name, headline: profile.headline }) }}</span>
-        </p>
-        <!-- Whether Pavel is open is the Profile's to say, and so is how it is
-             worded; `open` decides only whether the line is accented. -->
-        <p class="mt-1">
-          <span
-            data-availability
-            :class="
-              profile.availability.open ? 'text-accent' : 'text-subtle'
-            "
-          >{{ profile.availability.label }}</span>
-          <!-- The label is the Profile's, and may or may not end in a full
+        <SiteMark class="size-14 shrink-0 sm:size-20" />
+        <div class="min-w-0">
+          <p class="text-subtle">
+            {{ $t('banner.lastLogin', { date: lastLogin, tty }) }}
+          </p>
+          <p class="mt-3">
+            <span class="font-semibold">ppadron.page</span>
+            <span class="text-subtle">
+              {{ $t('banner.byline', { name: profile.name, headline: profile.headline }) }}</span>
+          </p>
+          <!-- Whether Pavel is open is the Profile's to say, and so is how it is
+               worded; `open` decides only whether the line is accented. -->
+          <p class="mt-1">
+            <span
+              data-availability
+              :class="
+                profile.availability.open ? 'text-accent' : 'text-subtle'
+              "
+            >{{ profile.availability.label }}</span>
+            <!-- The label is the Profile's, and may or may not end in a full
                stop, so the separator is this component's to supply. -->
-          <span class="text-subtle">
-            · {{ entries.length > 0
-              ? $t('banner.printed')
-              : $t('banner.empty') }}
-          </span>
-        </p>
+            <span class="text-subtle">
+              · {{ entries.length > 0
+                ? $t('banner.printed')
+                : $t('banner.empty') }}
+            </span>
+          </p>
+        </div>
       </div>
 
       <!-- Plain text in reading order rather than a live region: `clear` is

@@ -245,6 +245,13 @@
     animation: caret-blink 400ms steps(2, start) infinite;
   }
 
+  /* The prompt caret's period, so the cursors on screen go dark together. Not
+     its `caret-blink` timing, whose lit half is at half opacity: the mark's
+     cursor is lit in full, as on the favicon. */
+  .mark-cursor {
+    animation: mark-blink 1.06s steps(1) infinite;
+  }
+
   /* Output printed in response to a command. An Output fades in as one block;
      the three list Outputs also stagger their items off the `--i` they set,
      since a few paragraphs 45ms apart read as a flicker rather than a print.
@@ -320,6 +327,12 @@
   }
 }
 
+@keyframes mark-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @keyframes session-line {
   from {
     opacity: 0;
@@ -335,6 +348,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .caret,
+  .mark-cursor,
   .session-busy,
   .session-print > *,
   .session-print li,
