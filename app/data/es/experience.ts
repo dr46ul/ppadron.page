@@ -1,8 +1,9 @@
 import type { RoleProse } from '../experience'
 
 /**
- * Job titles stay as Pavel holds them, in English, so they match LinkedIn and a
- * recruiter's search; the prose around them is translated.
+ * A job title stays in English, as LinkedIn has it, so a recruiter's search
+ * still finds it, unless the Role has been given a Spanish one; the prose
+ * around the titles is translated.
  */
 export const roles: RoleProse[] = [
   {
@@ -47,7 +48,7 @@ export const roles: RoleProse[] = [
     account: [
       'Más de 7 años en un equipo estupendo, con grandes proyectos y muchos retos que me ayudaron a ampliar y mejorar mis habilidades.',
       'Me encargaba de crear interfaces atractivas, intuitivas y responsive, optimizadas para la experiencia de usuario. El puesto exigía conocer a fondo las últimas tendencias de diseño web y móvil y dominar HTML, CSS, JavaScript y el framework Vue.js. Me aseguré de que el código frontend fuera escalable y mantenible, optimicé el rendimiento de las aplicaciones y me mantuve al día con las tecnologías emergentes y las tendencias del sector a lo largo de los años.',
-      'Además, colaboré en un equipo multidisciplinar con product managers, diseñadores, desarrolladores backend y QA. Supe traducir conceptos de diseño en interfaces funcionales que cumplían los requisitos y necesidades de los usuarios finales, respetando los estándares técnicos y las buenas prácticas y en línea con los objetivos del negocio.',
+      'Además, colaboré en un equipo multidisciplinario con gestores de producto, diseñadores, desarrolladores backend y QA. Supe traducir conceptos de diseño en interfaces funcionales que cumplían los requisitos y necesidades de los usuarios finales, respetando los estándares técnicos y las buenas prácticas y en línea con los objetivos del negocio.',
       'Durante mi tiempo aquí trabajé directamente en los dos proyectos principales, la tienda online de Rogue Fitness y la Rogue Mobile App. Ambos se desarrollaron con un stack que evolucionó y, en algunos casos, cambió por completo. Así que mejoré mis habilidades y también tuve que aprender tecnologías y metodologías nuevas.',
       'Usábamos scrum y metodologías ágiles en todos los proyectos, junto con Bitbucket, Jira y Confluence.',
     ],
@@ -86,13 +87,13 @@ export const roles: RoleProse[] = [
   {
     slug: 'procyon-soluciones',
     company: 'Procyon Soluciones',
-    title: 'Senior Software Engineer / Team Manager',
+    title: 'Ingeniero de Software Senior / Gestor de Equipo',
     from: '2009-01',
     to: '2010-12',
-    summary: 'Dirigí un proyecto en un entorno de ritmo rápido, además de trabajar como ingeniero senior en un equipo de programadores jóvenes, como Project Manager y Team Leader para una empresa con sede en España.',
+    summary: 'Dirigí un proyecto en un entorno de ritmo rápido, además de trabajar como ingeniero senior en un equipo de programadores jóvenes, como Gestor de Proyecto y Líder de Equipo para una empresa con sede en España.',
     account: [
       'Otra gran oportunidad para aportar mis habilidades y desarrollar otras nuevas. Un gran equipo de programadores jóvenes, con ideas estupendas y trayectorias muy distintas. Gente con mucha experiencia en muchos campos.',
-      'Además de mi papel como Senior Software Engineer, tuve la oportunidad de ser Project Manager y Team Leader para una empresa con sede en España. El proyecto me permitió ampliar horizontes, empezar a trabajar en un entorno de ritmo rápido y aprender de profesionales del mercado internacional. ¡Trabajar aquí me abrió una puerta que cambiaría mi vida!',
+      'Además de mi papel como Ingeniero de Software Senior, tuve la oportunidad de ser Gestor de Proyecto y Líder de Equipo para una empresa con sede en España. El proyecto me permitió ampliar horizontes, empezar a trabajar en un entorno de ritmo rápido y aprender de profesionales del mercado internacional. ¡Trabajar aquí me abrió una puerta que cambiaría mi vida!',
     ],
   },
   {
@@ -118,7 +119,7 @@ export const roles: RoleProse[] = [
     account: [
       '¡Mi primer trabajo!',
       'Recuerdo que estaba listo para comerme el mundo; quería hacer muchísimo porque amo mi profesión y no me veo haciendo otra cosa. Los primeros meses estaba entusiasmado y tenía muchísimas ideas... Por desgracia, me encontré con varias barreras que intenté superar paso a paso.',
-      'Siempre me ha apasionado el desarrollo web, y ese fue el primer objetivo que me puse: crear el sitio web de GEA VC. Pero mis superiores tenían otro plan para mí, uno del que no me arrepiento y que me dio la oportunidad de conocer un mundo completamente nuevo dentro de la informática.',
+      'Siempre me ha apasionado el desarrollo web, y ese fue el primer objetivo que me puse: crear el sitio web de GEA VC. Pero mis superiores tenían otro plan para mí, uno del que no me arrepiento y que me permitió conocer un mundo completamente nuevo dentro de la informática.',
       'La primera lección que aprendí en esta empresa es que en Cuba es muy difícil desarrollarte profesionalmente como sueñas. Terminas la licenciatura y te asignan a una empresa donde casi nada de lo que estudiaste se puede aprovechar. ¡Ese fue mi caso al principio!',
       '¿Cómo iba a desarrollar un sitio web para una empresa que ni siquiera tenía intranet? Suena a locura, ¿verdad?',
       'Tuve que cambiar mis objetivos y ser realista si no quería desperdiciar todo el esfuerzo hecho hasta entonces. Así fue como, en lugar de desarrollador web, empecé diseñando la red intranet de la empresa donde trabajaba. Fue todo un reto y encontré demasiados obstáculos por el camino, pero lo conseguí con la ayuda de muchos compañeros y con recursos limitados.',

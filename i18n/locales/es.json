@@ -51,8 +51,8 @@
     "copyright": "© {year} {name}"
   },
   "head": {
-    "description": "Portafolio de Pavel Padron",
-    "title": "Pavel Padron — Ingeniero Frontend"
+    "description": "Portafolio de Pavel Padrón",
+    "title": "Pavel Padrón — Ingeniero Frontend"
   },
   "help": {
     "hint": "{tab} completa · {up} {down} recorren el historial · también valen palabras sueltas ({experience}, {contact}).",
@@ -60,7 +60,7 @@
   },
   "keys": {
     "down": "flecha abajo",
-    "enter": "intro",
+    "enter": "enter",
     "up": "flecha arriba"
   },
   "metaCommands": {
@@ -106,7 +106,7 @@
     "credit": " — {title}, {company}",
     "keyMove": "mover",
     "keyRead": "leer",
-    "provenance": "Tal cual en LinkedIn, en su inglés original. Colegas y responsables, no clientes.",
+    "provenance": "Tal cual en LinkedIn, en su idioma original. Colegas y responsables, no clientes.",
     "read": "Leer a {name}",
     "role": "{title}, {company}",
     "words": "{n} palabra | {n} palabras"
