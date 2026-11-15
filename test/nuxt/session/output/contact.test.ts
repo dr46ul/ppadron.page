@@ -3,7 +3,7 @@ import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import Contact from '~/components/session/output/Contact.vue'
-import { en, es, fill } from '../../messages'
+import { en, es, fill, inEachLocale } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /**
@@ -416,6 +416,18 @@ describe('contact output', () => {
 
       afterEach(() => {
         i18n().locale.value = 'en'
+      })
+
+      // Spanish groups no four-digit number, so the limit reads 5000 there.
+      it('formats the limit in a complaint as each Locale writes numbers', async () => {
+        const component = await mount({
+          failures: { message: 'too-long' },
+        })
+
+        expect(await inEachLocale(() => complaint(component, 'message'))).toEqual({
+          en: fill(en.contact.complaintTooLong, { limit: '5,000' }),
+          es: fill(es.contact.complaintTooLong, { limit: '5000' }),
+        })
       })
 
       it('re-applies a complaint already showing in the new Locale\'s words', async () => {

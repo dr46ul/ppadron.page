@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { createSSRApp, defineComponent, h, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { useDateContext } from '~/composables/useDateContext'
@@ -64,7 +64,7 @@ describe('useDateContext', () => {
    * Visitor's browser, in Berlin, hydrates what it served. Reading the browser
    * before mount would render Berlin's time over UTC's here.
    */
-  it('hydrates over the prerendered HTML without a mismatch', async () => {
+  async function hydrate() {
     visitFrom('UTC')
     const html = await renderToString(createSSRApp(probe().Probe))
 
@@ -79,14 +79,42 @@ describe('useDateContext', () => {
     const app = createSSRApp(probe().Probe)
     app.mount(root)
     await nextTick()
+    const text = root.textContent
+    app.unmount()
 
-    const mismatches = logged
-      .flatMap(spy => spy.mock.calls)
-      .filter(args => String(args[0]).includes('Hydration'))
-    expect({ mismatches, text: root.textContent }).toEqual({
+    return {
+      mismatches: logged
+        .flatMap(spy => spy.mock.calls)
+        .filter(args => String(args[0]).includes('Hydration')),
+      text,
+    }
+  }
+
+  it('hydrates over the prerendered HTML without a mismatch', async () => {
+    expect(await hydrate()).toEqual({
       mismatches: [],
       text: 'Sat, Mar 14, 10:05:07 AM GMT+1',
     })
-    app.unmount()
+  })
+
+  describe('in Spanish', () => {
+    const i18n = () => useNuxtApp().$i18n
+
+    beforeAll(async () => {
+      await i18n().loadLocaleMessages('es')
+    })
+
+    afterEach(() => {
+      i18n().locale.value = 'en'
+    })
+
+    it('hydrates over the prerendered HTML without a mismatch', async () => {
+      i18n().locale.value = 'es'
+
+      expect(await hydrate()).toEqual({
+        mismatches: [],
+        text: 'sáb, 14 mar, 10:05:07 CET',
+      })
+    })
   })
 })

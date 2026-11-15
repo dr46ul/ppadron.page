@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest'
+import { profile as esProfile } from '../../app/data/es/profile'
 import { profileTechnology, roleTechnology } from '../../app/data/technology'
 import { contentFor, contents } from '../../app/utils/content'
 
 describe('contentFor', () => {
   it('finds the Content of a Locale in the Locale list', () => {
     expect(contentFor('en')).toEqual(contents()[0])
+  })
+
+  it('finds Spanish as its own Content, not English\'s', () => {
+    expect(contentFor('es').profile.background).toEqual(esProfile.background)
   })
 
   it('falls back to English for a code that is not a Locale', () => {

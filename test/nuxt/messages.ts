@@ -40,3 +40,36 @@ export function markElements(paragraph: Element) {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+type Code = 'en' | 'es'
+
+/** One value per Locale, from that Locale's Messages: what a test expects. */
+export function byLocale<T>(make: (locale: typeof en) => T): Record<Code, T> {
+  return {
+    en: make(en),
+    es: make(es),
+  }
+}
+
+/**
+ * What `read` finds with the Session in each Locale in turn, for a component
+ * already mounted, so a test compares every Locale in one object. Back in
+ * English afterwards, whatever `read` did.
+ */
+export async function inEachLocale<T>(read: () => T): Promise<Record<Code, T>> {
+  const i18n = useNuxtApp().$i18n
+  await i18n.loadLocaleMessages('es')
+
+  async function readIn(code: Code) {
+    i18n.locale.value = code
+    await nextTick()
+    return read()
+  }
+
+  try {
+    return { en: await readIn('en'), es: await readIn('es') }
+  }
+  finally {
+    i18n.locale.value = 'en'
+  }
+}
