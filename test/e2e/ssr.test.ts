@@ -124,6 +124,32 @@ describe('home page', () => {
     expect(page.title).toBe('Pavel Padron — Frontend Engineer')
   })
 
+  function icons() {
+    return [
+      ...page.head.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]'),
+    ]
+      .map(link => ({
+        rel: link.getAttribute('rel'),
+        href: link.getAttribute('href'),
+      }))
+  }
+
+  it('links the favicon, its vector and the Apple touch icon in the head', () => {
+    expect(icons()).toEqual([
+      { rel: 'icon', href: '/favicon.ico' },
+      { rel: 'icon', href: '/favicon.svg' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+    ])
+  })
+
+  it('serves every icon the head links', async () => {
+    const statuses = await Promise.all(
+      icons().map(async ({ href }) => [href, (await fetch(href ?? '')).status]),
+    )
+
+    expect(statuses).toEqual(icons().map(({ href }) => [href, 200]))
+  })
+
   /**
    * One assertion per seam — the banner, then each of the three data modules
    * in the transcript block that consumes it. Every expected value is read

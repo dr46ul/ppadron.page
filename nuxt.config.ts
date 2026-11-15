@@ -27,6 +27,13 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Pavel Padron\'s portfolio' },
       ],
+      // `sizes` on the ICO is what lets Chrome pick the SVG over it; browsers
+      // without SVG favicons, Safari among them, fall back to the ICO.
+      link: [
+        { rel: 'icon', href: '/favicon.ico', sizes: '32x32' },
+        { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
     },
   },
 

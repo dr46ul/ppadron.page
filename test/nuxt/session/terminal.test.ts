@@ -225,6 +225,16 @@ describe('terminal', () => {
       )
     })
 
+    it('opens with the site\'s mark, which screen readers skip since the name follows', async () => {
+      const { banner } = await mountTerminal()
+
+      const first = banner().element.firstElementChild
+      expect({
+        tag: first?.tagName.toLowerCase(),
+        hidden: first?.getAttribute('aria-hidden'),
+      }).toEqual({ tag: 'svg', hidden: 'true' })
+    })
+
     it('names the machine, which is the site and not the Profile', async () => {
       const { banner } = await mountTerminal()
 

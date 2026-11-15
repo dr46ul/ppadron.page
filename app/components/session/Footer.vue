@@ -9,6 +9,7 @@ defineProps<{ profile: Profile, year: string }>()
     class="session-gutter text-meta flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
   >
     <p class="text-subtle">
+      <SiteMark class="mr-1 inline-block size-[1.4em] align-[-0.35em]" />
       {{ $t('footer.copyright', { year, name: profile.name }) }}
     </p>
     <!-- The library's link draws its focus ring in the text colour; without
