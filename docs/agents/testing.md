@@ -396,7 +396,10 @@ guards the number and the browser run proves the number reaches the element.
 "<command>"` runs one Command in Chromium and prints where its block landed
 (`blockTop`, `blockHeight`, `atFoot`), where focus is, and any console error,
 with a screenshot path to `Read`. `--width`, `--height` and `--scheme light`
-cover a phone and the other theme. It reuses the dev server already running
+cover a phone and the other theme. With no Command it looks at the page as
+first loaded; `--selector <css>` scrolls to one element and shoots it alone,
+and `--freeze <ms>` pauses every animation that far in, so a blink is caught
+in the phase asked for rather than whichever the shot lands on. It reuses the dev server already running
 from this checkout, found through `.nuxt/nuxt.lock`, and starts one for the run
 otherwise, because a second `nuxt dev` beside a live one refuses to start. For
 anything it does not cover, extend `scripts/look.mjs` rather than writing a

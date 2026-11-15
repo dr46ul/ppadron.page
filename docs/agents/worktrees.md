@@ -42,6 +42,12 @@ replaces the default. It is shared with the repo, so it applies to
   resolves the main checkout, so worktrees never nest.
 - `.claude/hooks/worktree-remove.sh` removes the worktree and its
   `worktree-<name>` branch. It refuses any path outside `.worktrees/`.
+- `.claude/hooks/guard-git.ts`, a `PreToolUse` hook on Bash, covers what the
+  two above never see: it denies a `git worktree add` typed into Bash whose
+  path is outside `.worktrees/`, and asks before a `git switch` or a branch
+  `git checkout` on a tree with uncommitted changes, which the switch would
+  carry along. The main checkout often holds work of Pavel's in progress, so
+  a task unrelated to it belongs in a worktree.
 
 Because a `WorktreeCreate` hook replaces Claude Code's git handling entirely,
 `.worktreeinclude` and the `worktree.*` settings (`baseRef`, `sparsePaths`,

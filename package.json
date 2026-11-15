@@ -18,7 +18,8 @@
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",
     "test:e2e": "vitest --project e2e",
-    "typecheck": "nuxt typecheck --checker vue-tsc"
+    "typecheck": "nuxt typecheck --checker vue-tsc",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "@nuxt/fonts": "1.2.0",
