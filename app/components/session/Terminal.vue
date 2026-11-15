@@ -22,7 +22,7 @@ import { recommendations } from '~/data/recommendations'
 
 // Terminal is the only component that picks a Locale's Content; the Outputs
 // below receive it already in the right language.
-const { d, locale } = useI18n()
+const { d, locale, setLocale } = useI18n()
 const content = computed(() => contentFor(locale.value))
 const profile = computed(() => content.value.profile)
 const roles = computed(() => content.value.roles)
@@ -60,6 +60,12 @@ onMounted(theme.resolve)
 const themeChoice = computed({
   get: () => theme.choice.value,
   set: theme.set,
+})
+
+/** Choosing a Locale goes to its URL, so the page a Visitor shares is the language they read. */
+const localeChoice = computed({
+  get: () => locale.value,
+  set: setLocale,
 })
 
 const commandLabel = useCommandLabel()
@@ -261,6 +267,7 @@ function focusPrompt(event: MouseEvent) {
       ref="promptBar"
       v-model="input"
       v-model:theme="themeChoice"
+      v-model:locale="localeChoice"
       :commands
       :meta-commands
       :recognises

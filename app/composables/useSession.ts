@@ -89,13 +89,14 @@ export const commands: SessionCommand[] = [
 
 /** Commands that act on the session itself rather than printing anything. */
 export interface MetaCommand {
-  cmd: 'reset' | 'clear' | 'theme'
+  cmd: 'reset' | 'clear' | 'theme' | 'lang'
 }
 
 export const metaCommands: MetaCommand[] = [
   { cmd: 'reset' },
   { cmd: 'clear' },
   { cmd: 'theme' },
+  { cmd: 'lang' },
 ]
 
 /**
@@ -110,6 +111,8 @@ const THEME_COMMANDS: Record<string, ThemeChoice | 'toggle'> = {
   'theme dark': 'dark',
   'theme light': 'light',
 }
+
+const LANGUAGE_COMMAND = 'lang'
 
 /** What a visitor is likely to type instead of the canonical spelling. */
 export const aliases: Record<string, string> = {
@@ -186,6 +189,18 @@ export function useSession(roleSlugs: string[]) {
 
   const enquiry = useEnquiry()
   const theme = useTheme()
+  const i18n = useNuxtApp().$i18n
+
+  /**
+   * The Locale `lang` would switch to: the code it names, or, on its own, the
+   * next Locale round. Undefined for a code the Session has no Locale for.
+   */
+  function languageTarget(normalised: string) {
+    const codes = i18n.localeCodes.value
+    if (normalised === LANGUAGE_COMMAND)
+      return codes[(codes.indexOf(i18n.locale.value) + 1) % codes.length]
+    return codes.find(code => normalised === `${LANGUAGE_COMMAND} ${code}`)
+  }
 
   function reducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -281,6 +296,12 @@ export function useSession(roleSlugs: string[]) {
       return
     }
 
+    const language = languageTarget(normalised)
+    if (language) {
+      i18n.setLocale(language)
+      return
+    }
+
     // A right Command with a wrong name gets Role detail's answer, not `unknown`:
     // the Visitor needs a different name, not a different Command.
     const isRolePath = normalised.startsWith(ROLE_DETAIL.path)
@@ -356,6 +377,7 @@ export function useSession(roleSlugs: string[]) {
     return normalised === 'reset'
       || normalised === 'clear'
       || Object.hasOwn(THEME_COMMANDS, normalised)
+      || languageTarget(normalised) !== undefined
       || commands.some(entry => entry.cmd === normalised)
       || roleSlugs.some(slug => rolePath(slug) === normalised)
   }

@@ -26,6 +26,7 @@ const commands: SessionCommand[] = [
 const metaCommands: MetaCommand[] = [
   { cmd: 'clear' },
   { cmd: 'theme' },
+  { cmd: 'lang' },
 ]
 
 /** What the session would run, standing in for its own rules. */
@@ -33,7 +34,7 @@ function recognises(typed: string) {
   return typed === 'kiln --hot'
 }
 
-function mount(props: { open?: boolean, theme?: ThemeChoice } = {}) {
+function mount(props: { open?: boolean, theme?: ThemeChoice, locale?: string } = {}) {
   return mountSuspended(CommandPalette, {
     props: {
       commands,
@@ -41,6 +42,7 @@ function mount(props: { open?: boolean, theme?: ThemeChoice } = {}) {
       recognises,
       open: true,
       theme: 'system',
+      locale: 'en',
       ...props,
     },
   })
@@ -334,6 +336,63 @@ describe('command palette', () => {
     })
   })
 
+  describe('the language', () => {
+    function languageButtons(component: Mounted) {
+      return component.find(`[role="group"][aria-label="${en.palette.language}"]`).findAll('button')
+    }
+
+    it('offers every Locale, each named in its own language', async () => {
+      const component = await mount()
+
+      expect(languageButtons(component).map(button => ({
+        text: button.text().trim(),
+        lang: button.attributes('lang'),
+      })))
+        .toEqual([
+          { text: 'English', lang: 'en' },
+          { text: 'Español', lang: 'es' },
+        ])
+    })
+
+    it('marks the Locale in use', async () => {
+      const component = await mount({ locale: 'es' })
+
+      expect(languageButtons(component).map(button => button.attributes('aria-pressed')))
+        .toEqual(['false', 'true'])
+    })
+
+    it('reports the Locale picked, and stays open to show it', async () => {
+      const component = await mount()
+
+      await languageButtons(component)[1]!.trigger('click')
+
+      expect({
+        locale: component.emitted('update:locale'),
+        open: component.emitted('update:open'),
+      })
+        .toEqual({
+          locale: [
+            ['es'],
+          ],
+          open: undefined,
+        })
+    })
+
+    it.each(['', 'LA', 'lang es'])('keeps the language row while `%s` could still be the meta command', async (typed) => {
+      const component = await mount()
+      await find(component).setValue(typed)
+
+      expect(languageButtons(component)).toHaveLength(2)
+    })
+
+    it('drops the language row once the query cannot be the meta command', async () => {
+      const component = await mount()
+      await find(component).setValue('kiln')
+
+      expect(component.find(`[role="group"][aria-label="${en.palette.language}"]`).exists()).toBe(false)
+    })
+  })
+
   describe('the keys', () => {
     it('closes from its esc key', async () => {
       const component = await mount()
@@ -455,7 +514,7 @@ describe('command palette', () => {
       })
     })
 
-    it('lists every command it is handed, then every meta command but the theme', async () => {
+    it('lists every command it is handed, then every meta command but the theme and the language', async () => {
       const component = await mount()
 
       expect(options(component).map(option => option.find('[data-cmd]').text()))

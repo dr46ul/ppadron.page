@@ -27,6 +27,8 @@ const typed = defineModel<string>({ required: true })
 
 const theme = defineModel<ThemeChoice>('theme', { required: true })
 
+const locale = defineModel<string>('locale', { required: true })
+
 const paletteOpen = ref(false)
 
 /**
@@ -171,6 +173,7 @@ defineExpose({
     <SessionCommandPalette
       v-model:open="paletteOpen"
       v-model:theme="theme"
+      v-model:locale="locale"
       :commands
       :meta-commands
       :recognises

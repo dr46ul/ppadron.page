@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useContactRoute } from '../contact-route'
 
 /**
@@ -514,8 +514,113 @@ describe('useSession', () => {
     })
   })
 
+  describe('lang', () => {
+    const i18n = () => useNuxtApp().$i18n
+    type Code = ReturnType<typeof i18n>['locale']['value']
+
+    // A Locale's Messages arrive by dynamic import on its first switch, which no
+    // faked clock can run out; loaded here, every switch below finds them.
+    beforeAll(async () => {
+      await i18n().loadLocaleMessages('es')
+    })
+
+    /** Switches outside the Session, under the faked clock the navigation waits on. */
+    async function switchTo(code: Code) {
+      const switched = i18n().setLocale(code)
+      await vi.runAllTimersAsync()
+      await switched
+    }
+
+    afterEach(async () => {
+      await switchTo('en')
+    })
+
+    /** Runs a command and lets the navigation it starts settle. */
+    async function run(typed: string) {
+      const session = useSession(SLUGS)
+      session.exec(typed)
+      await vi.runAllTimersAsync()
+      return session
+    }
+
+    it('moves to the next Locale when run on its own', async () => {
+      await run('lang')
+
+      expect(i18n().locale.value).toBe('es')
+    })
+
+    it('comes back round to the first Locale from the last', async () => {
+      await switchTo('es')
+
+      await run('lang')
+
+      expect(i18n().locale.value).toBe('en')
+    })
+
+    it.each(['es', 'en'] as const)('sets %s by its code, whichever was showing', async (code) => {
+      const after = []
+      for (const from of ['en', 'es'] as const) {
+        await switchTo(from)
+        await run(`lang ${code}`)
+        after.push(i18n().locale.value)
+      }
+
+      expect(after).toEqual([code, code])
+    })
+
+    it('reads the Locale whatever case it is typed in', async () => {
+      await run('Lang ES')
+
+      expect(i18n().locale.value).toBe('es')
+    })
+
+    it('goes to the Locale\'s own URL', async () => {
+      await run('lang es')
+
+      expect(useRoute().path).toBe('/es')
+    })
+
+    it('prints nothing, because the page changing is the answer', async () => {
+      const session = await run('lang')
+
+      expect(session.entries.value.map(entry => entry.output)).toEqual([
+        'whoami',
+        'experience',
+        'recommendations',
+        'contact',
+        'colophon',
+      ])
+    })
+
+    it('leaves itself in the history as typed', async () => {
+      const session = await run('lang es')
+      session.recall(1)
+
+      expect(session.input.value).toBe('lang es')
+    })
+
+    it('reports a Locale it does not have as an unknown command and keeps the one showing', async () => {
+      const session = await run('lang fr')
+
+      expect({
+        last: session.entries.value.at(-1),
+        locale: i18n().locale.value,
+      }).toEqual({
+        last: expect.objectContaining({ cmd: 'lang fr', output: 'unknown' }),
+        locale: 'en',
+      })
+    })
+
+    it('completes from part of its name', () => {
+      const session = useSession(SLUGS)
+      session.input.value = 'lan'
+
+      expect(session.completion.value).toBe('lang')
+    })
+  })
+
   describe('recognising', () => {
-    it('knows every Command, meta command, alias, theme spelling and Role path, whatever the case', () => {
+    it('knows every Command, meta command, alias, theme and Locale spelling and Role path, whatever the case', () => {
       const { recognises } = useSession(SLUGS)
 
       expect([
@@ -526,6 +631,9 @@ describe('useSession', () => {
         'theme',
         'Theme --DARK',
         'theme --system',
+        'lang',
+        'LANG es',
+        'lang en',
         'dark',
         'work',
         ` cat ~/experience/${SLUGS[0]} `,
@@ -538,6 +646,7 @@ describe('useSession', () => {
       expect([
         '',
         'theme sepia',
+        'lang fr',
         'cat ~/experience/nobody',
         'constructor',
         'rm -rf ~',
