@@ -12,5 +12,6 @@
     <circle cx="276" cy="296" r="120" fill="none" stroke="#e8ebef" stroke-width="56" />
     <line x1="156" y1="176" x2="156" y2="486" stroke="#e8ebef" stroke-width="56" stroke-linecap="round" />
     <rect class="mark-cursor" x="448" y="330" width="72" height="114" rx="6" fill="#f1b464" />
+    <circle cx="156" cy="512" r="46" fill="#f1b464" />
   </svg>
 </template>
