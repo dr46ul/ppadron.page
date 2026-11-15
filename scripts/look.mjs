@@ -1,11 +1,13 @@
 /**
  * Runs one Command in a real browser and reports the block it printed: where
  * it sits in the window, whether the page followed it to the foot, and any
- * console error, with a screenshot of the window to look at.
+ * console error, with a screenshot of the window to look at. With no Command
+ * it looks at the page as a Visitor first finds it.
  *
  *   pnpm look "ls ~/experience"
  *   pnpm look "cat ~/recommendations" --width 390 --height 844 --scheme light
  *   pnpm look "whoami" --keys "Meta+k,c,a,ArrowDown"
+ *   pnpm look --selector footer --freeze 0
  *
  * happy-dom lays nothing out, so this is how a change to layout, scrolling,
  * focus or colour gets seen (docs/agents/testing.md). It drives the dev server
@@ -30,6 +32,12 @@ const { values, positionals } = parseArgs({
     // Pressed in order once the Command has printed, comma-separated in
     // Playwright's spelling, for what only the keyboard opens or moves.
     keys: { type: 'string', default: '' },
+    // Scrolled to and shot alone, with its box in the report, for what sits
+    // outside the window or is too small to judge in a whole-window shot.
+    selector: { type: 'string', default: '' },
+    // Every animation paused this many ms in. A blink otherwise lands in
+    // whichever phase the shot happens to catch.
+    freeze: { type: 'string', default: '' },
     out: {
       type: 'string',
       default: join(tmpdir(), 'look.png'),
@@ -38,10 +46,6 @@ const { values, positionals } = parseArgs({
 })
 
 const command = positionals.join(' ')
-if (!command) {
-  console.error('usage: pnpm look "<command>" [--width 1100] [--height 800] [--scheme dark|light] [--keys "Meta+k,ArrowDown"] [--out file.png]')
-  process.exit(1)
-}
 
 /** The live dev server's URL, or `undefined` when the lock is missing or stale. */
 function runningServer() {
@@ -98,6 +102,65 @@ try {
   page.on('pageerror', error => errors.push(error.message))
 
   await page.goto(url, { waitUntil: 'networkidle' })
+  if (command)
+    await run(page, command)
+
+  for (const key of values.keys.split(',').filter(Boolean))
+    await page.keyboard.press(key)
+  if (values.keys)
+    await page.waitForTimeout(300)
+
+  if (values.freeze) {
+    await page.evaluate(ms => document.getAnimations().forEach((animation) => {
+      animation.pause()
+      animation.currentTime = ms
+    }), Number(values.freeze))
+  }
+
+  const target = values.selector
+    ? page.locator(values.selector).first()
+    : undefined
+  await target?.scrollIntoViewIfNeeded()
+
+  const report = await page.evaluate(({ command, selector }) => {
+    const box = element => element && (({ top, left, width, height }) => ({
+      top: Math.round(top),
+      left: Math.round(left),
+      width: Math.round(width),
+      height: Math.round(height),
+    }))(element.getBoundingClientRect())
+    const block = command
+      ? box([
+          ...document.querySelectorAll('[data-entry]'),
+        ].at(-1))
+      : undefined
+    return {
+      ...(block && { blockTop: block.top, blockHeight: block.height }),
+      ...(selector && { selected: box(document.querySelector(selector)) ?? 'no match' }),
+      window: `${window.innerWidth}×${window.innerHeight}`,
+      atFoot: Math.ceil(window.scrollY + window.innerHeight) >= document.body.scrollHeight - 1,
+      focus: document.activeElement?.id
+        || document.activeElement?.getAttribute('aria-label')
+        || document.activeElement?.tagName.toLowerCase(),
+    }
+  }, { command, selector: values.selector })
+  await (target ?? page).screenshot({ path: values.out })
+
+  console.log(JSON.stringify({
+    server: url,
+    command: command || undefined,
+    ...report,
+    consoleErrors: errors,
+    screenshot: values.out,
+  }, null, 2))
+}
+finally {
+  await browser.close()
+  server?.kill()
+}
+
+/** Types the Command at the prompt and waits for its block to print and the page to stop scrolling. */
+async function run(page, command) {
   const before = await page.locator('[data-entry]').count()
   await page.fill('#prompt', command)
   await page.press('#prompt', 'Enter')
@@ -111,38 +174,4 @@ try {
     scrollY = await page.evaluate(() => window.scrollY)
     await page.waitForTimeout(250)
   }
-
-  for (const key of values.keys.split(',').filter(Boolean))
-    await page.keyboard.press(key)
-  if (values.keys)
-    await page.waitForTimeout(300)
-
-  const report = await page.evaluate(() => {
-    const block = [
-      ...document.querySelectorAll('[data-entry]'),
-    ].at(-1)
-    const box = block.getBoundingClientRect()
-    return {
-      blockTop: Math.round(box.top),
-      blockHeight: Math.round(box.height),
-      window: `${window.innerWidth}×${window.innerHeight}`,
-      atFoot: Math.ceil(window.scrollY + window.innerHeight) >= document.body.scrollHeight - 1,
-      focus: document.activeElement?.id
-        || document.activeElement?.getAttribute('aria-label')
-        || document.activeElement?.tagName.toLowerCase(),
-    }
-  })
-  await page.screenshot({ path: values.out })
-
-  console.log(JSON.stringify({
-    server: url,
-    command,
-    ...report,
-    consoleErrors: errors,
-    screenshot: values.out,
-  }, null, 2))
-}
-finally {
-  await browser.close()
-  server?.kill()
 }
