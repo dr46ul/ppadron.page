@@ -49,8 +49,9 @@ payload to `_payload.json`, and the client awaits a fetch of it before it
 hydrates. That file serves client-side navigation between prerendered pages,
 and there is one page, so it was a round trip on every visit for nothing.
 _[ADR-0013](./0013-each-locale-is-a-prerendered-page.md) adds a second
-prerendered page, `/es`, with its own route rule and a client-side navigation
-between the two, so this reason is to be checked again before Spanish lands._
+prerendered page, `/es`, with its own route rule. The reason still holds:
+nothing navigates between the two pages client-side, so the extracted file
+would still be fetched for nothing._
 
 **`nuxt generate` must not be used**, and the script is gone from
 `package.json`. It emits a fully static site with no function, so
@@ -65,6 +66,6 @@ to drop the route rule quietly.
 prerendered page with one function behind the form. If this changes, their
 copy changes in the same commit.
 
-`test/e2e/ssr.test.ts` checks that the build produced `public/index.html`. A
-response cannot tell a prerendered page from a rendered one, so the build
-output is the only place this is visible.
+`test/e2e/ssr.test.ts` checks that the build produced `public/index.html` and
+`public/es/index.html`. A response cannot tell a prerendered page from a
+rendered one, so the build output is the only place this is visible.

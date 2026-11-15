@@ -47,12 +47,14 @@ export default defineNuxtConfig({
   // see docs/adr/0008-the-page-is-prerendered-only-the-api-is-a-function.md.
   routeRules: {
     '/': { prerender: true },
+    '/es': { prerender: true },
   },
 
   experimental: {
     // An extracted `_payload.json` serves client-side navigation between
-    // prerendered pages, and there is one page. Left on, hydration waits on a
-    // fetch of it that adds nothing the inline payload does not already hold.
+    // prerendered pages, and nothing navigates between the two Locales' pages.
+    // Left on, hydration waits on a fetch that adds nothing the inline payload
+    // already holds.
     payloadExtraction: false,
   },
 
@@ -63,6 +65,7 @@ export default defineNuxtConfig({
     defaultLocale: 'en',
     locales: [
       { code: 'en', language: 'en', file: 'en.json' },
+      { code: 'es', language: 'es', file: 'es.json' },
     ],
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,

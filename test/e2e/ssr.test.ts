@@ -6,8 +6,11 @@ import { Window } from 'happy-dom'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { roles } from '../../app/data/en/experience'
 import { profile } from '../../app/data/en/profile'
+import { roles as esRoles } from '../../app/data/es/experience'
+import { profile as esProfile } from '../../app/data/es/profile'
 import { recommendations } from '../../app/data/recommendations'
 import en from '../../i18n/locales/en.json'
+import es from '../../i18n/locales/es.json'
 import { themeScript } from '../../shared/theme'
 
 /**
@@ -49,7 +52,80 @@ function parse(html: string) {
   return window.document
 }
 
+/**
+ * The transcript block one command printed, found by the command it echoes
+ * rather than by its `data-entry` id — the ids are just TOUR's order, and
+ * that order is TOUR's to change. Mirrors `output(cmd)` in
+ * test/nuxt/session/terminal.test.ts.
+ */
+function entryIn(page: ReturnType<typeof parse>, cmd: string) {
+  return [
+    ...page.querySelectorAll('[data-entry]'),
+  ].find(block =>
+    block.querySelector('p')?.textContent?.endsWith(cmd),
+  )
+}
+
+/** Each Locale's page names every Locale's URL, so each is indexed under its own. */
+function alternates(page: ReturnType<typeof parse>) {
+  return [
+    ...page.querySelectorAll('link[rel="alternate"][hreflang]'),
+  ]
+    .map(link => ({
+      hreflang: link.getAttribute('hreflang'),
+      href: link.getAttribute('href'),
+    }))
+}
+
+const ALTERNATES = [
+  { hreflang: 'x-default', href: 'https://ppadron.page' },
+  { hreflang: 'en', href: 'https://ppadron.page' },
+  { hreflang: 'es', href: 'https://ppadron.page/es' },
+]
+
+/**
+ * The build's instant, from the inline payload hydration resumes from.
+ * Nuxt serialises it with devalue and its own reactive wrappers, which
+ * carry nothing a test needs, so each is unwrapped as it is met.
+ */
+function builtAtOf(page: ReturnType<typeof parse>): number {
+  const unwrap = (value: unknown) => value
+  const payload = parsePayload(
+    page.querySelector('#__NUXT_DATA__')!.textContent!,
+    {
+      Reactive: unwrap,
+      ShallowReactive: unwrap,
+      Ref: unwrap,
+      ShallowRef: unwrap,
+    },
+  )
+  return payload.state['$sbuilt-at']
+}
+
+/** The banner's date as the build prints it: no Visitor, so UTC. */
+function lastLoginIn(language: string, builtAt: number) {
+  return new Intl.DateTimeFormat(language, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+    timeZone: 'UTC',
+  }).format(builtAt)
+}
+
 await setup()
+
+// The server's context is set around each test and cleared after it, so a
+// `beforeAll` inside a later `describe` finds none. Fetched here, before the
+// first test, it still has one.
+let spanish: ReturnType<typeof parse>
+
+beforeAll(async () => {
+  spanish = parse(await $fetch<string>('/es'))
+})
 
 describe('home page', () => {
   let page: ReturnType<typeof parse>
@@ -67,18 +143,8 @@ describe('home page', () => {
   function property(name: string) {
     return page.querySelector(`meta[property="${name}"]`)?.getAttribute('content')
   }
-  /**
-   * The transcript block one command printed, found by the command it echoes
-   * rather than by its `data-entry` id — the ids are just TOUR's order, and
-   * that order is TOUR's to change. Mirrors `output(cmd)` in
-   * test/nuxt/session/terminal.test.ts.
-   */
   function entry(cmd: string) {
-    return [
-      ...page.querySelectorAll('[data-entry]'),
-    ].find(block =>
-      block.querySelector('p')?.textContent?.endsWith(cmd),
-    )
+    return entryIn(page, cmd)
   }
 
   it('responds with HTML', () => {
@@ -132,13 +198,8 @@ describe('home page', () => {
   it('names the page\'s own URL in og:url', () => {
     expect(property('og:url')).toBe('https://ppadron.page')
   })
-  it('lists only English among the hreflang alternates', () => {
-    expect(
-      [
-        ...page.querySelectorAll('link[rel="alternate"][hreflang]'),
-      ]
-        .map(link => link.getAttribute('hreflang')),
-    ).toEqual(['x-default', 'en'])
+  it('lists every Locale among the hreflang alternates, English as the default', () => {
+    expect(alternates(page)).toEqual(ALTERNATES)
   })
 
   it('sets the charset to utf-8', () => {
@@ -236,38 +297,14 @@ describe('home page', () => {
   describe('prerendered dates', () => {
     let builtAt: number
 
-    /**
-     * The build's instant, from the inline payload hydration resumes from.
-     * Nuxt serialises it with devalue and its own reactive wrappers, which
-     * carry nothing a test needs, so each is unwrapped as it is met.
-     */
     beforeAll(() => {
-      const unwrap = (value: unknown) => value
-      const payload = parsePayload(
-        page.querySelector('#__NUXT_DATA__')!.textContent!,
-        {
-          Reactive: unwrap,
-          ShallowReactive: unwrap,
-          Ref: unwrap,
-          ShallowRef: unwrap,
-        },
-      )
-      builtAt = payload.state['$sbuilt-at']
+      builtAt = builtAtOf(page)
     })
 
     it('prints the banner for the build, in English and UTC', () => {
       expect(page.querySelector('[data-banner]')?.textContent).toContain(
         en.banner.lastLogin
-          .replace('{date}', new Intl.DateTimeFormat('en', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZoneName: 'short',
-            timeZone: 'UTC',
-          }).format(builtAt))
+          .replace('{date}', lastLoginIn('en', builtAt))
           .replace('{tty}', 'ttys002'),
       )
     })
@@ -282,11 +319,76 @@ describe('home page', () => {
   })
 })
 
+describe('the Spanish page', () => {
+  let page: ReturnType<typeof parse>
+
+  beforeAll(() => {
+    page = spanish
+  })
+
+  function property(name: string) {
+    return page.querySelector(`meta[property="${name}"]`)?.getAttribute('content')
+  }
+
+  it('is in Spanish from the head down, at its own URL', () => {
+    expect({
+      lang: page.documentElement.getAttribute('lang'),
+      title: page.title,
+      description: page.querySelector('meta[name="description"]')?.getAttribute('content'),
+      canonical: page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+      locale: property('og:locale'),
+      url: property('og:url'),
+    }).toEqual({
+      lang: 'es',
+      title: es.head.title,
+      description: es.head.description,
+      canonical: 'https://ppadron.page/es',
+      locale: 'es',
+      url: 'https://ppadron.page/es',
+    })
+  })
+
+  it('lists every Locale among the hreflang alternates, English as the default', () => {
+    expect(alternates(page)).toEqual(ALTERNATES)
+  })
+
+  describe('server-rendered Content', () => {
+    it('prints the Spanish availability in the login banner', () => {
+      expect(page.querySelector('[data-banner]')?.textContent).toContain(
+        esProfile.availability.label,
+      )
+    })
+
+    it('prints the Spanish Profile in the whoami block', () => {
+      expect(entryIn(page, 'whoami')?.textContent).toContain(esProfile.intro)
+    })
+
+    it('prints the Spanish Roles in the experience block', () => {
+      expect(entryIn(page, 'ls ~/experience')?.textContent).toContain(esRoles[0]!.summary)
+    })
+
+    it('prints the Recommendations verbatim, as in every Locale', () => {
+      expect(entryIn(page, 'cat ~/recommendations')?.textContent).toContain(
+        recommendations[0]!.quote.at(-1)!,
+      )
+    })
+  })
+
+  it('prints the banner for the build in Spanish', () => {
+    expect(page.querySelector('[data-banner]')?.textContent).toContain(
+      es.banner.lastLogin
+        .replace('{date}', lastLoginIn('es', builtAtOf(page)))
+        .replace('{tty}', 'ttys002'),
+    )
+  })
+})
+
 describe('the build', () => {
-  it('prerenders the page to a static file, per ADR-0008', () => {
+  it('prerenders each Locale\'s page to a static file, per ADR-0008', () => {
     const output = useTestContext().nuxt!.options.nitro.output!.dir!
 
-    expect(existsSync(join(output, 'public/index.html'))).toBe(true)
+    expect(['public/index.html', 'public/es/index.html'].filter(file => !existsSync(join(output, file))))
+      .toEqual([])
   })
 })
 

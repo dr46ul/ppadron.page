@@ -20,5 +20,6 @@ const dateFormats = {
 export default defineI18nConfig(() => ({
   datetimeFormats: {
     en: dateFormats,
+    es: dateFormats,
   },
 }))

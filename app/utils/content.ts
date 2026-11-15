@@ -2,6 +2,8 @@ import type { Role } from '../data/experience'
 import type { Profile } from '../data/profile'
 import { roles as enRoles } from '../data/en/experience'
 import { profile as enProfile } from '../data/en/profile'
+import { roles as esRoles } from '../data/es/experience'
+import { profile as esProfile } from '../data/es/profile'
 import { profileTechnology, roleTechnology } from '../data/technology'
 
 /**
@@ -12,6 +14,7 @@ import { profileTechnology, roleTechnology } from '../data/technology'
 export function written() {
   return [
     { code: 'en', profile: enProfile, roles: enRoles },
+    { code: 'es', profile: esProfile, roles: esRoles },
   ]
 }
 

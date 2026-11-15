@@ -1,9 +1,9 @@
 import type { EnquiryFailures } from '#shared/enquiry'
 import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import Contact from '~/components/session/output/Contact.vue'
-import { en, fill } from '../../messages'
+import { en, es, fill, inEachLocale, loadSpanish } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /**
@@ -408,30 +408,35 @@ describe('contact output', () => {
     })
 
     describe('when the Locale changes', () => {
-      // English is the only Locale the site ships, so the test brings a second
-      // one of its own that says the same complaint differently.
-      const OTHER = 'en-x-test'
-      const OTHER_WHO = `${WHO} (${OTHER})`
       const i18n = () => useNuxtApp().$i18n
+
+      beforeAll(loadSpanish)
 
       afterEach(() => {
         i18n().locale.value = 'en'
       })
 
-      it('re-applies a complaint already showing in the new Locale\'s words', async () => {
-        i18n().setLocaleMessage(OTHER, {
-          contact: { complaintName: OTHER_WHO },
+      // Spanish groups no four-digit number, so the limit reads 5000 there.
+      it('formats the limit in a complaint as each Locale writes numbers', async () => {
+        const component = await mount({
+          failures: { message: 'too-long' },
         })
+
+        expect(await inEachLocale(() => complaint(component, 'message'))).toEqual({
+          en: fill(en.contact.complaintTooLong, { limit: '5,000' }),
+          es: fill(es.contact.complaintTooLong, { limit: '5000' }),
+        })
+      })
+
+      it('re-applies a complaint already showing in the new Locale\'s words', async () => {
         const component = await mount({
           failures: { name: 'missing' },
         })
 
-        // The Locale type is generated from the shipped Locales, so it has no
-        // room for one a test brings.
-        Reflect.set(i18n().locale, 'value', OTHER)
+        i18n().locale.value = 'es'
         await nextTick()
 
-        expect(complaint(component, 'name')).toBe(OTHER_WHO)
+        expect(complaint(component, 'name')).toBe(es.contact.complaintName)
       })
     })
   })

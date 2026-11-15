@@ -176,20 +176,28 @@ Two mechanics this depends on:
 A transcript block is found by the command it echoes, not by its `data-entry`
 id — the ids are only `TOUR`'s order, and that order is `TOUR`'s to change.
 
-**That `/` is prerendered is asserted against the build, not a response.** A
-static file and a per-request render serve the same HTML, so `ssr.test.ts`
-checks for `public/index.html` in the output `setup()` built, found through
+**That each Locale's page is prerendered is asserted against the build, not a
+response.** A static file and a per-request render serve the same HTML, so
+`ssr.test.ts` checks for `public/index.html` and `public/es/index.html` in the
+output `setup()` built, found through
 `useTestContext().nuxt.options.nitro.output.dir`. Nitro prerenders under the
 `node-server` preset the e2e build uses, so the check holds there; what it
 cannot see is the Vercel preset's own layout. See ADR-0008.
 
 **The dates a Visitor is served are asserted here too.** The build has no
-Visitor, so the banner and the © ship in English and UTC and are re-dated once
-the page is mounted (ADR-0009). The composables' tests see the fallback
-during setup, but only the prerendered HTML shows the page actually ships it.
-The expected banner is formatted from the build's own instant, read out of the
-inline payload (`$sbuilt-at`, decoded with `devalue`), with the English and UTC
-spelled out rather than imported, so a changed fallback fails here.
+Visitor, so the banner and the © ship in the page's Locale and UTC and are
+re-dated once the page is mounted (ADR-0009). The composables' tests see the
+fallback during setup, but only the prerendered HTML shows the page actually
+ships it. The expected banner is formatted from the build's own instant, read
+out of the inline payload (`$sbuilt-at`, decoded with `devalue`), with the
+language and UTC spelled out rather than imported, so a changed fallback fails
+here.
+
+**Each Locale's page gets its own Content seams.** The Spanish page repeats
+one assertion per data module against the Spanish modules, so a Locale wired
+to another's Content fails. A file-level `beforeAll` fetches it: the server's
+context is set around each test and cleared after it, so a `beforeAll` inside
+a later `describe` finds none.
 
 ## Rules that are not obvious
 
@@ -239,6 +247,17 @@ CI in another. Unstub with `vi.unstubAllEnvs()`. `visitFrom`, in
 `test/nuxt/visit-from.ts`, does this. The browser's language is never stubbed:
 a date's language is the Session's Locale (ADR-0014).
 
+**A Locale's Messages load by dynamic import, which no faked clock runs out.**
+The first switch to Spanish in a file waits on that import, so
+`vi.runAllTimersAsync()` returns before the switch lands and the test reads
+English. Load them once with `beforeAll(loadSpanish)`, from
+`test/nuxt/messages.ts`, as `contact.test.ts` and `use-date-context.test.ts` do.
+
+**A component in two Locales is one `expect`.** `inEachLocale(read)`, in
+`test/nuxt/messages.ts`, reads a mounted component in each Locale and returns
+`{ en, es }`; `byLocale(make)` builds the expected side from each Locale's
+Messages. Its own Messages are loaded for you.
+
 **`mountSuspended` resolves with the component already mounted**, so anything
 a component holds before `onMounted` is invisible to an assertion made after
 it. To see it, mount a small probe component that copies the value out during
@@ -246,9 +265,9 @@ it. To see it, mount a small probe component that copies the value out during
 
 **A hydration mismatch is tested at the composable, and checked in a browser
 for the page.** `use-date-context.test.ts` plays the build with
-`renderToString` under English and UTC, re-stubs the Visitor, hydrates the HTML
-with `createSSRApp`, and fails on any console message mentioning `Hydration`
-— Vue's dev build reports each mismatch. Reading the browser before mount is
+`renderToString` under UTC, in English and again in Spanish, re-stubs the
+Visitor, hydrates the HTML with `createSSRApp`, and fails on any console message
+mentioning `Hydration` — Vue's dev build reports each mismatch. Reading the browser before mount is
 the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
 still checked against `.output`: open it in a Playwright context with a
 `locale` and `timezoneId` unlike the build's, and watch the console. Vue's

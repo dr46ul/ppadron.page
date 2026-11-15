@@ -2,7 +2,7 @@ import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Recommendations from '~/components/session/output/Recommendations.vue'
-import { en, fill, plural } from '../../messages'
+import { byLocale, en, fill, inEachLocale, plural } from '../../messages'
 import { roleOf } from '../../text-role'
 
 function recommendation(
@@ -396,6 +396,19 @@ describe('recommendations output', () => {
       ])
 
       expect(component.get('li [data-length]').text()).toBe(plural(en.recommendations.words, count))
+    })
+
+    it('agrees the count with its noun at nought, one and two in each Locale', async () => {
+      const counts = [0, 1, 2]
+      const components = await Promise.all(counts.map(count => mount([
+        recommendation(),
+        recommendation({
+          quote: [Array.from({ length: count }).fill('word').join(' ') || ' '],
+        }),
+      ])))
+
+      expect(await inEachLocale(() => components.map(component => component.get('li [data-length]').text())))
+        .toEqual(byLocale(messages => counts.map(count => plural(messages.recommendations.words, count))))
     })
 
     it('says what a row does to a screen reader, ahead of what it shows', async () => {

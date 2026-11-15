@@ -5,7 +5,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { arrived, emails, useContactRoute } from '../contact-route'
-import { en, fill, markElements, plural } from '../messages'
+import { byLocale, en, fill, inEachLocale, markElements, plural } from '../messages'
 import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
@@ -25,6 +25,12 @@ const data = vi.hoisted(() => ({
   recommendations: [
     recommendationFixture(),
   ],
+  spanish: {
+    profile: profileFixture(),
+    roles: [
+      roleFixture(),
+    ],
+  },
 }))
 
 // Getters, so the Content is read when a Terminal asks for it and a test can
@@ -39,6 +45,17 @@ vi.mock('~/data/en/profile', () => ({
 vi.mock('~/data/en/experience', () => ({
   get roles() {
     return data.roles.map(({ stack: _stack, ...prose }) => prose)
+  },
+}))
+vi.mock('~/data/es/profile', () => ({
+  get profile() {
+    const { stack: _stack, skills: _skills, ...prose } = data.spanish.profile
+    return prose
+  },
+}))
+vi.mock('~/data/es/experience', () => ({
+  get roles() {
+    return data.spanish.roles.map(({ stack: _stack, ...prose }) => prose)
   },
 }))
 vi.mock('~/data/technology', () => ({
@@ -197,6 +214,10 @@ describe('terminal', () => {
       data.recommendations.length,
       recommendationFixture(),
     )
+    Object.assign(data.spanish.profile, profileFixture(), {
+      intro: 'Trabaja con equipos cuya compilación dura más que su reunión diaria.',
+    })
+    data.spanish.roles.splice(0, data.spanish.roles.length, roleFixture())
   })
 
   afterEach(() => {
@@ -403,6 +424,13 @@ describe('terminal', () => {
         'Systems plumber · Reykjavík',
         'Works with teams whose build takes longer than their standup.',
       ].filter(line => !whoami.includes(line))).toEqual([])
+    })
+
+    it('hands each Locale\'s Profile to the Whoami output', async () => {
+      const { output } = await mountTerminal()
+
+      expect(await inEachLocale(() => output('whoami').text().includes(data.spanish.profile.intro)))
+        .toEqual({ en: false, es: true })
     })
 
     it('hands the Roles to the Experience output', async () => {
@@ -637,6 +665,19 @@ describe('terminal', () => {
         once: plural(en.transcript.dropped, 1, { scrollback: '14' }),
         twice: plural(en.transcript.dropped, 2, { scrollback: '14' }),
       })
+    })
+
+    it('agrees the dropped count with its noun in each Locale', async () => {
+      const session = await mountTerminal()
+
+      // Two over the cap of 14, so exactly two blocks are dropped.
+      for (let i = 0; i < 11; i++) {
+        await session.pick('whoami').trigger('click')
+        await session.settle()
+      }
+
+      expect(await inEachLocale(() => session.component.get('[data-dropped]').text()))
+        .toEqual(byLocale(messages => plural(messages.transcript.dropped, 2, { scrollback: '14' })))
     })
 
     it('says nothing about the scrollback until it drops something', async () => {

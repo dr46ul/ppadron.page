@@ -1,0 +1,130 @@
+{
+  "background": {
+    "education": "Formación",
+    "skills": "Habilidades"
+  },
+  "banner": {
+    "byline": "— {name}, {headline}",
+    "empty": "Ejecuta un comando.",
+    "lastLogin": "Último acceso: {date} en {tty}",
+    "printed": "Todo lo de abajo ya está impreso — sigue leyendo o ejecuta un comando."
+  },
+  "colophon": {
+    "lede": "No hay galería de proyectos, así que esta página es la muestra de trabajo: un sitio Nuxt prerenderizado de forma estática, con una sola función serverless detrás del formulario, y todo su código se puede leer."
+  },
+  "commands": {
+    "background": "la historia completa",
+    "colophon": "cómo está hecha esta página",
+    "contact": "envíame un mensaje",
+    "experience": "el trabajo en sí",
+    "help": "esta lista",
+    "recommendations": "lo que dicen mis colegas",
+    "whoami": "quién soy"
+  },
+  "contact": {
+    "bodyLabel": "mensaje:",
+    "complaintAddress": "Necesito una dirección a la que pueda responder.",
+    "complaintMessage": "Un poco más, por favor — al menos {min} caracteres.",
+    "complaintName": "Dime quién eres.",
+    "complaintTooLong": "Que no pase de {limit} caracteres; el resto puede seguir por correo.",
+    "emailPlaceholder": "tu{'@'}empresa.com",
+    "failed": "No se ha enviado y no se ha guardado nada. Escríbeme a {email} y el mensaje me llegará igualmente.",
+    "fromLabel": "de:",
+    "lede": "Cuéntame qué estás construyendo y qué te lo impide. Respondo personalmente a cada mensaje.",
+    "legend": "Enviar una consulta",
+    "messagePlaceholder": "¿qué estás construyendo y qué te lo impide?",
+    "namePlaceholder": "tu nombre",
+    "replyToLabel": "responder:",
+    "retention": "no se guarda en ningún otro sitio",
+    "send": "enviar",
+    "sending": "enviando…",
+    "sent": "enviado",
+    "sentNotice": "Enviado. Ya está en mi bandeja de entrada y responderé a la dirección que me has dado."
+  },
+  "error": {
+    "home": "Volver al inicio"
+  },
+  "experience": {
+    "ndaNote": "El trabajo freelance para clientes está bajo NDA, así que no hay galería de proyectos. Este es el trabajo en sí."
+  },
+  "footer": {
+    "copyright": "© {year} {name}"
+  },
+  "head": {
+    "description": "Portafolio de Pavel Padrón",
+    "title": "Pavel Padrón — Ingeniero Frontend"
+  },
+  "help": {
+    "hint": "{tab} completa · {up} {down} recorren el historial · también valen palabras sueltas ({experience}, {contact}).",
+    "roleForm": "{form} muestra un puesto completo."
+  },
+  "keys": {
+    "down": "flecha abajo",
+    "enter": "enter",
+    "up": "flecha arriba"
+  },
+  "metaCommands": {
+    "clear": "vaciar la pantalla",
+    "reset": "volver a la página tal como cargó",
+    "theme": "claro, oscuro o el del sistema"
+  },
+  "palette": {
+    "backdropClose": "cerrar",
+    "close": "Cerrar",
+    "dialog": "Comandos",
+    "groupCommands": "Comandos",
+    "groupSession": "Sesión",
+    "keyClose": "cerrar",
+    "keyMove": "mover",
+    "keyRun": "ejecutar",
+    "list": "Comandos",
+    "nothing": "No hay coincidencias.",
+    "runTyped": "Intro ejecuta {typed}.",
+    "search": "Buscar un comando",
+    "searchPlaceholder": "buscar un comando",
+    "theme": "Tema",
+    "themeChoice": {
+      "dark": "oscuro",
+      "light": "claro",
+      "system": "sistema"
+    }
+  },
+  "period": {
+    "months": "{from} – {to}",
+    "now": "actualidad",
+    "years": "{from} — {to}"
+  },
+  "promptBar": {
+    "commands": "comandos",
+    "label": "Ejecutar un comando",
+    "placeholder": "escribe un comando o abre la lista"
+  },
+  "recommendations": {
+    "alsoOnFile": "También en el archivo",
+    "credit": " — {title}, {company}",
+    "keyMove": "mover",
+    "keyRead": "leer",
+    "provenance": "Tal cual en LinkedIn, en su idioma original. Colegas y responsables, no clientes.",
+    "read": "Leer a {name}",
+    "role": "{title}, {company}",
+    "words": "{n} palabra | {n} palabras"
+  },
+  "roleDetail": {
+    "notFound": "cat: ~/experience/{role}: No existe el archivo o el directorio — prueba {list}",
+    "techStack": "Tecnologías"
+  },
+  "session": {
+    "skip": "Ir a la línea de comandos"
+  },
+  "transcript": {
+    "cleared": "Pantalla vaciada. Ejecuta {help} para ver qué hay, o {whoami} para empezar.",
+    "dropped": "[ {n} bloque anterior descartado — el historial guarda {scrollback} ] | [ {n} bloques anteriores descartados — el historial guarda {scrollback} ]",
+    "working": "Trabajando…"
+  },
+  "unknown": {
+    "notFound": "{cmd}: comando no encontrado — prueba {help}"
+  },
+  "whoami": {
+    "more": "La historia completa: {background}"
+  }
+}
