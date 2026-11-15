@@ -9,7 +9,7 @@ describe('contentFor', () => {
   })
 
   it('finds Spanish as its own Content, not English\'s', () => {
-    expect(contentFor('es').profile.background).toEqual(esProfile.background)
+    expect(contentFor('es').profile.intro).toBe(esProfile.intro)
   })
 
   it('falls back to English for a code that is not a Locale', () => {

@@ -143,12 +143,6 @@ describe('home page', () => {
   function property(name: string) {
     return page.querySelector(`meta[property="${name}"]`)?.getAttribute('content')
   }
-  /**
-   * The transcript block one command printed, found by the command it echoes
-   * rather than by its `data-entry` id — the ids are just TOUR's order, and
-   * that order is TOUR's to change. Mirrors `output(cmd)` in
-   * test/nuxt/session/terminal.test.ts.
-   */
   function entry(cmd: string) {
     return entryIn(page, cmd)
   }

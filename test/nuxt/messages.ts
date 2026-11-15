@@ -52,13 +52,21 @@ export function byLocale<T>(make: (locale: typeof en) => T): Record<Code, T> {
 }
 
 /**
+ * A Locale's Messages arrive by dynamic import on its first switch, which no
+ * faked clock can run out. Loaded first, every switch after finds them.
+ */
+export function loadSpanish() {
+  return useNuxtApp().$i18n.loadLocaleMessages('es')
+}
+
+/**
  * What `read` finds with the Session in each Locale in turn, for a component
  * already mounted, so a test compares every Locale in one object. Back in
  * English afterwards, whatever `read` did.
  */
 export async function inEachLocale<T>(read: () => T): Promise<Record<Code, T>> {
   const i18n = useNuxtApp().$i18n
-  await i18n.loadLocaleMessages('es')
+  await loadSpanish()
 
   async function readIn(code: Code) {
     i18n.locale.value = code

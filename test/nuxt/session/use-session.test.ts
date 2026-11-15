@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useContactRoute } from '../contact-route'
+import { loadSpanish } from '../messages'
 
 /**
  * `useSession()` holds no component state, so every test here calls it
@@ -518,11 +519,7 @@ describe('useSession', () => {
     const i18n = () => useNuxtApp().$i18n
     type Code = ReturnType<typeof i18n>['locale']['value']
 
-    // A Locale's Messages arrive by dynamic import on its first switch, which no
-    // faked clock can run out; loaded here, every switch below finds them.
-    beforeAll(async () => {
-      await i18n().loadLocaleMessages('es')
-    })
+    beforeAll(loadSpanish)
 
     /** Switches outside the Session, under the faked clock the navigation waits on. */
     async function switchTo(code: Code) {

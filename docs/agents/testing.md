@@ -250,8 +250,8 @@ a date's language is the Session's Locale (ADR-0014).
 **A Locale's Messages load by dynamic import, which no faked clock runs out.**
 The first switch to Spanish in a file waits on that import, so
 `vi.runAllTimersAsync()` returns before the switch lands and the test reads
-English. Load them once with `await useNuxtApp().$i18n.loadLocaleMessages('es')`
-in a `beforeAll`, as `use-session.test.ts` and `app.test.ts` do. A switch made
+English. Load them once with `beforeAll(loadSpanish)`, from
+`test/nuxt/messages.ts`, as `use-session.test.ts` and `app.test.ts` do. A switch made
 under fake timers with `setLocale` also waits on the navigation it starts:
 start it, run the clock out, then await it.
 
@@ -267,9 +267,9 @@ it. To see it, mount a small probe component that copies the value out during
 
 **A hydration mismatch is tested at the composable, and checked in a browser
 for the page.** `use-date-context.test.ts` plays the build with
-`renderToString` under UTC, in English and again in Spanish, re-stubs the Visitor, hydrates the HTML
-with `createSSRApp`, and fails on any console message mentioning `Hydration`
-— Vue's dev build reports each mismatch. Reading the browser before mount is
+`renderToString` under UTC, in English and again in Spanish, re-stubs the
+Visitor, hydrates the HTML with `createSSRApp`, and fails on any console message
+mentioning `Hydration` — Vue's dev build reports each mismatch. Reading the browser before mount is
 the mistake it catches (ADR-0009). Whether the whole page hydrates cleanly is
 still checked against `.output`: open it in a Playwright context with a
 `locale` and `timezoneId` unlike the build's, and watch the console. Vue's

@@ -68,6 +68,5 @@ prerendered page with one function behind the form. If this changes, their
 copy changes in the same commit.
 
 `test/e2e/ssr.test.ts` checks that the build produced `public/index.html` and
-`public/es/index.html`. A
-response cannot tell a prerendered page from a rendered one, so the build
-output is the only place this is visible.
+`public/es/index.html`. A response cannot tell a prerendered page from a
+rendered one, so the build output is the only place this is visible.

@@ -3,7 +3,7 @@ import type { EnquiryDraft, EnquiryState } from '~/composables/useEnquiry'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import Contact from '~/components/session/output/Contact.vue'
-import { en, es, fill, inEachLocale } from '../../messages'
+import { en, es, fill, inEachLocale, loadSpanish } from '../../messages'
 import { roleOf } from '../../text-role'
 
 /**
@@ -410,9 +410,7 @@ describe('contact output', () => {
     describe('when the Locale changes', () => {
       const i18n = () => useNuxtApp().$i18n
 
-      beforeAll(async () => {
-        await i18n().loadLocaleMessages('es')
-      })
+      beforeAll(loadSpanish)
 
       afterEach(() => {
         i18n().locale.value = 'en'

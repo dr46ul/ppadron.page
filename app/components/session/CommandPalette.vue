@@ -25,7 +25,6 @@ const open = defineModel<boolean>('open', { required: true })
 
 const theme = defineModel<ThemeChoice>('theme', { required: true })
 
-/** The Session's Locale, by code. */
 const locale = defineModel<string>('locale', { required: true })
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')

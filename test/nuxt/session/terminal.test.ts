@@ -5,7 +5,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { arrived, emails, useContactRoute } from '../contact-route'
-import { byLocale, en, fill, inEachLocale, markElements, plural } from '../messages'
+import { byLocale, en, fill, inEachLocale, loadSpanish, markElements, plural } from '../messages'
 import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
@@ -1117,11 +1117,7 @@ describe('terminal', () => {
       }
     }
 
-    // A Locale's Messages arrive by dynamic import on its first switch, which no
-    // faked clock can run out; loaded here, every switch below finds them.
-    beforeAll(async () => {
-      await i18n().loadLocaleMessages('es')
-    })
+    beforeAll(loadSpanish)
 
     afterEach(async () => {
       const switched = i18n().setLocale('en')

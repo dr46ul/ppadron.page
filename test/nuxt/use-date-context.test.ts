@@ -3,6 +3,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { createSSRApp, defineComponent, h, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { useDateContext } from '~/composables/useDateContext'
+import { loadSpanish } from './messages'
 import { visitFrom } from './visit-from'
 
 const builtAt = Date.UTC(2026, 2, 14, 9, 5, 7)
@@ -100,9 +101,7 @@ describe('useDateContext', () => {
   describe('in Spanish', () => {
     const i18n = () => useNuxtApp().$i18n
 
-    beforeAll(async () => {
-      await i18n().loadLocaleMessages('es')
-    })
+    beforeAll(loadSpanish)
 
     afterEach(() => {
       i18n().locale.value = 'en'
