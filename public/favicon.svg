@@ -1,4 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+  <!-- The source of the mark: `pnpm icons` renders favicon.ico and
+       apple-touch-icon.png from it, and app/components/SiteMark.vue draws it
+       inline. -->
   <rect width="640" height="640" rx="128" fill="#14171c"/>
   <circle cx="276" cy="296" r="120" fill="none" stroke="#e8ebef" stroke-width="56"/>
   <line x1="156" y1="176" x2="156" y2="486" stroke="#e8ebef" stroke-width="56" stroke-linecap="round"/>
