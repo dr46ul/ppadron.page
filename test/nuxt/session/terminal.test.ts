@@ -216,6 +216,15 @@ describe('terminal', () => {
       ].filter(line => !text.includes(line))).toEqual([])
     })
 
+    it('sets the machine\'s name apart from the byline by a space', async () => {
+      const { banner } = await mountTerminal()
+
+      const line = banner().findAll('p').find(paragraph => paragraph.text().startsWith('ppadron.page'))!
+      expect(line.element.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+        `ppadron.page ${fill(en.banner.byline, { name: 'Wilhelmina Ashgrove', headline: 'Systems plumber' })}`,
+      )
+    })
+
     it('stamps the session with the time it was built, in the Session\'s Locale and the Visitor\'s time zone', async () => {
       visitFrom('Europe/Berlin')
       const { banner } = await mountTerminal()

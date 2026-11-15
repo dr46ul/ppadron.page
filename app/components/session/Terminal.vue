@@ -129,10 +129,10 @@ function focusPrompt(event: MouseEvent) {
           <p class="text-subtle">
             {{ $t('banner.lastLogin', { date: lastLogin, tty }) }}
           </p>
+          <!-- One line: Vue drops whitespace that holds a line break between
+               two elements, and the space before the byline would go with it. -->
           <p class="mt-3">
-            <span class="font-semibold">ppadron.page</span>
-            <span class="text-subtle">
-              {{ $t('banner.byline', { name: profile.name, headline: profile.headline }) }}</span>
+            <span class="font-semibold">ppadron.page</span> <span class="text-subtle">{{ $t('banner.byline', { name: profile.name, headline: profile.headline }) }}</span>
           </p>
           <!-- Whether Pavel is open is the Profile's to say, and so is how it is
                worded; `open` decides only whether the line is accented. -->
