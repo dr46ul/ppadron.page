@@ -234,9 +234,10 @@
   }
 
   /* An empty prompt has the block at its start, where it would cover the
-     placeholder's first letter. */
+     placeholder's first letter. The extra cell keeps the hint from reading as
+     text already typed after the caret. */
   .prompt-input:placeholder-shown {
-    text-indent: var(--caret-width);
+    text-indent: calc(var(--caret-width) + 1ch);
   }
 
   /* The machine thinking, for exactly as long as it takes the first line to

@@ -87,10 +87,10 @@ describe('the prompt input', () => {
     expect(declarations('.prompt-input')).toMatch(/caret-color:\s*transparent/)
   })
 
-  it('starts the placeholder one block along while the prompt is empty', () => {
+  it('starts the placeholder one cell past the block while the prompt is empty', () => {
     const width = declarations('.caret')?.match(/width:([^;]+)/)?.[1]?.trim()
     const indent = declarations('.prompt-input:placeholder-shown')?.match(/text-indent:([^;]+)/)?.[1]?.trim()
 
-    expect(indent).toEqual(expect.stringContaining(width ?? 'no caret width'))
+    expect(indent).toBe(`calc(${width ?? 'no caret width'} + 1ch)`)
   })
 })
