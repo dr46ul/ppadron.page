@@ -107,7 +107,7 @@ defineExpose({
     class="border-edge bg-base-200/95 sticky bottom-0 z-20 border-t backdrop-blur-sm"
   >
     <form
-      class="session-gutter flex items-baseline gap-2 py-3"
+      class="session-gutter flex items-center gap-2 py-3"
       @submit.prevent="emit('run', typed)"
     >
       <label class="sr-only" for="prompt">{{ $t('promptBar.label') }}</label>
@@ -152,7 +152,7 @@ defineExpose({
         type="button"
         data-commands
         aria-haspopup="dialog"
-        class="btn btn-outline btn-accent btn-sm border-edge text-muted hover:border-accent hover:text-accent-content text-meta ml-auto shrink-0 gap-2 self-center px-2.5 font-normal"
+        class="btn btn-outline btn-accent btn-sm border-edge text-muted hover:border-accent hover:text-accent-content text-meta ml-auto shrink-0 gap-2 px-2.5 font-normal"
         @click.stop="paletteOpen = true"
       >
         <svg
