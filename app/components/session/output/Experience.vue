@@ -32,70 +32,42 @@ function open(event: MouseEvent, slug: string) {
     </p>
 
     <ul class="mt-5 flex flex-col gap-8">
-      <template
+      <li
         v-for="(role, index) in roles"
         :key="role.from"
+        :style="{ '--i': index }"
+        class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
       >
-        <li
-          :style="{ '--i': index }"
-          class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
+        <time
+          :datetime="role.from"
+          class="text-meta tabular-nums"
+          :class="index === 0 ? 'text-accent' : 'text-muted'"
         >
-          <time
-            :datetime="role.from"
-            class="text-meta tabular-nums"
-            :class="index === 0 ? 'text-accent' : 'text-muted'"
-          >
-            {{ period.years(role) }}
-          </time>
+          {{ period.years(role) }}
+        </time>
 
-          <div>
-            <!-- The button stops at the name so the summary below stays plain
-                 text to select. `.stop` because the session behind it would put
-                 the caret in the prompt and take focus off the list. -->
-            <button
-              type="button"
-              class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
-              @click.stop="open($event, role.slug)"
-            >
-              <span class="decoration-edge group-hover:text-accent text-prose font-semibold underline underline-offset-4">{{ role.company }}</span>
-              <span class="text-muted text-meta">
-                {{ role.title }}
-              </span>
-            </button>
-            <p class="text-prose text-body mt-1 max-w-prose">
-              {{ role.summary }}
-            </p>
-            <p class="text-subtle mt-1 text-meta">
-              {{ role.stack.slice(0, glanceCount).join(' · ') }}
-            </p>
-          </div>
-        </li>
-        <li
-          v-if="role.before"
-          class="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[9rem_1fr]"
-        >
-          <time
-            :datetime="role.before.from"
-            class="text-muted text-meta tabular-nums"
+        <div>
+          <!-- The button stops at the name so the summary below stays plain
+               text to select. `.stop` because the session behind it would put
+               the caret in the prompt and take focus off the list. -->
+          <button
+            type="button"
+            class="group flex w-full flex-wrap items-baseline gap-x-3 text-left select-text pointer-coarse:min-h-11 pointer-coarse:items-center"
+            @click.stop="open($event, role.slug)"
           >
-            {{ period.years(role.before) }}
-          </time>
-          <div>
-            <p class="flex flex-wrap items-baseline gap-x-3">
-              <span class="text-prose font-semibold">{{ role.before.name }}</span>
-              <span class="text-muted text-meta">
-                {{ role.before.title }}
-              </span>
-            </p>
-            <p class="text-prose text-body mt-1 max-w-prose">
-              {{ role.before.summary }}
-            </p>
-            <p class="text-subtle mt-1 text-meta">
-              {{ role.before.tech.join(' · ') }}
-            </p>
-          </div>
-        </li>
-      </template>
+            <span class="decoration-edge group-hover:text-accent text-prose font-semibold underline underline-offset-4">{{ role.company }}</span>
+            <span class="text-muted text-meta">
+              {{ role.title }}
+            </span>
+          </button>
+          <p class="text-prose text-body mt-1 max-w-prose">
+            {{ role.summary }}
+          </p>
+          <p class="text-subtle mt-1 text-meta">
+            {{ role.stack.slice(0, glanceCount).join(' · ') }}
+          </p>
+        </div>
+      </li>
     </ul>
   </div>
 </template>

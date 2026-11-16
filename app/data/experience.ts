@@ -16,17 +16,6 @@ export interface RoleProject {
   phases: RolePhase[]
 }
 
-export interface RoleNote {
-  /** Years only: the note shares the Experience list's column of years. */
-  from: Year
-  to: Year
-  /** Stands where a Role has its company, for time with no single employer. */
-  name: string
-  title: string
-  summary: string
-  tech: string[]
-}
-
 export interface Role {
   /** The name in the Role's path, `~/experience/<slug>`. Stable once published. */
   slug: string
@@ -41,11 +30,6 @@ export interface Role {
   /** Leads with what was built, never with what he was employed as. */
   summary: string
   account: string[]
-  /**
-   * An entry the Experience list prints under this Role, for time before it
-   * that was not a Role. It is not openable and has no slug.
-   */
-  before?: RoleNote
   history?: RoleProject[]
   stack: string[]
 }
@@ -54,8 +38,7 @@ export interface Role {
  * What a Locale writes for a Role: everything but the technology names, which
  * are the same in every Locale and live in `technology.ts`.
  */
-export interface RoleProse extends Omit<Role, 'stack' | 'before' | 'history'> {
-  before?: Omit<RoleNote, 'tech'>
+export interface RoleProse extends Omit<Role, 'stack' | 'history'> {
   history?: {
     name: string
     phases: Omit<RolePhase, 'tech'>[]

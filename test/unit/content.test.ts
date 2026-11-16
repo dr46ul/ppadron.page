@@ -92,13 +92,11 @@ describe.each(written())('technology for the Roles of $code', ({ roles }) => {
   it('is shaped like the Roles it belongs to', () => {
     const technologyShape = roles.map(({ slug }) => ({
       slug,
-      before: Boolean(roleTechnology[slug]?.before),
       history: roleTechnology[slug]?.history?.map(project => project.length),
     }))
 
     expect(technologyShape).toEqual(roles.map(role => ({
       slug: role.slug,
-      before: Boolean(role.before),
       history: role.history?.map(project => project.phases.length),
     })))
   })

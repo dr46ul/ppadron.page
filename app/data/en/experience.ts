@@ -47,13 +47,6 @@ export const roles: RoleProse[] = [
       'During the time I worked here I was hands-on with the two main projects, the Rogue Fitness e-commerce web store and the Rogue Mobile App. Both projects were developed with a tech stack that evolved and in some cases completely changed. Therefore, I improved my skills and had to learn some new technologies and methodologies as well.',
       'We used scrum and agile methodologies in all the projects. We also used Bitbucket, Jira and Confluence.',
     ],
-    before: {
-      from: '2011',
-      to: '2014',
-      name: 'Freelance',
-      title: 'Middle Frontend Developer',
-      summary: 'Built custom Magento themes for several e-commerce stores, turning each shop\'s design into a working storefront, from the catalogue and product pages through to cart and checkout.',
-    },
     history: [
       {
         name: 'Web Store',
@@ -77,6 +70,20 @@ export const roles: RoleProse[] = [
           },
         ],
       },
+    ],
+  },
+  {
+    slug: 'freelance',
+    company: 'Self-employed/Freelance',
+    from: '2011-01',
+    to: '2014-10',
+    title: 'Middle Frontend Developer',
+    summary: 'Built custom Magento themes for several e-commerce stores, turning each shop\'s design into a working storefront, from the catalogue and product pages through to cart and checkout.',
+    account: [
+      'I started working on my own at the beginning of 2011, just after moving to Italy, building custom Magento themes for e-commerce stores. At the end of that year I moved to Minsk and carried on freelancing from there.',
+      'Each project started from the store\'s design and ended with a working storefront: the catalogue, product pages, cart and checkout, built on top of Magento with HTML5, CSS3, JavaScript and jQuery, and PHP for the theme templates.',
+      'Working alone meant owning the whole job, from understanding what the client needed to delivering the store and supporting it afterwards. [How you found clients, or one store you\'re proud of.]',
+      'Almost four years of this made Magento second nature to me, and that experience is what led to my next seven years at Rogue Fitness.',
     ],
   },
   {

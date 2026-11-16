@@ -28,16 +28,10 @@ describe('contentFor', () => {
     expect({ stack: profile.stack, skills: profile.skills }).toEqual(profileTechnology)
   })
 
-  it('joins the technology of a Role\'s note and phases', () => {
+  it('joins the technology of a Role\'s phases', () => {
     const roles = contentFor('en').roles
-    const technology = roles.map(role => ({
-      before: role.before?.tech,
-      history: role.history?.map(project => project.phases.map(phase => phase.tech)),
-    }))
+    const technology = roles.map(role => role.history?.map(project => project.phases.map(phase => phase.tech)))
 
-    expect(technology).toEqual(roles.map(role => ({
-      before: roleTechnology[role.slug]!.before,
-      history: roleTechnology[role.slug]!.history,
-    })))
+    expect(technology).toEqual(roles.map(role => roleTechnology[role.slug]!.history))
   })
 })
