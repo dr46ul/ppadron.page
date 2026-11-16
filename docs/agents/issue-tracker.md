@@ -4,7 +4,8 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Create an issue**: `gh issue create --assignee @me --title "..." --body "..."`. Use a heredoc for multi-line bodies. Pavel is the only person on this repo, so every issue and PR is assigned to him and he is the reviewer.
+- **A ticket that needs a grilling session first**: label it `wayfinder:grilling`, not `ready-for-agent`. The body says the design is undecided and that the pickup starts with `/grilling` before any test or code; list the open questions as where the session starts, and name the constraints already decided. The outcome goes in as a comment, and `ready-for-agent` is added only once Pavel confirms it.
 - **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
@@ -14,6 +15,12 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **Link the PR**: end the PR body with `Closes #<number>` so merging closes the issue.
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
+
+## Project board
+
+Issues land on the `PPADRON.PAGE` board (`dr46ul`, project 8) as Todo. When the implementation is ready for Pavel to review, run `pnpm board review <issue>` to move it to Review. Open the PR with Pavel as assignee and reviewer.
+
+The `gh` token needs the project scopes, and the refresh needs a real terminal (it fails under Claude Code's `!` prefix): `gh auth refresh -h github.com -s read:project,project`. Check `gh auth status` before touching the board.
 
 ## Pull requests as a triage surface
 
