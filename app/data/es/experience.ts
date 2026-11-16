@@ -87,7 +87,7 @@ export const roles: RoleProse[] = [
     account: [
       'Empecé a trabajar por mi cuenta a principios de 2011, recién llegado a Italia, creando temas de Magento a medida para tiendas online. A finales de ese año me mudé a Minsk y seguí trabajando como freelance desde allí.',
       'Cada proyecto empezaba con el diseño de la tienda y terminaba con un escaparate funcional: el catálogo, las fichas de producto, el carrito y el checkout, construidos sobre Magento con HTML5, CSS3, JavaScript y jQuery, y PHP para las plantillas del tema.',
-      'Trabajar solo significaba encargarme de todo, desde entender lo que necesitaba el cliente hasta entregar la tienda y darle soporte después. [Cómo encontrabas clientes, o una tienda de la que estés orgulloso.]',
+      'Trabajar solo significaba encargarme de todo, desde entender lo que necesitaba el cliente hasta entregar la tienda y darle soporte después.',
       'Casi cuatro años así hicieron de Magento algo natural para mí, y esa experiencia es la que me llevó a mis siete años siguientes en Rogue Fitness.',
     ],
   },
