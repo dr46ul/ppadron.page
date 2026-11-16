@@ -49,8 +49,9 @@ bundle gained, and that pnpm's `trustPolicy` accepts the new dependency tree.
 
 **Every Locale has a prerender rule.** ADR-0008's route rule for `/` has one
 beside it for `/es`. ADR-0008 turned payload extraction off because there was
-one page. Now there are two, but nothing navigates between them client-side,
-so payload extraction stays off.
+one page. Now there are two, and a switch between them is a client-side
+navigation, but it keeps the page mounted and fetches no data, so payload
+extraction stays off.
 
 **Messages live where the module looks for them.** The Interface copy is one
 JSON file per Locale in `i18n/locales/`, so a whole translation can be read and

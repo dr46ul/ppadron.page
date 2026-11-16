@@ -49,9 +49,10 @@ payload to `_payload.json`, and the client awaits a fetch of it before it
 hydrates. That file serves client-side navigation between prerendered pages,
 and there is one page, so it was a round trip on every visit for nothing.
 _[ADR-0013](./0013-each-locale-is-a-prerendered-page.md) adds a second
-prerendered page, `/es`, with its own route rule. The reason still holds:
-nothing navigates between the two pages client-side, so the extracted file
-would still be fetched for nothing._
+prerendered page, `/es`, with its own route rule and a client-side navigation
+between the two. The reason still holds: that navigation is a language switch,
+which keeps the page mounted, one page key for every Locale, and fetches no
+data, so the extracted file would still be fetched for nothing._
 
 **`nuxt generate` must not be used**, and the script is gone from
 `package.json`. It emits a fully static site with no function, so

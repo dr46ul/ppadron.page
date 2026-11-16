@@ -35,12 +35,12 @@ each Locale, so a translated Experience cannot drop a Role, change a slug or
 reorder the list. Every Locale also has the same Roles with the same slugs, so
 `cat ~/experience/<slug>` names the same Role in every Locale.
 
-**Technology names are written once.** Each Role's `stack`, its note's
-and phases' tech, and the Profile's `stack` and `skills` live in
+**Technology names are written once.** Each Role's `stack`, its phases'
+tech, and the Profile's `stack` and `skills` live in
 `app/data/technology.ts`, keyed by the Role's slug. A Locale's modules hold only
 prose, and `contentFor` joins the two, so Spanish never copies a list of tool
-names. A Role's technology is matched to its Locale's `before` note and
-`history` by position, and the Content test checks the shapes agree.
+names. A Role's technology is matched to its Locale's `history` by position,
+and the Content test checks the shapes agree.
 
 **Only prose is translated.** Summaries, accounts, phase names and the
 Background are translated. Company names, people's names and technology names

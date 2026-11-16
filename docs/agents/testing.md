@@ -251,7 +251,9 @@ a date's language is the Session's Locale (ADR-0014).
 The first switch to Spanish in a file waits on that import, so
 `vi.runAllTimersAsync()` returns before the switch lands and the test reads
 English. Load them once with `beforeAll(loadSpanish)`, from
-`test/nuxt/messages.ts`, as `contact.test.ts` and `use-date-context.test.ts` do.
+`test/nuxt/messages.ts`, as `use-session.test.ts` and `app.test.ts` do. A switch made
+under fake timers with `setLocale` also waits on the navigation it starts:
+start it, run the clock out, then await it.
 
 **A component in two Locales is one `expect`.** `inEachLocale(read)`, in
 `test/nuxt/messages.ts`, reads a mounted component in each Locale and returns

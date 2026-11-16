@@ -7,8 +7,6 @@ import type { Profile } from './profile'
 export interface RoleTechnology {
   /** The Role's full list, the names that matter most first: the Experience list prints only its head. */
   stack: string[]
-  /** The tech of the Role's `before` note. */
-  before?: string[]
   /** The tech of each phase of each project, in the order the Content lists them. */
   history?: string[][][]
 }
@@ -92,14 +90,6 @@ export const roleTechnology: Record<string, RoleTechnology> = {
       'MacOS',
       'Linux/Ubuntu',
     ],
-    before: [
-      'HTML5',
-      'CSS3',
-      'JavaScript',
-      'jQuery',
-      'Magento',
-      'PHP',
-    ],
     history: [
       [
         [
@@ -165,6 +155,16 @@ export const roleTechnology: Record<string, RoleTechnology> = {
           'InVision/Sketch',
         ],
       ],
+    ],
+  },
+  'freelance': {
+    stack: [
+      'HTML5',
+      'CSS3',
+      'JavaScript',
+      'jQuery',
+      'Magento',
+      'PHP',
     ],
   },
   'procyon-soluciones': {

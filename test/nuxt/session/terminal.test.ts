@@ -2,10 +2,10 @@ import type { Role } from '~/data/experience'
 import type { Profile } from '~/data/profile'
 import type { Recommendation } from '~/data/recommendations'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import Terminal from '~/components/session/Terminal.vue'
 import { arrived, emails, useContactRoute } from '../contact-route'
-import { byLocale, en, fill, inEachLocale, markElements, plural } from '../messages'
+import { byLocale, en, fill, inEachLocale, loadSpanish, markElements, plural } from '../messages'
 import { roleOf } from '../text-role'
 import { visitFrom } from '../visit-from'
 
@@ -217,7 +217,10 @@ describe('terminal', () => {
     Object.assign(data.spanish.profile, profileFixture(), {
       intro: 'Trabaja con equipos cuya compilación dura más que su reunión diaria.',
     })
-    data.spanish.roles.splice(0, data.spanish.roles.length, roleFixture())
+    data.spanish.roles.splice(0, data.spanish.roles.length, {
+      ...roleFixture(),
+      summary: 'Rehízo el programa de cocción para que nada se agrietara al enfriar.',
+    })
   })
 
   afterEach(() => {
@@ -797,7 +800,7 @@ describe('terminal', () => {
   })
 
   describe('what it hands the prompt bar', () => {
-    it('lists every command and every meta command in the palette, the theme as its own row', async () => {
+    it('lists every command and every meta command in the palette, the theme and the language as rows of their own', async () => {
       const { promptBar } = await mountTerminal()
       const listed = promptBar()
         .findAll('[role="option"] [data-cmd]')
@@ -805,7 +808,7 @@ describe('terminal', () => {
 
       expect(listed).toEqual([
         ...commands.map(command => command.cmd),
-        ...metaCommands.map(command => command.cmd).filter(cmd => cmd !== 'theme'),
+        ...metaCommands.map(command => command.cmd).filter(cmd => cmd !== 'theme' && cmd !== 'lang'),
       ])
     })
 
@@ -1106,6 +1109,92 @@ describe('terminal', () => {
           theme: 'terminal',
           pressed: [en.palette.themeChoice.dark],
         })
+    })
+  })
+
+  describe('the language', () => {
+    type Session = Awaited<ReturnType<typeof mountTerminal>>
+
+    const i18n = () => useNuxtApp().$i18n
+
+    /** Found by its buttons, since its label changes language with the page. */
+    function languageRow(session: Session) {
+      return session.component.findAll('[role="group"]').find(group => group.find('button[lang]').exists())!
+    }
+
+    /** Read as the Visitor would: which Locale is marked, and where they are. */
+    function where(session: Session) {
+      return {
+        pressed: languageRow(session)
+          .findAll('button')
+          .filter(button => button.attributes('aria-pressed') === 'true')
+          .map(button => button.attributes('lang')),
+        path: useRoute().path,
+      }
+    }
+
+    beforeAll(loadSpanish)
+
+    afterEach(async () => {
+      const switched = i18n().setLocale('en')
+      await vi.runAllTimersAsync()
+      await switched
+    })
+
+    it('marks the Locale in use', async () => {
+      const session = await mountTerminal()
+
+      expect(where(session)).toEqual({
+        pressed: ['en'],
+        path: '/',
+      })
+    })
+
+    it('goes to the Locale picked in the palette', async () => {
+      const session = await mountTerminal()
+
+      await languageRow(session).find('button[lang="es"]').trigger('click')
+      await session.settle()
+
+      expect(where(session)).toEqual({
+        pressed: ['es'],
+        path: '/es',
+      })
+    })
+
+    it('hands the new Locale\'s Profile to an Output already printed', async () => {
+      const session = await mountTerminal()
+
+      await session.run('lang es')
+      const whoami = session.output('whoami').text()
+
+      expect({
+        spanish: whoami.includes(data.spanish.profile.intro),
+        english: whoami.includes(data.profile.intro),
+      }).toEqual({ spanish: true, english: false })
+    })
+
+    it('hands the new Locale\'s Roles to an Output already printed', async () => {
+      const session = await mountTerminal()
+
+      await session.run('lang es')
+      const experience = session.output('ls ~/experience').text()
+
+      expect({
+        spanish: experience.includes(data.spanish.roles[0]!.summary),
+        english: experience.includes(data.roles[0]!.summary),
+      }).toEqual({ spanish: true, english: false })
+    })
+
+    it('keeps the palette in step with a Locale typed at the prompt', async () => {
+      const session = await mountTerminal()
+
+      await session.run('lang es')
+
+      expect(where(session)).toEqual({
+        pressed: ['es'],
+        path: '/es',
+      })
     })
   })
 

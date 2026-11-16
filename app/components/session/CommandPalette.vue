@@ -25,11 +25,13 @@ const open = defineModel<boolean>('open', { required: true })
 
 const theme = defineModel<ThemeChoice>('theme', { required: true })
 
+const locale = defineModel<string>('locale', { required: true })
+
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
 const id = useId()
 
-const { t } = useI18n()
+const { t, locales } = useI18n()
 
 const labelOf = useCommandLabel()
 
@@ -40,8 +42,9 @@ const themeLabels = computed(() => ({
   system: t('palette.themeChoice.system'),
 }) satisfies Record<ThemeChoice, string>)
 
-/** The meta command's name: an identifier, so no Locale touches it. */
+/** The meta commands' names: identifiers, so no Locale touches them. */
 const themeCommand = 'theme'
+const languageCommand = 'lang'
 
 const query = ref('')
 
@@ -53,9 +56,10 @@ function matching<T extends SessionCommand | MetaCommand>(list: T[]) {
   return list.filter(command => command.cmd.includes(needle.value))
 }
 
-/** While what was typed could still be `theme`, or is `theme` with a flag. */
-const themeShown = computed(() =>
-  'theme'.includes(needle.value) || needle.value.startsWith('theme'))
+/** While what was typed could still be the meta command, or is it with an argument. */
+function settingShown(name: string) {
+  return name.includes(needle.value) || needle.value.startsWith(name)
+}
 
 const typedRuns = computed(() => props.recognises(query.value.trim()))
 
@@ -71,7 +75,8 @@ const groups = computed(() => {
     {
       id: 'session',
       label: t('palette.groupSession'),
-      commands: matching(props.metaCommands.filter(command => command.cmd !== themeCommand)),
+      commands: matching(props.metaCommands.filter(command =>
+        command.cmd !== themeCommand && command.cmd !== languageCommand)),
       offset: commands.length,
     },
   ]
@@ -225,9 +230,9 @@ onMounted(() => {
       </div>
 
       <!-- Outside the list: a setting changed in place rather than a command
-         run, so picking one leaves the palette open on the theme it shows. -->
+         run, so picking one leaves the palette open on the choice it shows. -->
       <div
-        v-if="themeShown"
+        v-if="settingShown(themeCommand)"
         role="group"
         :aria-label="$t('palette.theme')"
         class="border-base-300 text-meta flex items-baseline gap-3 border-t px-4 py-2.5"
@@ -245,6 +250,31 @@ onMounted(() => {
               @click="theme = choice"
             >
               {{ themeLabels[choice] }}
+            </button>
+          </template>
+        </span>
+      </div>
+
+      <div
+        v-if="settingShown(languageCommand)"
+        role="group"
+        :aria-label="$t('palette.language')"
+        class="border-base-300 text-meta flex items-baseline gap-3 border-t px-4 py-2.5"
+      >
+        <span class="text-machine shrink-0">{{ languageCommand }}</span>
+        <span aria-hidden="true" class="bg-base-300 h-px min-w-3 flex-1 self-center" />
+        <span class="flex shrink-0 items-baseline gap-0.5">
+          <template v-for="(option, index) in locales" :key="option.code">
+            <span v-if="index > 0" aria-hidden="true" class="text-subtle">/</span>
+            <button
+              type="button"
+              class="min-h-8 px-1"
+              :class="locale === option.code ? 'text-accent' : 'text-muted hover:text-base-content'"
+              :lang="option.language"
+              :aria-pressed="locale === option.code"
+              @click="locale = option.code"
+            >
+              {{ option.name }}
             </button>
           </template>
         </span>

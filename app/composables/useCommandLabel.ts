@@ -22,6 +22,7 @@ export function useCommandLabel() {
     reset: t('metaCommands.reset'),
     clear: t('metaCommands.clear'),
     theme: t('metaCommands.theme'),
+    lang: t('metaCommands.lang'),
   }) satisfies Record<MetaCommand['cmd'], string>)
 
   return (command: SessionCommand | MetaCommand) =>
